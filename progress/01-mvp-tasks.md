@@ -2,7 +2,7 @@
 
 작성: 2026-10-03 · 진행표: [MVP 개발 진행 안내](README.md) · 기준: [전체 설계](../docs/README.md)
 
-M01부터 M12 순으로 통합한다. 외부 자료가 필요한 단계의 실제 처리는 선행 조건을 충족한 후 진행한다. 자료 대기 중 독립적인 코드·mock 시험을 선행할 수 있으며 그 경우 완료 기준의 실데이터 검증은 남겨 둔다. M01은 완료했고 M02를 진행한다. 단계별 검증 결과를 완료 기록에 남긴다.
+M01부터 M12 순으로 통합한다. 외부 자료가 필요한 단계의 실제 처리는 선행 조건을 충족한 후 진행한다. 자료 대기 중 독립적인 코드·mock 시험을 선행할 수 있으며 그 경우 완료 기준의 실데이터 검증은 남겨 둔다. M01·M02는 완료했고 M03을 진행한다. 단계별 검증 결과를 완료 기록에 남긴다.
 
 ## M01. 착수 기준과 개발 규칙
 
@@ -27,16 +27,16 @@ M01부터 M12 순으로 통합한다. 외부 자료가 필요한 단계의 실�
 
 기준 문서: [프론트 설계](../docs/02-frontend.md), [운영 설계](../docs/06-qa-operations.md)
 
-- [ ] frontend/에 React·TypeScript·Vite를, backend/에 FastAPI 프로젝트를 생성하고 의존성 파일을 고정한다.
-- [ ] 기본 실행·빌드·형식/정적 검사·자동 시험 명령과 .gitignore를 준비한다.
-- [ ] web·api·db의 Dockerfile·Compose 구성을 만들고 pgvector가 설치된 PostgreSQL 이미지를 사용한다.
-- [ ] web의 정적 파일·API 프록시와 API 1개 워커를 연결한다. 개발 설정과 운영 HTTPS 설정을 구분한다.
-- [ ] DB healthcheck·시작 순서·영속 볼륨·서버 설정 주입을 구성한다. API·DB 포트는 기본적으로 외부에 공개하지 않는다.
-- [ ] 실제 키·비밀번호 없이 프로젝트 시작과 프론트 빌드·API 기본 응답·DB 연결을 확인한다.
+- [x] frontend/에 React·TypeScript·Vite를, backend/에 FastAPI 프로젝트를 생성하고 의존성 파일을 고정한다.
+- [x] 기본 실행·빌드·형식/정적 검사·자동 시험 명령과 .gitignore를 준비한다.
+- [x] web·api·db의 Dockerfile·Compose 구성을 만들고 pgvector가 설치된 PostgreSQL 이미지를 사용한다.
+- [x] web의 정적 파일·API 프록시와 API 1개 워커를 연결한다. 개발 설정과 운영 HTTPS 설정을 구분한다.
+- [x] DB healthcheck·시작 순서·영속 볼륨·서버 설정 주입을 구성한다. API·DB 포트는 기본적으로 외부에 공개하지 않는다.
+- [x] 실제 키·비밀번호 없이 프로젝트 시작과 프론트 빌드·API 기본 응답·DB 연결을 확인한다.
 
 **완료 기준:** 빈 개발 환경에서 문서화한 절차로 web·api·db를 실행할 수 있고, OpenAI OFF 상태에서도 앱이 시작된다.
 
-**완료 기록:** 아직 없음. 완료 시 산출물·검증 결과·날짜를 기록한다.
+**완료 기록:** 2026-10-03. React·FastAPI·Caddy·pgvector Compose 3개 서비스를 실제 실행했다. API 1개 워커, DML 전용 DB 계정, 내부 포트·볼륨·HTTPS 분리 설정을 확인했다. 프론트 타입/린트/빌드·Vitest 2건, 백엔드 Ruff·pytest 12건 통과. web 200, live/ready 200, 미완성 목록 503·없는 API 404를 확인했다. [실행 안내](../docs/10-local-development.md).
 
 ## M03. 단일 DB와 API 공통 기반
 

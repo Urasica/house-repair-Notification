@@ -69,3 +69,8 @@ def test_wire_contract_normalizes_timezone_and_uses_camel_case():
     payload = session.model_dump(mode="json", by_alias=True)
     assert payload["createdAt"] == "2026-10-03T00:00:00Z"
     assert "access_mode" not in payload
+
+
+def test_docker_environment_dimension_is_parsed_as_integer(monkeypatch):
+    monkeypatch.setenv("EMBEDDING_DIMENSIONS", "1536")
+    assert Settings(_env_file=None).embedding_dimensions == 1536

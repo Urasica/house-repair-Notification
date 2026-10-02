@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     openai_api_key: SecretStr = SecretStr("")
     openai_chat_model: str = ""
     openai_embedding_model: str = "text-embedding-3-small"
-    embedding_dimensions: Literal[1536] = 1536
+    embedding_dimensions: int = Field(default=1536, ge=1536, le=1536)
     session_ttl_hours: int = Field(default=24, ge=1, le=24)
     auth_ttl_hours: int = Field(default=24, ge=1, le=24)
     question_retention_years: int = Field(default=5, ge=3, le=5)

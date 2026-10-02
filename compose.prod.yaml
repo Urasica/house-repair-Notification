@@ -1,0 +1,9 @@
+services:
+  web:
+    ports: !override
+      - "80:80"
+      - "443:443"
+    environment:
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:?Set PUBLIC_DOMAIN}
+    volumes:
+      - ./frontend/Caddyfile.prod:/etc/caddy/Caddyfile:ro
