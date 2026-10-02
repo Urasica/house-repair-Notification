@@ -1,0 +1,12 @@
+# Isolated Compose project: always pass -p repair-guide-test.
+services:
+  api:
+    build:
+      context: ./backend
+      target: test
+    environment:
+      APP_ENV: test
+      RUN_DB_TESTS: "1"
+    restart: "no"
+    volumes:
+      - ./schemas:/schemas:ro

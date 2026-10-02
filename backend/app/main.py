@@ -1,11 +1,11 @@
+import logging
 from contextlib import asynccontextmanager
 from uuid import uuid4
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine
+from fastapi.openapi.utils import get_openapi
 from starlette.exceptions import HTTPException
 
 from app.core.config import Settings, get_settings
@@ -16,33 +16,45 @@ from app.core.errors import (
     unexpected_error_handler,
     validation_error_handler,
 )
-from app.domain.constants import ErrorCode
-from app.schemas.catalog import Catalog
-from app.schemas.contracts import ErrorResponse, Readiness
+from app.db.session import Database
+from app.schemas.catalog import Catalog, Question
+from app.schemas.contracts import CONTRACT_MODELS, ErrorResponse, Readiness
+from app.services.catalog import get_catalog
+from app.services.locks import ConsultationLocks
+from app.services.readiness import get_readiness
+
+logger = logging.getLogger(__name__)
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def create_app(settings: Settings | None = None, database: Database | None = None) -> FastAPI:
     settings = settings or get_settings()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        app.state.engine = create_async_engine(
-            settings.database_url.get_secret_value(),
-            pool_pre_ping=True,
-            connect_args={"connect_timeout": 3},
-            pool_timeout=3,
-        )
-        yield
-        await app.state.engine.dispose()
+        app.state.database = database or Database(settings)
+        try:
+            await app.state.database.initialize()
+        except AppError:
+            logger.warning("Database is not ready; live endpoint remains available")
+        try:
+            yield
+        finally:
+            await app.state.database.dispose()
 
-    app = FastAPI(title="우리집 보수 길잡이 API", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(
+        title="우리집 보수 길잡이 API",
+        version="0.1.0",
+        lifespan=lifespan,
+        responses={422: {"model": ErrorResponse}, 503: {"model": ErrorResponse}},
+    )
     app.state.settings = settings
+    app.state.consultation_locks = ConsultationLocks()
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.web_origins,
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE"],
-        allow_headers=["Content-Type", "X-CSRF-Token"],
+        allow_headers=["Content-Type", "Authorization", "X-CSRF-Token"],
     )
     app.add_exception_handler(AppError, app_error_handler)
     app.add_exception_handler(RequestValidationError, validation_error_handler)
@@ -52,31 +64,60 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.middleware("http")
     async def request_metadata(request: Request, call_next):
         request.state.trace_id = uuid4()
-        response = await call_next(request)
+        try:
+            response = await call_next(request)
+        except Exception as error:
+            logger.error(
+                "Unhandled request failure: %s trace=%s",
+                type(error).__name__,
+                request.state.trace_id,
+            )
+            response = await unexpected_error_handler(request, error)
         response.headers["X-Trace-Id"] = str(request.state.trace_id)
-        if request.url.path.startswith("/api/"):
+        if request.url.path.startswith(("/api/", "/health/")):
             response.headers["Cache-Control"] = "no-store"
         return response
 
-    @app.get("/health/live")
+    @app.get("/health/live", operation_id="getLive")
     async def live() -> dict[str, str]:
         return {"status": "ok"}
 
-    @app.get("/health/ready", response_model=Readiness, responses={503: {"model": ErrorResponse}})
+    @app.get("/health/ready", response_model=Readiness, operation_id="getReadiness")
     async def ready(request: Request) -> Readiness:
-        try:
-            async with request.app.state.engine.connect() as connection:
-                await connection.execute(text("SELECT 1"))
-        except Exception as error:
-            raise AppError(
-                ErrorCode.SERVICE_UNAVAILABLE, "서비스 준비 상태를 확인할 수 없어요.", 503
-            ) from error
-        return Readiness(status="ok", catalog_ready=False, rag_ready=False)
+        db = request.app.state.database
+        await db.initialize()
+        async with db.session() as session:
+            return await get_readiness(session, settings)
 
-    @app.get("/api/v1/catalog", response_model=Catalog, responses={503: {"model": ErrorResponse}})
-    async def catalog() -> Catalog:
-        raise AppError(ErrorCode.CATALOG_NOT_READY, "증상 목록을 준비하고 있어요.", 503)
+    @app.get(
+        "/api/v1/catalog",
+        response_model=Catalog,
+        operation_id="getCatalog",
+        responses={404: {"model": ErrorResponse}},
+    )
+    async def catalog(
+        request: Request, version: str | None = Query(default=None, min_length=1, max_length=80)
+    ) -> Catalog:
+        db = request.app.state.database
+        await db.initialize()
+        async with db.session() as session:
+            return await get_catalog(session, version)
 
+    def openapi_contract() -> dict:
+        if app.openapi_schema is None:
+            schema = get_openapi(title=app.title, version=app.version, routes=app.routes)
+            components = schema.setdefault("components", {}).setdefault("schemas", {})
+            for model in (*CONTRACT_MODELS, Question):
+                definition = model.model_json_schema(
+                    by_alias=True, mode="serialization", ref_template="#/components/schemas/{model}"
+                )
+                for name, value in definition.pop("$defs", {}).items():
+                    components.setdefault(name, value)
+                components.setdefault(model.__name__, definition)
+            app.openapi_schema = schema
+        return app.openapi_schema
+
+    app.openapi = openapi_contract
     return app
 
 

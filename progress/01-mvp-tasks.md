@@ -2,7 +2,7 @@
 
 작성: 2026-10-03 · 진행표: [MVP 개발 진행 안내](README.md) · 기준: [전체 설계](../docs/README.md)
 
-M01부터 M12 순으로 통합한다. 외부 자료가 필요한 단계의 실제 처리는 선행 조건을 충족한 후 진행한다. 자료 대기 중 독립적인 코드·mock 시험을 선행할 수 있으며 그 경우 완료 기준의 실데이터 검증은 남겨 둔다. M01·M02는 완료했고 M03을 진행한다. 단계별 검증 결과를 완료 기록에 남긴다.
+M01부터 M12 순으로 통합한다. 외부 자료가 필요한 단계의 실제 처리는 선행 조건을 충족한 후 진행한다. 자료 대기 중 독립적인 코드·mock 시험을 선행할 수 있으며 그 경우 완료 기준의 실데이터 검증은 남겨 둔다. M01~M03은 완료했다. 다음 작업은 M04이며 완성 목록·자료 추출은 후속 입력을 기다린다. 단계별 검증 결과를 완료 기록에 남긴다.
 
 ## M01. 착수 기준과 개발 규칙
 
@@ -44,17 +44,17 @@ M01부터 M12 순으로 통합한다. 외부 자료가 필요한 단계의 실�
 
 기준 문서: [DB 설계](../docs/04-database.md), [API 설계](../docs/03-backend.md)
 
-- [ ] SQLAlchemy AsyncSession·Psycopg 연결과 Alembic 이력 하나를 구성한다.
-- [ ] DB 설계의 12개 테이블·FK·UNIQUE·CHECK·필수 인덱스를 migration으로 구현한다. 빈 지식 테이블도 생성하되 원문·벡터는 아직 넣지 않는다.
-- [ ] 단기 상담 삭제 시 회원 결과·정제 질문이 SET NULL로 남고 단기 요청·대화만 정리되는 관계를 구현한다.
-- [ ] camelCase 응답·UTC 시간·입력 검증·공통 오류·traceId·사용자 응답 no-store를 구현한다.
-- [ ] live·ready와 catalogReady·ragReady를 구분한다. 카탈로그가 없으면 상담만 차단하고, DB 장애는 저장·이력 조회를 503으로 처리한다.
-- [ ] 상담별 메모리 잠금·요청 상태 저장의 공통 코드를 준비하고, OpenAPI로 프론트 타입을 생성하는 절차를 연결한다.
-- [ ] 실제 PostgreSQL + pgvector에서 migration·관계·공통 오류를 검증한다.
+- [x] SQLAlchemy AsyncSession·Psycopg 연결과 Alembic 이력 하나를 구성한다.
+- [x] DB 설계의 12개 테이블·FK·UNIQUE·CHECK·필수 인덱스를 migration으로 구현한다. 빈 지식 테이블도 생성하되 원문·벡터는 아직 넣지 않는다.
+- [x] 단기 상담 삭제 시 회원 결과·정제 질문이 SET NULL로 남고 단기 요청·대화만 정리되는 관계를 구현한다.
+- [x] camelCase 응답·UTC 시간·입력 검증·공통 오류·traceId·사용자 응답 no-store를 구현한다.
+- [x] live·ready와 catalogReady·ragReady를 구분한다. 카탈로그가 없으면 상담만 차단하고, DB 장애는 저장·이력 조회를 503으로 처리한다.
+- [x] 상담별 메모리 잠금·요청 상태 저장의 공통 코드를 준비하고, OpenAPI로 프론트 타입을 생성하는 절차를 연결한다.
+- [x] 실제 PostgreSQL + pgvector에서 migration·관계·공통 오류를 검증한다.
 
 **완료 기준:** 빈 DB에서 migration이 성공하고 DB 제약·삭제 경계·공통 API 응답이 확인된다. API가 1개 워커로 동작한다.
 
-**완료 기록:** 아직 없음. 완료 시 산출물·검증 결과·날짜를 기록한다.
+**완료 기록:** 2026-10-03. 단일 AsyncSession 연결·12개 테이블·최초 Alembic migration·삭제 경계·공통 오류/UTC/traceId/no-store·실제 catalog/ready 조회·상담 잠금·요청 상태 저장·OpenAPI 타입 생성을 구현했다. 실제 PostgreSQL + pgvector 시험 19건을 포함해 백엔드 41건, 프론트 2건과 타입/린트/빌드가 통과했다. 빈 시험 DB에서 upgrade/downgrade/반복 upgrade·모델 일치, 단일 프로세스 시작 복구·DB 중단/복구·실제 프록시 응답을 검증했다. 공개 카탈로그·원문·벡터는 비어 있으며 OpenAI 호출은 없다. [실행·검증 안내](../docs/10-local-development.md).
 
 ## M04. 회원 인증과 접근 권한
 

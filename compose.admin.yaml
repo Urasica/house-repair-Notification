@@ -1,0 +1,5 @@
+# Same API image, privileged one-off command. Never use this override with up.
+services:
+  api:
+    environment:
+      DATABASE_URL: ${MIGRATION_DATABASE_URL:?Set MIGRATION_DATABASE_URL}
