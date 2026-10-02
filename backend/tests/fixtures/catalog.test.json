@@ -1,0 +1,21 @@
+{
+  "version": "test-only-v1",
+  "review": {"state": "DRAFT"},
+  "housingTypes": [
+    {"id": "UNKNOWN", "label": "시험용 주택 유형", "supported": false}
+  ],
+  "rooms": [{"id": "test-room", "label": "시험용 공간"}],
+  "facilities": [{"id": "test-facility", "label": "시험용 시설", "roomIds": ["test-room"]}],
+  "symptoms": [{"id": "test-symptom", "label": "시험용 항목", "facilityIds": ["test-facility"]}],
+  "questions": [{
+    "questionId": "test-question",
+    "type": "singleChoice",
+    "label": "시험용 선택 질문",
+    "required": true,
+    "symptomIds": ["test-symptom"],
+    "options": [{"value": "UNKNOWN", "label": "모름"}, {"value": "TEST", "label": "시험 값"}],
+    "interruptValues": [],
+    "conditions": [],
+    "order": 0
+  }]
+}

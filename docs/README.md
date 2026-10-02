@@ -93,3 +93,4 @@ JSON은 camelCase, DB 열은 snake_case, 시간은 UTC이고 화면은 Asia/Seou
 - [설계 결정과 단순화 기록](07-architecture-decisions.md): DB·프레임워크·운영 구성의 선택 사유와 초기 제외 항목
 - [확장 기준과 구현 순서](08-scaling-roadmap.md): 측정할 문제·확장 조건·단계별 구현 순서
 - [MVP 개발 진행 안내](../progress/README.md): 순서별 개발 작업·선행 조건·완료 기준·진행 상태
+개발 계약·입력 형식·설정·버전 고정은 [개발 기준](09-development-standards.md)을 참고한다.

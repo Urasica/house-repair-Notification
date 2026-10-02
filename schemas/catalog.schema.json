@@ -1,0 +1,375 @@
+{
+  "$defs": {
+    "CatalogItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "CatalogItem",
+      "type": "object"
+    },
+    "CatalogQuestion": {
+      "additionalProperties": false,
+      "properties": {
+        "questionId": {
+          "title": "Questionid",
+          "type": "string"
+        },
+        "type": {
+          "const": "singleChoice",
+          "default": "singleChoice",
+          "title": "Type",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "required": {
+          "title": "Required",
+          "type": "boolean"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/$defs/Option"
+          },
+          "minItems": 2,
+          "title": "Options",
+          "type": "array"
+        },
+        "interruptValues": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Interruptvalues",
+          "type": "array"
+        },
+        "symptomIds": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Symptomids",
+          "type": "array"
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/Condition"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "order": {
+          "minimum": 0,
+          "title": "Order",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "questionId",
+        "label",
+        "required",
+        "options",
+        "symptomIds",
+        "order"
+      ],
+      "title": "CatalogQuestion",
+      "type": "object"
+    },
+    "CatalogReview": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "default": "DRAFT",
+          "enum": [
+            "DRAFT",
+            "COMPLETE_VERIFIED"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "reviewer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewer"
+        },
+        "reviewedAt": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewedat"
+        }
+      },
+      "title": "CatalogReview",
+      "type": "object"
+    },
+    "Condition": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "equals",
+            "in"
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "path",
+        "operator",
+        "value"
+      ],
+      "title": "Condition",
+      "type": "object"
+    },
+    "FacilityItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        },
+        "roomIds": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Roomids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "roomIds"
+      ],
+      "title": "FacilityItem",
+      "type": "object"
+    },
+    "HousingItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/HousingType"
+        },
+        "label": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "supported": {
+          "title": "Supported",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "supported"
+      ],
+      "title": "HousingItem",
+      "type": "object"
+    },
+    "HousingType": {
+      "enum": [
+        "LH_CONSTRUCTION_RENTAL",
+        "LH_RENTAL_BEFORE_SALE",
+        "SOLD_OR_PRIVATE",
+        "OTHER",
+        "UNKNOWN"
+      ],
+      "title": "HousingType",
+      "type": "string"
+    },
+    "Option": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "label"
+      ],
+      "title": "Option",
+      "type": "object"
+    },
+    "SymptomItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        },
+        "facilityIds": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Facilityids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "facilityIds"
+      ],
+      "title": "SymptomItem",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Version",
+      "type": "string"
+    },
+    "review": {
+      "$ref": "#/$defs/CatalogReview"
+    },
+    "housingTypes": {
+      "items": {
+        "$ref": "#/$defs/HousingItem"
+      },
+      "title": "Housingtypes",
+      "type": "array"
+    },
+    "rooms": {
+      "items": {
+        "$ref": "#/$defs/CatalogItem"
+      },
+      "title": "Rooms",
+      "type": "array"
+    },
+    "facilities": {
+      "items": {
+        "$ref": "#/$defs/FacilityItem"
+      },
+      "title": "Facilities",
+      "type": "array"
+    },
+    "symptoms": {
+      "items": {
+        "$ref": "#/$defs/SymptomItem"
+      },
+      "title": "Symptoms",
+      "type": "array"
+    },
+    "questions": {
+      "items": {
+        "$ref": "#/$defs/CatalogQuestion"
+      },
+      "title": "Questions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "version",
+    "review",
+    "housingTypes",
+    "rooms",
+    "facilities",
+    "symptoms",
+    "questions"
+  ],
+  "title": "CatalogDefinition",
+  "type": "object"
+}
