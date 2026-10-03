@@ -109,11 +109,12 @@ class RequestRun(Identity, Created, Base):
     __table_args__ = (
         UniqueConstraint("consultation_id", "request_id"),
         CheckConstraint("kind IN ('SURVEY', 'CHAT')", name="kind"),
-        CheckConstraint("state IN ('PROCESSING', 'COMPLETED', 'FAILED')", name="state"),
+        CheckConstraint("state IN ('PROCESSING', 'COMPLETED', 'FAILED', 'DELETED')", name="state"),
         CheckConstraint(
             "(state = 'PROCESSING' AND finished_at IS NULL AND response_json IS NULL)"
             " OR (state = 'COMPLETED' AND finished_at IS NOT NULL AND response_json IS NOT NULL)"
-            " OR (state = 'FAILED' AND finished_at IS NOT NULL AND response_json IS NULL)",
+            " OR (state IN ('FAILED', 'DELETED')"
+            " AND finished_at IS NOT NULL AND response_json IS NULL)",
             name="state_payload",
         ),
     )

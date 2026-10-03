@@ -29,3 +29,7 @@ class ConsultationLocks:
     @property
     def active_count(self) -> int:
         return len(self._locks)
+
+    def is_held(self, identifier: UUID) -> bool:
+        lock = self._locks.get(identifier)
+        return bool(lock and lock.locked())

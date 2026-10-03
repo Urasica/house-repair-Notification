@@ -10,7 +10,7 @@ from app.core.errors import AppError
 from app.db.requests import RequestRepository
 from app.domain.constants import ErrorCode
 
-MIGRATION_HEAD = "0002_m05"
+MIGRATION_HEAD = "0003_m06"
 
 
 class Database:
@@ -25,6 +25,7 @@ class Database:
         self.sessions = async_sessionmaker(self.engine, expire_on_commit=False)
         self._initialized = False
         self._initialization_lock = asyncio.Lock()
+        self._active_changes: set[asyncio.Task] = set()
 
     async def initialize(self):
         if self._initialized:
@@ -32,6 +33,8 @@ class Database:
         async with self._initialization_lock:
             if self._initialized:
                 return
+            if self._active_changes:
+                raise self.unavailable()
             async with self.transaction() as session:
                 revision = await session.scalar(text("SELECT version_num FROM alembic_version"))
                 vector = await session.scalar(
@@ -56,7 +59,22 @@ class Database:
             async with self.sessions() as session:
                 yield session
         except SQLAlchemyError as error:
+            self._initialized = False
+            current = asyncio.current_task()
+            for task in self._active_changes:
+                if task is not current and not task.cancelling():
+                    task.cancel()
             raise self.unavailable() from error
+
+    @asynccontextmanager
+    async def change(self):
+        await self.initialize()
+        task = asyncio.current_task()
+        self._active_changes.add(task)
+        try:
+            yield
+        finally:
+            self._active_changes.discard(task)
 
     @asynccontextmanager
     async def transaction(self):

@@ -69,14 +69,35 @@ class RequestRepository:
         )
         if existing is None:
             raise AppError(ErrorCode.NOT_FOUND, "요청을 찾을 수 없어요.", 404)
+        return self.existing(existing, kind, request_hash)
+
+    @staticmethod
+    def existing(existing: RequestRun, kind: RequestKind, request_hash: str) -> Reservation:
+        if existing.state == RequestStatus.DELETED:
+            raise AppError(
+                ErrorCode.REQUEST_DELETED, "삭제된 요청이에요. 새 평가로 시작해 주세요.", 410
+            )
         if existing.kind != kind or existing.request_hash != request_hash:
             raise AppError(ErrorCode.IDEMPOTENCY_CONFLICT, "같은 요청 ID의 입력이 달라요.", 409)
         if existing.state == RequestStatus.COMPLETED:
             return Reservation(existing.id, existing.response_json)
         if existing.state == RequestStatus.PROCESSING:
-            raise AppError(ErrorCode.REQUEST_IN_PROGRESS, "요청을 처리하고 있어요.", 409)
+            raise AppError(
+                ErrorCode.REQUEST_IN_PROGRESS,
+                "요청을 처리하고 있어요.",
+                409,
+                {"retryAfterMs": 1000},
+            )
         raise AppError(
             ErrorCode.REQUEST_FAILED, "실패한 요청이에요. 새 요청으로 다시 시도해 주세요.", 409
+        )
+
+    async def lookup(self, session: AsyncSession, consultation_id: UUID, request_id: UUID):
+        return await session.scalar(
+            select(RequestRun).where(
+                RequestRun.consultation_id == consultation_id,
+                RequestRun.request_id == request_id,
+            )
         )
 
     async def complete(self, session: AsyncSession, run_id: UUID, response: dict) -> None:

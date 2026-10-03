@@ -2,7 +2,7 @@
 
 상위 문서: [전체 안내](README.md) · 연계: [DB](04-database.md), [RAG](05-ai-rag.md), [운영](06-qa-operations.md)
 
-이 문서는 목표 계약이다. M01~M03 기반 구현 이후 수정한 DELETED·REQUEST_DELETED·ChatHistory 계약은 아직 코드에 반영되지 않았으며 [후속 반영 항목](09-development-standards.md#5-계획-정합성-개정과-후속-반영)에 따라 구현한다.
+M06에서 계정·상담·설문·회원 이력/삭제와 DELETED·REQUEST_DELETED를 구현했다. 실제 RAG 연결은 M09, ChatHistory 계약은 M10에서 구현하며 [후속 반영 항목](09-development-standards.md#5-계획-정합성-개정과-후속-반영)에 따라 구현한다.
 
 ## 1. 책임과 구조
 

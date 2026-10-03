@@ -9,6 +9,8 @@ from fastapi.openapi.utils import get_openapi
 from starlette.exceptions import HTTPException
 
 from app.api.v1.auth import router as auth_router
+from app.api.v1.history import router as history_router
+from app.api.v1.sessions import router as sessions_router
 from app.auth.access import guard_member_path
 from app.auth.rate_limit import AuthRateLimiter
 from app.auth.security import Passwords
@@ -24,6 +26,7 @@ from app.db.session import Database
 from app.schemas.catalog import Catalog, Question
 from app.schemas.contracts import CONTRACT_MODELS, ErrorResponse, Readiness
 from app.services.catalog import get_catalog
+from app.services.guidance import evaluate_survey
 from app.services.locks import ConsultationLocks
 from app.services.readiness import get_readiness
 
@@ -55,6 +58,8 @@ def create_app(settings: Settings | None = None, database: Database | None = Non
     app.state.passwords = Passwords()
     app.state.auth_rate_limiter = AuthRateLimiter()
     app.state.consultation_locks = ConsultationLocks()
+    app.state.question_deletion_locks = ConsultationLocks()
+    app.state.evaluate_survey = evaluate_survey
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.web_origins,
@@ -127,6 +132,8 @@ def create_app(settings: Settings | None = None, database: Database | None = Non
         return app.openapi_schema
 
     app.include_router(auth_router)
+    app.include_router(sessions_router)
+    app.include_router(history_router)
     app.openapi = openapi_contract
     return app
 

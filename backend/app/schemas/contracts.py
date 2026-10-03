@@ -12,7 +12,7 @@ from app.domain.constants import (
     RequestStatus,
 )
 from app.schemas.base import APIModel
-from app.schemas.catalog import Question
+from app.schemas.catalog import Question, Version
 
 
 class Context(APIModel):
@@ -33,6 +33,15 @@ class QuestionsResponse(APIModel):
     catalog_version: str
     revision: int = Field(ge=0)
     questions: list[Question]
+
+
+class SessionCreate(APIModel):
+    catalog_version: Version
+
+
+class SessionCreated(APIModel):
+    session: "Session"
+    session_token: str | None
 
 
 class EvaluationRequest(APIModel):
@@ -128,6 +137,19 @@ class GuidanceResult(APIModel):
     is_current: bool
 
 
+class ResultListItem(APIModel):
+    id: UUID
+    generated_at: AwareDatetime
+    status: GuidanceStatus
+    summary: ResultSummary
+    retained_until: AwareDatetime
+
+
+class ResultList(APIModel):
+    items: list[ResultListItem]
+    next_cursor: str | None
+
+
 class ChatMessage(APIModel):
     id: UUID
     request_id: UUID
@@ -179,6 +201,8 @@ CONTRACT_MODELS = (
     Context,
     ContextUpdate,
     QuestionsResponse,
+    SessionCreate,
+    SessionCreated,
     EvaluationRequest,
     ChatRequest,
     Session,
@@ -186,6 +210,7 @@ CONTRACT_MODELS = (
     AuthState,
     Citation,
     GuidanceResult,
+    ResultList,
     ChatMessage,
     ChatResponse,
     RequestState,

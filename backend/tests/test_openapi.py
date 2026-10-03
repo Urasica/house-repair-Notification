@@ -20,6 +20,16 @@ def test_openapi_snapshot_matches_app_and_has_contracts_without_fake_routes():
         "/api/v1/auth/login",
         "/api/v1/auth/me",
         "/api/v1/auth/logout",
+        "/api/v1/sessions",
+        "/api/v1/sessions/{consultation_id}",
+        "/api/v1/sessions/{consultation_id}/context",
+        "/api/v1/sessions/{consultation_id}/questions",
+        "/api/v1/sessions/{consultation_id}/evaluations",
+        "/api/v1/sessions/{consultation_id}/results/{result_id}",
+        "/api/v1/sessions/{consultation_id}/requests/{request_id}",
+        "/api/v1/me/results",
+        "/api/v1/me/results/{result_id}",
+        "/api/v1/me/question-records",
     }
     assert "Session" in schema["components"]["schemas"]
     assert "expectedRevision" in schema["components"]["schemas"]["ContextUpdate"]["properties"]

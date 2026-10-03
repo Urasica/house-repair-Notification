@@ -38,6 +38,10 @@ class BoundDatabase:
     async def dispose(self):
         pass
 
+    @asynccontextmanager
+    async def change(self):
+        yield
+
 
 @pytest.fixture
 async def auth_client(pg_session):
