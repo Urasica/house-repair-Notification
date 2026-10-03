@@ -12,6 +12,7 @@ from app.domain.constants import (
     RequestStatus,
 )
 from app.schemas.base import APIModel
+from app.schemas.catalog import Question
 
 
 class Context(APIModel):
@@ -26,6 +27,12 @@ class Context(APIModel):
 class ContextUpdate(APIModel):
     expected_revision: int = Field(ge=0)
     context: Context
+
+
+class QuestionsResponse(APIModel):
+    catalog_version: str
+    revision: int = Field(ge=0)
+    questions: list[Question]
 
 
 class EvaluationRequest(APIModel):
@@ -171,6 +178,7 @@ class Readiness(APIModel):
 CONTRACT_MODELS = (
     Context,
     ContextUpdate,
+    QuestionsResponse,
     EvaluationRequest,
     ChatRequest,
     Session,

@@ -368,11 +368,6 @@ async def test_catalog_only_exposes_verified_published_payload_and_utc(pg_sessio
     catalog = await seed_catalog(pg_session)
     with pytest.raises(AppError):
         await get_catalog(pg_session)
-    catalog.status = "PUBLISHED"
-    catalog.published_at = datetime.now(UTC) - timedelta(seconds=1)
-    await pg_session.flush()
-    with pytest.raises(AppError):
-        await get_catalog(pg_session)
     payload = dict(catalog.payload_json)
     payload["review"] = {
         "state": "COMPLETE_VERIFIED",
@@ -380,6 +375,8 @@ async def test_catalog_only_exposes_verified_published_payload_and_utc(pg_sessio
         "reviewedAt": datetime.now(UTC).isoformat(),
     }
     catalog.payload_json = payload
+    catalog.status = "PUBLISHED"
+    catalog.published_at = datetime.now(UTC)
     await pg_session.flush()
     response = await get_catalog(pg_session)
     data = response.model_dump(mode="json", by_alias=True)

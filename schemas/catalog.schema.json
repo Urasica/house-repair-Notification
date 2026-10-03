@@ -16,8 +16,11 @@
         },
         "aliases": {
           "items": {
+            "maxLength": 120,
+            "minLength": 1,
             "type": "string"
           },
+          "maxItems": 20,
           "title": "Aliases",
           "type": "array"
         }
@@ -33,6 +36,7 @@
       "additionalProperties": false,
       "properties": {
         "questionId": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$",
           "title": "Questionid",
           "type": "string"
         },
@@ -62,6 +66,7 @@
         },
         "interruptValues": {
           "items": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$",
             "type": "string"
           },
           "title": "Interruptvalues",
@@ -69,6 +74,7 @@
         },
         "symptomIds": {
           "items": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$",
             "type": "string"
           },
           "minItems": 1,
@@ -114,6 +120,8 @@
         "reviewer": {
           "anyOf": [
             {
+              "maxLength": 120,
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -194,13 +202,17 @@
         },
         "aliases": {
           "items": {
+            "maxLength": 120,
+            "minLength": 1,
             "type": "string"
           },
+          "maxItems": 20,
           "title": "Aliases",
           "type": "array"
         },
         "roomIds": {
           "items": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$",
             "type": "string"
           },
           "minItems": 1,
@@ -256,8 +268,7 @@
       "additionalProperties": false,
       "properties": {
         "value": {
-          "maxLength": 80,
-          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$",
           "title": "Value",
           "type": "string"
         },
@@ -291,13 +302,17 @@
         },
         "aliases": {
           "items": {
+            "maxLength": 120,
+            "minLength": 1,
             "type": "string"
           },
+          "maxItems": 20,
           "title": "Aliases",
           "type": "array"
         },
         "facilityIds": {
           "items": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$",
             "type": "string"
           },
           "minItems": 1,
@@ -317,8 +332,7 @@
   "additionalProperties": false,
   "properties": {
     "version": {
-      "maxLength": 80,
-      "minLength": 1,
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$",
       "title": "Version",
       "type": "string"
     },

@@ -1,6 +1,6 @@
 # 개발 기준과 입력 형식
 
-작성: 2026-10-03 · 적용: M01~M03 및 후속 구현
+작성: 2026-10-03 · 적용: M01~M05 코드 및 후속 구현
 
 기준: [전체 안내](README.md) · 진행: [MVP 작업](../progress/README.md)
 
@@ -15,6 +15,8 @@
 완성 목록은 schemas/catalog.schema.json의 JSON Schema와 CatalogDefinition의 연결 검증을 따른다. version, review, housingTypes, rooms, facilities, symptoms, questions를 사용한다. ID는 안정적인 문자열이며 시설물은 roomIds, 증상은 facilityIds, 질문은 symptomIds로 연결한다.
 
 질문은 singleChoice이며 options·required·interruptValues·order·conditions를 포함한다. 조건은 housingType·roomId·facilityId·symptomId 또는 answers.질문ID의 equals/in만 허용한다. COMPLETE_VERIFIED 검토에는 검토자·검토일과 비어 있지 않은 목록이 필요하다. 실제 목록은 아직 제공되지 않았으며 자동 게시하지 않는다.
+
+M05는 5개 주택 유형·고유한 옵션/연결·실제 조건 값·앞선 질문 참조를 검증한다. 게시본은 새 migration의 DB trigger로 수정·삭제를 차단하며 동일 게시 재전송은 기존 시각을 유지한다. [목록 작성·명령·설문 정책](11-catalog-publication.md)에 세부 규칙을 기록했다. 실제 목록 게시와 상담/설문 API 연결은 각각 자료 확보 후와 M06의 작업이다.
 
 backend/tests/fixtures/catalog.test.json은 구조 검증용 시험 데이터다. 공개 목록·개발 홈·운영 목록에 게시하지 않는다. 기존 예시 증상은 복사하지 않는다.
 

@@ -37,7 +37,13 @@ def main():
     assert headers["Cache-Control"] == "no-store" and headers["X-Trace-Id"] == error["traceId"]
     status, _, missing = fetch(args.url, "/api/v1/missing")
     assert status == 404 and json.loads(missing)["error"]["code"] == "NOT_FOUND"
-    print("Smoke checks passed: web, live, ready, catalog, API errors")
+    if not args.database_unavailable:
+        status, headers, auth = fetch(args.url, "/api/v1/auth/me")
+        assert status == 200 and json.loads(auth) == {"user": None, "csrfToken": None}
+        assert headers["Cache-Control"] == "no-store"
+        status, _, history = fetch(args.url, "/api/v1/me/results")
+        assert status == 401 and json.loads(history)["error"]["code"] == "AUTH_REQUIRED"
+    print("Smoke checks passed: web, live, ready, empty catalog, auth, API errors")
 
 
 if __name__ == "__main__":

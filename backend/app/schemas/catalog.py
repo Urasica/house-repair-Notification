@@ -1,23 +1,25 @@
 import re
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import AwareDatetime, Field, model_validator
+from pydantic import AwareDatetime, Field, StringConstraints, model_validator
 
 from app.domain.constants import SUPPORTED_HOUSING_TYPES, HousingType
 from app.schemas.base import APIModel
 
-Identifier = str
+Identifier = Annotated[str, Field(pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$")]
+Version = Annotated[str, Field(pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$")]
+Label = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)]
 
 
 class CatalogItem(APIModel):
-    id: Identifier = Field(pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$")
-    label: str = Field(min_length=1, max_length=120)
-    aliases: list[str] = Field(default_factory=list)
+    id: Identifier
+    label: Label
+    aliases: list[Label] = Field(default_factory=list, max_length=20)
 
 
 class HousingItem(APIModel):
     id: HousingType
-    label: str = Field(min_length=1, max_length=120)
+    label: Label
     supported: bool
 
     @model_validator(mode="after")
@@ -28,16 +30,16 @@ class HousingItem(APIModel):
 
 
 class FacilityItem(CatalogItem):
-    room_ids: list[str] = Field(min_length=1)
+    room_ids: list[Identifier] = Field(min_length=1)
 
 
 class SymptomItem(CatalogItem):
-    facility_ids: list[str] = Field(min_length=1)
+    facility_ids: list[Identifier] = Field(min_length=1)
 
 
 class Option(APIModel):
-    value: str = Field(min_length=1, max_length=80)
-    label: str = Field(min_length=1, max_length=200)
+    value: Identifier
+    label: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
 
 
 class Condition(APIModel):
@@ -54,16 +56,19 @@ class Condition(APIModel):
             raise ValueError("equals requires a string")
         if self.operator == "in" and (not isinstance(self.value, list) or not self.value):
             raise ValueError("in requires a nonempty list")
+        values = [self.value] if isinstance(self.value, str) else self.value
+        if any(not value.strip() for value in values) or len(values) != len(set(values)):
+            raise ValueError("Condition values must be nonblank and unique")
         return self
 
 
 class Question(APIModel):
-    question_id: str
+    question_id: Identifier
     type: Literal["singleChoice"] = "singleChoice"
-    label: str = Field(min_length=1, max_length=500)
+    label: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]
     required: bool
     options: list[Option] = Field(min_length=2)
-    interrupt_values: list[str] = Field(default_factory=list)
+    interrupt_values: list[Identifier] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def unique_options(self):
@@ -72,17 +77,19 @@ class Question(APIModel):
             raise ValueError("Duplicate option values")
         if not set(self.interrupt_values) <= set(values):
             raise ValueError("Interrupt values must be defined options")
+        if len(self.interrupt_values) != len(set(self.interrupt_values)):
+            raise ValueError("Duplicate interrupt values")
         return self
 
 
 class CatalogQuestion(Question):
-    symptom_ids: list[str] = Field(min_length=1)
+    symptom_ids: list[Identifier] = Field(min_length=1)
     conditions: list[Condition] = Field(default_factory=list)
     order: int = Field(ge=0)
 
 
 class Catalog(APIModel):
-    version: str = Field(min_length=1, max_length=80)
+    version: Version
     published_at: AwareDatetime
     housing_types: list[HousingItem]
     rooms: list[CatalogItem]
@@ -92,7 +99,7 @@ class Catalog(APIModel):
 
 class CatalogReview(APIModel):
     state: Literal["DRAFT", "COMPLETE_VERIFIED"] = "DRAFT"
-    reviewer: str | None = None
+    reviewer: Label | None = None
     reviewed_at: AwareDatetime | None = None
 
     @model_validator(mode="after")
@@ -103,7 +110,7 @@ class CatalogReview(APIModel):
 
 
 class CatalogDefinition(APIModel):
-    version: str = Field(min_length=1, max_length=80)
+    version: Version
     review: CatalogReview
     housing_types: list[HousingItem]
     rooms: list[CatalogItem]
@@ -123,19 +130,51 @@ class CatalogDefinition(APIModel):
         if any(len(group) != len(set(group)) for group in groups):
             raise ValueError("Duplicate catalog IDs")
         room_ids, facility_ids, symptom_ids, question_ids = map(set, groups[1:])
+        questions = {question.question_id: question for question in self.questions}
+        condition_values = {
+            "housingType": set(groups[0]),
+            "roomId": room_ids,
+            "facilityId": facility_ids,
+            "symptomId": symptom_ids,
+        }
+        for item in (*self.rooms, *self.facilities, *self.symptoms):
+            if len(item.aliases) != len(set(item.aliases)):
+                raise ValueError("Duplicate aliases within an item")
         for facility in self.facilities:
+            if len(facility.room_ids) != len(set(facility.room_ids)):
+                raise ValueError("Duplicate facility room references")
             if not set(facility.room_ids) <= room_ids:
                 raise ValueError("Facility refers to an unknown room")
         for symptom in self.symptoms:
+            if len(symptom.facility_ids) != len(set(symptom.facility_ids)):
+                raise ValueError("Duplicate symptom facility references")
             if not set(symptom.facility_ids) <= facility_ids:
                 raise ValueError("Symptom refers to an unknown facility")
         for question in self.questions:
+            if len(question.symptom_ids) != len(set(question.symptom_ids)):
+                raise ValueError("Duplicate question symptom references")
             if not set(question.symptom_ids) <= symptom_ids:
                 raise ValueError("Question refers to an unknown symptom")
             for condition in question.conditions:
                 if condition.path.startswith("answers."):
-                    if condition.path.split(".", 1)[1] not in question_ids:
+                    parent_id = condition.path.split(".", 1)[1]
+                    if parent_id not in question_ids:
                         raise ValueError("Condition refers to an unknown question")
+                    parent = questions[parent_id]
+                    if (parent.order, parent.question_id) >= (question.order, question.question_id):
+                        raise ValueError("Answer conditions must refer to an earlier question")
+                    if not set(question.symptom_ids) <= set(parent.symptom_ids):
+                        raise ValueError("Answer condition parent must cover the same symptoms")
+                    allowed = {option.value for option in parent.options}
+                else:
+                    allowed = condition_values[condition.path]
+                values = (
+                    {condition.value} if isinstance(condition.value, str) else set(condition.value)
+                )
+                if not values <= allowed:
+                    raise ValueError("Condition refers to an unknown selection or option")
         if self.review.state == "COMPLETE_VERIFIED" and any(not group for group in groups):
             raise ValueError("Completed catalog cannot have empty item groups")
+        if self.review.state == "COMPLETE_VERIFIED" and set(groups[0]) != set(HousingType):
+            raise ValueError("Completed catalog must include all five housing types")
         return self

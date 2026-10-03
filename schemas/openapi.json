@@ -78,8 +78,7 @@
             "type": "array"
           },
           "version": {
-            "maxLength": 80,
-            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$",
             "title": "Version",
             "type": "string"
           }
@@ -100,8 +99,11 @@
         "properties": {
           "aliases": {
             "items": {
+              "maxLength": 120,
+              "minLength": 1,
               "type": "string"
             },
+            "maxItems": 20,
             "title": "Aliases",
             "type": "array"
           },
@@ -548,8 +550,11 @@
         "properties": {
           "aliases": {
             "items": {
+              "maxLength": 120,
+              "minLength": 1,
               "type": "string"
             },
+            "maxItems": 20,
             "title": "Aliases",
             "type": "array"
           },
@@ -566,6 +571,7 @@
           },
           "roomIds": {
             "items": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$",
               "type": "string"
             },
             "minItems": 1,
@@ -784,8 +790,7 @@
             "type": "string"
           },
           "value": {
-            "maxLength": 80,
-            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$",
             "title": "Value",
             "type": "string"
           }
@@ -802,6 +807,7 @@
         "properties": {
           "interruptValues": {
             "items": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$",
               "type": "string"
             },
             "title": "Interruptvalues",
@@ -822,6 +828,7 @@
             "type": "array"
           },
           "questionId": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$",
             "title": "Questionid",
             "type": "string"
           },
@@ -843,6 +850,34 @@
           "options"
         ],
         "title": "Question",
+        "type": "object"
+      },
+      "QuestionsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "catalogVersion": {
+            "title": "Catalogversion",
+            "type": "string"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/Question"
+            },
+            "title": "Questions",
+            "type": "array"
+          },
+          "revision": {
+            "minimum": 0,
+            "title": "Revision",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "catalogVersion",
+          "revision",
+          "questions"
+        ],
+        "title": "QuestionsResponse",
         "type": "object"
       },
       "Readiness": {
@@ -1056,13 +1091,17 @@
         "properties": {
           "aliases": {
             "items": {
+              "maxLength": 120,
+              "minLength": 1,
               "type": "string"
             },
+            "maxItems": 20,
             "title": "Aliases",
             "type": "array"
           },
           "facilityIds": {
             "items": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$",
               "type": "string"
             },
             "minItems": 1,

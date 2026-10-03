@@ -54,7 +54,7 @@ npm run build
 npm run dev
 ```
 
-macOS/Linux의 venv 경로는 .venv/bin/python이다. M04 기준 기본 pytest는 DB 시험 27건을 skip하고 독립 시험 27건을 실행한다. 실제 DB 시험은 다음 절차로 별도 실행해야 한다.
+macOS/Linux의 venv 경로는 .venv/bin/python이다. M05 코드 기준 기본 pytest는 DB 시험 37건을 skip하고 독립 시험 53건을 실행한다. 실제 DB 시험은 다음 절차로 별도 실행해야 한다.
 
 프론트 개발 서버는 /api·/health를 127.0.0.1:8000에 프록시한다. API는 backend에서 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1로 실행한다. 기본 Compose의 DB 포트는 비공개이므로 실제 DB 검증은 컨테이너 안에서 실행한다. 호스트 API 개발 시 별도 개발 DB 연결 URL을 설정한다.
 
@@ -73,13 +73,13 @@ docker compose -p repair-guide-test --env-file .env.example --env-file .env.test
 docker compose -p repair-guide-test --env-file .env.example --env-file .env.test.example -f compose.yaml -f compose.test.yaml down
 ```
 
-M04 기준 54건은 계약·설정·오류·잠금·실제 DB 관계/제약·요청 재생/실패·트랜잭션·재시작 정리·벡터/자료 적격성·가입/인증/만료/CSRF/소유권 시험을 포함한다. 프론트는 인증·캐시·회원 경로를 포함해 Vitest 8건과 타입/린트/빌드를 검증한다. test 빌드 단계는 같은 API의 일회성 시험 명령용이며 상시 서비스를 추가하지 않는다. upgrade → downgrade base → upgrade → upgrade 반복은 비어 있는 시험 DB에서만 검증한다. 데이터를 가진 개발/운영 DB에는 downgrade base를 실행하지 않는다.
+M05 코드 기준 백엔드 90건은 계약·설정·오류·잠금·실제 DB 관계/제약·요청 재생/실패·트랜잭션·재시작 정리·벡터/자료 적격성·가입/인증/만료/CSRF/소유권·목록 게시/불변성/분기/선택 정리 시험을 포함한다. 프론트는 인증·캐시·회원 경로를 포함해 Vitest 8건과 타입/린트/빌드를 검증한다. test 빌드 단계는 같은 API의 일회성 시험 명령용이며 상시 서비스를 추가하지 않는다. upgrade → downgrade base → upgrade → upgrade 반복은 비어 있는 시험 DB에서만 검증한다. 데이터를 가진 개발/운영 DB에는 downgrade base를 실행하지 않는다.
 
 빈 목록 상태의 web·프록시·API 확인은 저장소 루트에서 Python으로 scripts/smoke_api.py를 실행한다. --url http://127.0.0.1:8080도 지원한다. --database-unavailable은 DB가 중단된 상태의 기대 응답을 검사할 뿐 직접 DB를 중단하지 않는다.
 
 ## 4. 계약과 코드 연결
 
-backend/app/db/models.py는 12개 테이블, alembic/versions/0001_m03_initial_business_and_knowledge_schema.py는 최초 변경 이력이다. DB 스키마를 바꾸면 새 migration을 추가하고 readiness의 MIGRATION_HEAD를 함께 갱신한다. 앱 시작 시 migration을 자동 실행하지 않는다.
+backend/app/db/models.py는 12개 테이블, alembic/versions/0001_m03_initial_business_and_knowledge_schema.py는 최초 변경 이력이다. M05의 0002_m05_immutable_catalogs.py는 게시된 카탈로그의 UPDATE/DELETE를 차단하는 trigger를 추가한다. 현재 MIGRATION_HEAD는 0002_m05다. DB 스키마를 바꾸면 새 migration을 추가하고 readiness의 MIGRATION_HEAD를 함께 갱신한다. 앱 시작 시 migration을 자동 실행하지 않는다.
 
 Database는 한 연결 풀과 요청별 AsyncSession을 제공한다. transaction은 호출자 쓰기를 한 번에 확정한다. RequestRepository는 스스로 commit하지 않으며 완료 결과·정제 질문·완료 상태를 같은 트랜잭션에 넣을 수 있다. M04에서 계정/익명 권한·소유권 검사 함수를 구현했다. isCurrent·revision과 상담/결과 API 연결은 M06에서 구현한다.
 
@@ -90,6 +90,8 @@ ConsultationLocks는 단일 프로세스의 같은 상담 변경을 즉시 409�
 API의 knowledgeReleaseId는 knowledge_sets.id에 대응한다. ragReady는 OpenAI 설정·검토 완료 manifest·호환 게시본·유효 승인 문서·임베딩 해시를 확인한다. 이 상태는 자료 준비 점검이며 실제 검색·생성 품질 검증은 M09/M10의 완료 기준이다.
 
 계약 변경 시 backend에서 python -m scripts.export_openapi를 실행한 뒤 frontend에서 npm run types를 실행한다. schemas/openapi.json과 src/api/generated/schema.ts를 함께 커밋한다. 생성 파일은 직접 편집하지 않는다. 후속 DTO도 OpenAPI components에 포함하지만 아직 구현하지 않은 API 경로는 노출하지 않는다. 카탈로그 입력 형식은 python -m scripts.export_catalog_schema로 갱신한다.
+
+M05의 카탈로그 명령·검토·게시본 불변성·질문 정책은 [카탈로그 안내](11-catalog-publication.md)를 따른다. 실제 목록은 미제공 상태이며 최신 버전 확인 함수·QuestionsResponse를 상담 API에 연결하는 작업은 M06이다. 브라우저에서 로컬 로그인 화면·비회원 이력 접근 제한·홈의 준비 중 상태를 확인했다.
 
 ## 5. 운영 설정
 

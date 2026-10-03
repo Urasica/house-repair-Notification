@@ -2,7 +2,11 @@
   "version": "test-only-v1",
   "review": {"state": "DRAFT"},
   "housingTypes": [
-    {"id": "UNKNOWN", "label": "시험용 주택 유형", "supported": false}
+    {"id": "LH_CONSTRUCTION_RENTAL", "label": "시험용 지원 유형 A", "supported": true},
+    {"id": "LH_RENTAL_BEFORE_SALE", "label": "시험용 지원 유형 B", "supported": true},
+    {"id": "SOLD_OR_PRIVATE", "label": "시험용 범위 밖 유형 A", "supported": false},
+    {"id": "OTHER", "label": "시험용 범위 밖 유형 B", "supported": false},
+    {"id": "UNKNOWN", "label": "시험용 모름 유형", "supported": false}
   ],
   "rooms": [{"id": "test-room", "label": "시험용 공간"}],
   "facilities": [{"id": "test-facility", "label": "시험용 시설", "roomIds": ["test-room"]}],

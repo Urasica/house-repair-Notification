@@ -452,6 +452,15 @@ export interface components {
              */
             type: "singleChoice";
         };
+        /** QuestionsResponse */
+        QuestionsResponse: {
+            /** Catalogversion */
+            catalogVersion: string;
+            /** Questions */
+            questions: components["schemas"]["Question"][];
+            /** Revision */
+            revision: number;
+        };
         /** Readiness */
         Readiness: {
             /** Catalogready */
