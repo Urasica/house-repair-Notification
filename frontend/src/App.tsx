@@ -1,26 +1,54 @@
-import { useQuery } from '@tanstack/react-query'
-import { catalogIsReady } from './api/catalog'
+import { useState } from 'react'
+import { Link, Route, Routes, useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { ApiError } from './api/client'
+import { logout } from './features/auth/api'
+import { MemberOnly } from './features/auth/Auth'
+import { useAuth } from './features/auth/useAuth'
+import { anonymous, replaceAuth } from './features/auth/state'
+import Home from './pages/Home'
+import Login from './pages/Login'
 
 export default function App() {
-  const catalog = useQuery({ queryKey: ['catalog-ready'], queryFn: catalogIsReady })
-
-  return (
-    <main className="shell">
-      <header className="brand"><span className="brand-mark" aria-hidden="true">⌂</span> 우리집 보수 길잡이</header>
-      <section className="intro" aria-labelledby="page-title">
-        <p className="eyebrow">우리 집의 불편함, 차근차근 확인해요</p>
-        <h1 id="page-title">보수 안내를<br />쉽고 편안하게.</h1>
-        <p className="description">주택과 증상을 선택하고 간단한 질문에 답하면,<br className="desktop-break" /> 관련 기준과 문의할 내용을 안내해 드려요.</p>
-        <ol className="steps"><li>주택·증상 선택</li><li>간단 설문</li><li>안내 결과 확인</li></ol>
-      </section>
-      <section className="notice" aria-live="polite" aria-labelledby="notice-title">
-        <h2 id="notice-title">{catalog.isError ? '잠시 연결이 어려워요' : '안내 서비스를 준비하고 있어요'}</h2>
-        <p>{catalog.isError ? catalog.error.message : '정확한 안내를 위해 증상 목록과 관련 자료를 준비하고 있어요. 준비가 끝나면 설문을 시작할 수 있어요.'}</p>
-        {catalog.isError
-          ? <button onClick={() => void catalog.refetch()}>다시 확인하기</button>
-          : <button disabled>설문 준비 중</button>}
-      </section>
-      <footer>실제 보수 여부는 담당 기관 확인이 필요해요.</footer>
-    </main>
-  )
+  const auth = useAuth()
+  const client = useQueryClient()
+  const navigate = useNavigate()
+  const [message, setMessage] = useState('')
+  const [leaving, setLeaving] = useState(false)
+  async function leave() {
+    if (!auth.data?.csrfToken) return
+    setLeaving(true)
+    try {
+      await logout(auth.data.csrfToken)
+    } catch (error) {
+      if (!(error instanceof ApiError && error.status === 401)) {
+        setMessage('로그아웃하지 못했어요. 잠시 후 다시 시도해 주세요.')
+        setLeaving(false)
+        return
+      }
+    }
+    await replaceAuth(client, anonymous)
+    setLeaving(false)
+    setMessage('')
+    void navigate('/', { replace: true })
+  }
+  return <main className="shell">
+    <header className="topbar">
+      <Link className="brand" to="/"><span className="brand-mark" aria-hidden="true">⌂</span> 우리집 보수 길잡이</Link>
+      <nav aria-label="이용 메뉴">
+        <Link to="/chat">챗봇</Link><Link to="/history">이전 결과</Link>
+        {auth.data?.user && !auth.isError ? <button className="nav-button" disabled={leaving} onClick={() => void leave()}>로그아웃</button> : <Link to="/login">로그인</Link>}
+      </nav>
+    </header>
+    {message && <p role="alert">{message}</p>}
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/chat" element={<MemberOnly><section className="notice member-panel"><h1>회원 챗봇</h1><p>검토된 안내 자료와 대화 기능을 준비하고 있어요.</p></section></MemberOnly>} />
+      <Route path="/history" element={<MemberOnly><section className="notice member-panel"><h1>이전 결과</h1><p>이전 결과 조회 기능을 준비하고 있어요.</p></section></MemberOnly>} />
+      <Route path="/history/:resultId" element={<MemberOnly><section className="notice member-panel"><h1>이전 결과 상세</h1><p>조회 기능을 준비하고 있어요.</p></section></MemberOnly>} />
+      <Route path="*" element={<section className="notice"><h1>페이지를 찾을 수 없어요</h1><Link to="/">홈으로 돌아가기</Link></section>} />
+    </Routes>
+    <footer>실제 보수 여부는 담당 기관 확인이 필요해요.</footer>
+  </main>
 }

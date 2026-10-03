@@ -18,7 +18,7 @@ class AppError(Exception):
 
 def error_response(request: Request, error: AppError) -> JSONResponse:
     trace_id = str(getattr(request.state, "trace_id", uuid4()))
-    return JSONResponse(
+    response = JSONResponse(
         status_code=error.status,
         content={
             "error": {
@@ -30,6 +30,18 @@ def error_response(request: Request, error: AppError) -> JSONResponse:
         },
         headers={"Cache-Control": "no-store", "X-Trace-Id": trace_id},
     )
+    if error.code == ErrorCode.RATE_LIMITED:
+        response.headers["Retry-After"] = str(error.details.get("retryAfterSeconds", 60))
+    if error.code == ErrorCode.AUTH_EXPIRED:
+        settings = request.app.state.settings
+        response.delete_cookie(
+            settings.auth_cookie_name,
+            httponly=True,
+            secure=settings.auth_cookie_secure,
+            samesite="lax",
+            path="/",
+        )
+    return response
 
 
 async def app_error_handler(request: Request, error: AppError):

@@ -10,7 +10,7 @@ COPY scripts ./scripts
 RUN useradd --uid 10001 --create-home appuser
 USER appuser
 EXPOSE 8000
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--proxy-headers", "--forwarded-allow-ips", "*"]
 
 FROM runtime AS test
 USER root

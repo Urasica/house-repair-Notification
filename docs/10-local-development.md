@@ -54,7 +54,7 @@ npm run build
 npm run dev
 ```
 
-macOS/Linux의 venv 경로는 .venv/bin/python이다. 기본 pytest는 DB 시험 19건을 skip하고 독립 시험 22건을 실행한다. 실제 DB 시험은 다음 절차로 별도 실행해야 한다.
+macOS/Linux의 venv 경로는 .venv/bin/python이다. M04 기준 기본 pytest는 DB 시험 27건을 skip하고 독립 시험 27건을 실행한다. 실제 DB 시험은 다음 절차로 별도 실행해야 한다.
 
 프론트 개발 서버는 /api·/health를 127.0.0.1:8000에 프록시한다. API는 backend에서 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1로 실행한다. 기본 Compose의 DB 포트는 비공개이므로 실제 DB 검증은 컨테이너 안에서 실행한다. 호스트 API 개발 시 별도 개발 DB 연결 URL을 설정한다.
 
@@ -73,7 +73,7 @@ docker compose -p repair-guide-test --env-file .env.example --env-file .env.test
 docker compose -p repair-guide-test --env-file .env.example --env-file .env.test.example -f compose.yaml -f compose.test.yaml down
 ```
 
-41건은 계약·설정·오류·잠금·실제 DB 관계/제약·요청 재생/실패·트랜잭션·재시작 정리·벡터/자료 적격성 시험을 포함한다. test 빌드 단계는 같은 API의 일회성 시험 명령용이며 상시 서비스를 추가하지 않는다. upgrade → downgrade base → upgrade → upgrade 반복은 비어 있는 시험 DB에서만 검증한다. 데이터를 가진 개발/운영 DB에는 downgrade base를 실행하지 않는다.
+M04 기준 54건은 계약·설정·오류·잠금·실제 DB 관계/제약·요청 재생/실패·트랜잭션·재시작 정리·벡터/자료 적격성·가입/인증/만료/CSRF/소유권 시험을 포함한다. 프론트는 인증·캐시·회원 경로를 포함해 Vitest 8건과 타입/린트/빌드를 검증한다. test 빌드 단계는 같은 API의 일회성 시험 명령용이며 상시 서비스를 추가하지 않는다. upgrade → downgrade base → upgrade → upgrade 반복은 비어 있는 시험 DB에서만 검증한다. 데이터를 가진 개발/운영 DB에는 downgrade base를 실행하지 않는다.
 
 빈 목록 상태의 web·프록시·API 확인은 저장소 루트에서 Python으로 scripts/smoke_api.py를 실행한다. --url http://127.0.0.1:8080도 지원한다. --database-unavailable은 DB가 중단된 상태의 기대 응답을 검사할 뿐 직접 DB를 중단하지 않는다.
 
@@ -81,7 +81,9 @@ docker compose -p repair-guide-test --env-file .env.example --env-file .env.test
 
 backend/app/db/models.py는 12개 테이블, alembic/versions/0001_m03_initial_business_and_knowledge_schema.py는 최초 변경 이력이다. DB 스키마를 바꾸면 새 migration을 추가하고 readiness의 MIGRATION_HEAD를 함께 갱신한다. 앱 시작 시 migration을 자동 실행하지 않는다.
 
-Database는 한 연결 풀과 요청별 AsyncSession을 제공한다. transaction은 호출자 쓰기를 한 번에 확정한다. RequestRepository는 스스로 commit하지 않으며 완료 결과·정제 질문·완료 상태를 같은 트랜잭션에 넣을 수 있다. isCurrent·소유권·revision의 실제 서비스 연결은 M04/M06에서 구현한다.
+Database는 한 연결 풀과 요청별 AsyncSession을 제공한다. transaction은 호출자 쓰기를 한 번에 확정한다. RequestRepository는 스스로 commit하지 않으며 완료 결과·정제 질문·완료 상태를 같은 트랜잭션에 넣을 수 있다. M04에서 계정/익명 권한·소유권 검사 함수를 구현했다. isCurrent·revision과 상담/결과 API 연결은 M06에서 구현한다.
+
+로컬 `/login`에서 가입/로그인할 수 있고 `/api/v1/auth/me`는 미로그인일 때 user=null을 반환한다. 회원 경로는 미로그인 요청을 서버에서도 401로 차단한다. 로그인한 사용자의 챗봇·이력 본문은 후속 단계 준비 중이다. 운영 쿠키는 Secure이며 로컬 HTTP에서만 개발 쿠키를 사용한다. API의 프록시 헤더 신뢰 설정은 API 포트 비공개·Caddy 내부 연결을 전제로 한다.
 
 ConsultationLocks는 단일 프로세스의 같은 상담 변경을 즉시 409로 차단하고 다른 상담은 동시에 처리한다. 중단 요청 정리는 이전 프로세스가 완전히 종료된 뒤 시작 때 한 번 실행하며 readiness 조회가 활성 요청을 실패로 바꾸지 않는다. DB 장애 중 활성 변경 취소·재시도 제어는 실제 변경 서비스와 함께 M06에서 연결한다.
 

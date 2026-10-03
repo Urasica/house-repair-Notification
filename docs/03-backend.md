@@ -29,6 +29,10 @@ backend/app/
 
 계정은 이메일·비밀번호로 가입·로그인하며 비밀번호는 Argon2id 해시만 저장한다. 로그인 시 충분한 난수의 계정 인증 토큰을 HttpOnly·Secure·SameSite=Lax 쿠키로 발급하고 DB에는 해시만 저장한다. 계정 인증은 기본 24시간이며 만료 후 재로그인한다. 비밀번호·쿠키 토큰은 응답 JSON·로그에 포함하지 않는다.
 
+M04 구현은 이메일 공백 제거·소문자 정규화와 12~128자 비밀번호를 검사한다. 운영 HTTPS 쿠키는 `__Host-repair_auth`·Secure·HttpOnly·SameSite=Lax·Path=/이며 Domain을 지정하지 않는다. 로컬 HTTP 개발/시험에서만 `repair_auth`·Secure=false를 사용한다. CSRF는 인증 토큰에서 서버가 HMAC으로 재구성하고 DB에는 해시만 저장한다. `/auth/me`가 CSRF를 반환하며 인증 토큰은 쿠키 외에 반환하지 않는다. 이메일 확인·비밀번호 재설정은 현재 구현 범위에 포함하지 않는다.
+
+가입·로그인은 이메일당 10회, 접속 주소당 60회를 10분 동안 허용한다. 단일 프로세스의 제한된 메모리에 식별자 해시만 보관하고 429에 Retry-After를 반환한다. 서버 재시작 시 제한 이력이 초기화되므로 실제 트래픽을 측정해 보완한다. Caddy가 전달한 주소를 사용하며 API는 내부 네트워크에서만 접근한다. Caddy의 기본 프록시는 외부에서 전달한 X-Forwarded-* 값을 신뢰하지 않는다. [Caddy 헤더 정책](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy#headers).
+
 비회원 설문은 별도 256비트 이상 익명 Bearer 토큰을 발급한다. 토큰은 해당 세션의 설문·현재 결과만 허용하며 계정 인증이 아니다. 서버는 다음을 확인한다.
 
 | 기능 | 인증 조건 |

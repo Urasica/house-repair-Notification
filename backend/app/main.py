@@ -8,6 +8,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from starlette.exceptions import HTTPException
 
+from app.api.v1.auth import router as auth_router
+from app.auth.access import guard_member_path
+from app.auth.rate_limit import AuthRateLimiter
+from app.auth.security import Passwords
 from app.core.config import Settings, get_settings
 from app.core.errors import (
     AppError,
@@ -48,6 +52,8 @@ def create_app(settings: Settings | None = None, database: Database | None = Non
         responses={422: {"model": ErrorResponse}, 503: {"model": ErrorResponse}},
     )
     app.state.settings = settings
+    app.state.passwords = Passwords()
+    app.state.auth_rate_limiter = AuthRateLimiter()
     app.state.consultation_locks = ConsultationLocks()
     app.add_middleware(
         CORSMiddleware,
@@ -65,7 +71,10 @@ def create_app(settings: Settings | None = None, database: Database | None = Non
     async def request_metadata(request: Request, call_next):
         request.state.trace_id = uuid4()
         try:
+            await guard_member_path(request)
             response = await call_next(request)
+        except AppError as error:
+            response = await app_error_handler(request, error)
         except Exception as error:
             logger.error(
                 "Unhandled request failure: %s trace=%s",
@@ -117,6 +126,7 @@ def create_app(settings: Settings | None = None, database: Database | None = Non
             app.openapi_schema = schema
         return app.openapi_schema
 
+    app.include_router(auth_router)
     app.openapi = openapi_contract
     return app
 

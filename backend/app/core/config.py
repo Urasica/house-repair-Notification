@@ -30,6 +30,14 @@ class Settings(BaseSettings):
     survey_timeout_seconds: int = Field(default=10, ge=1, le=10)
     chat_timeout_seconds: int = Field(default=25, ge=1, le=25)
 
+    @property
+    def auth_cookie_name(self) -> str:
+        return "__Host-repair_auth" if self.app_env == "production" else "repair_auth"
+
+    @property
+    def auth_cookie_secure(self) -> bool:
+        return self.app_env == "production"
+
     @model_validator(mode="after")
     def validate_runtime(self):
         url = make_url(self.database_url.get_secret_value())

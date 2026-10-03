@@ -12,7 +12,15 @@ def test_openapi_snapshot_matches_app_and_has_contracts_without_fake_routes():
     snapshot = Path(__file__).resolve().parents[2] / "schemas" / "openapi.json"
     schema = json.loads(snapshot.read_text(encoding="utf-8"))
     assert schema == json.loads(contract_json())
-    assert set(schema["paths"]) == {"/api/v1/catalog", "/health/live", "/health/ready"}
+    assert set(schema["paths"]) == {
+        "/api/v1/catalog",
+        "/health/live",
+        "/health/ready",
+        "/api/v1/auth/register",
+        "/api/v1/auth/login",
+        "/api/v1/auth/me",
+        "/api/v1/auth/logout",
+    }
     assert "Session" in schema["components"]["schemas"]
     assert "expectedRevision" in schema["components"]["schemas"]["ContextUpdate"]["properties"]
     assert schema["paths"]["/api/v1/catalog"]["get"]["responses"]["422"]["content"][
