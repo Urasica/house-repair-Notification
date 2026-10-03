@@ -2,6 +2,8 @@
 
 작성: 2026-10-03 · 기준: [개발 규칙](09-development-standards.md) · 상태: [진행표](../progress/README.md)
 
+이 문서의 실행·시험 기록은 M01~M03 기반에 대한 것이다. 이후 계획 점검에서 확정한 DELETED·REQUEST_DELETED·ChatHistory는 아직 구현하지 않았으며 [후속 반영 표](09-development-standards.md#5-계획-정합성-개정과-후속-반영)의 단계에서 코드·migration·생성 타입과 검증을 갱신한다.
+
 ## 1. Docker 실행
 
 Docker Desktop의 Linux 컨테이너 엔진과 Docker Compose를 실행한다. 저장소 루트에서 이미지를 만든 뒤 DB를 준비하고 마이그레이션을 한 번 적용한다. 기존 API가 있으면 먼저 완전히 중단한다.

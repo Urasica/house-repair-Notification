@@ -31,7 +31,9 @@ UUID·TIMESTAMPTZ·JSONB를 사용하고 시행일은 DATE, 불명확하면 null
 
 consultations는 회원 소유 ID와 익명 토큰 해시 중 정확히 하나만 존재하도록 CHECK한다. auth_sessions는 계정 삭제 시 CASCADE한다. 장기 기록·회원 결과 삭제는 보존·명시적 삭제 정책대로 처리한다.
 
-request_runs는 영속 작업 큐가 아니다. lease·attempt·자동 재처리 없이 같은 요청의 완료 응답만 재생한다. PROCESSING/COMPLETED/FAILED는 단순 상태이며 실패한 요청은 자동으로 재실행하지 않는다. 세부 정책은 03을 따른다.
+request_runs는 영속 작업 큐가 아니다. lease·attempt·자동 재처리 없이 같은 요청의 완료 응답만 재생한다. 상태는 PROCESSING/COMPLETED/FAILED/DELETED이며 실패·삭제된 요청은 재실행하지 않는다. DELETED는 본문 없는 재실행 차단 기록이며 세부 정책은 03을 따른다.
+
+목표 CHECK는 PROCESSING이면 finished_at·response_json 모두 null, COMPLETED이면 둘 다 NOT NULL, FAILED 또는 DELETED이면 finished_at NOT NULL·response_json null이다. M03 구현에는 아직 DELETED가 없으므로 M06에서 최초 migration을 수정하지 않고 새 migration으로 상태·응답 제약을 확장한다.
 
 검토 전 원문과 전체 문장 정리는 접근 제한된 파일·검토표로 관리한다. COMPLETE_VERIFIED를 확인한 정리본만 DB의 BUILDING 지식 묶음에 청킹·임베딩한다. manifest_json에 범위·검토자·완전성·실제 별표·모델을 기록하고 모두 확인한 뒤 게시한다.
 
@@ -54,7 +56,11 @@ erDiagram
     CONSULTATIONS o|--o{ QUESTION_RECORDS : originates
 ```
 
-results·question_records의 consultation_id는 ON DELETE SET NULL이다. 상담이 정리돼도 회원 이력·정제 질문은 유지한다. request_runs·messages는 단기 데이터로 상담 삭제 시 CASCADE한다. 결과의 request_run_id·question_record_id도 SET NULL로 처리한다. 질문 분석 기록만 삭제하면 회원 결과 스냅샷은 유지하며 결과 삭제는 연결된 질문 기록·요청 응답도 함께 정리한다. 화면에서 두 삭제 범위를 설명한다.
+results·question_records의 consultation_id는 ON DELETE SET NULL이다. 상담이 정리돼도 회원 이력·정제 질문은 유지한다. request_runs·messages는 단기 데이터로 상담 삭제 시 CASCADE한다. 결과의 request_run_id·question_record_id도 SET NULL로 처리한다. 질문 분석 기록만 삭제하면 회원 결과 스냅샷·완료 응답은 유지하며 재생으로 질문 기록을 다시 만들지 않는다. 결과 삭제는 연결된 질문 기록·요청 응답 본문도 함께 정리한다. 연결 요청 행은 지우지 않고 DELETED로 바꾸며 response_json=null로 저장한다. 결과·질문 삭제, 요청 상태 변경, deletion_log 기록은 한 트랜잭션이다. 화면에서 두 삭제 범위를 설명한다.
+
+DELETED 요청은 식별자·kind·입력 해시·시각·상태만 유지하고 단기 상담 정리 때 함께 삭제한다. 만료한 상담은 API에서 접근할 수 없으며 단기 정리는 만료 후 7일 이내 수행한다. 복원 시 결과 삭제 로그를 적용하면서 백업에 남은 연결 요청도 DELETED로 전환하고 응답 본문을 제거한다. 연결 요청을 찾는 작업은 결과 행을 지우기 전에 수행한다.
+
+챗봇 조회의 쌍별 표시 정보는 COMPLETED CHAT 요청의 response_json에 저장된 ChatResponse를 기준으로 한다. messages와 response_json은 같은 완료 트랜잭션으로 저장한다. 별도 표시 정보 테이블은 추가하지 않으며 조회 때 contextRevision·인용으로 isCurrent를 재계산한다. 원본 대화·요청 응답은 함께 단기 정리되므로 회원 결과 이력의 장기 보존과 구분한다.
 
 익명 결과는 owner_user_id=null이고 상담 만료 후 7일 이내 삭제한다. 회원 결과와 정제 질문은 각 retained_until까지 남는다. 계정 탈퇴가 구현되면 원본 이력·계정 연결 질문을 명시적으로 정리하며 SET NULL만으로 개인정보를 남기지 않는다.
 

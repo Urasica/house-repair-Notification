@@ -65,6 +65,8 @@ frontend/src/
 
 설문 평가·채팅마다 UUID requestId를 발급한다. 시간 초과·응답 유실이면 GET .../requests/{requestId} 또는 같은 ID 재전송으로 상태·완료 응답을 확인한다. PROCESSING이면 기다리고 COMPLETED이면 저장된 응답을 표시한다. FAILED는 실패를 설명한 뒤 사용자가 재시도할 때만 새 ID로 실행한다. 새 ID 자동 재전송은 없다. 요청 대기 중 맥락 저장·새 전송을 막는다. 서버 SESSION_BUSY·REQUEST_IN_PROGRESS의 대기 시간을 따른다.
 
+상태 조회가 DELETED이거나 재전송이 410 REQUEST_DELETED이면 삭제된 기록임을 표시하고 해당 결과·재생 응답 캐시와 처리 중 requestId를 제거한다. 자동 재시도·결과 복원을 하지 않는다. 사용자가 새 평가를 명시적으로 시작할 때만 새 ID를 발급한다.
+
 결과 저장은 서버의 평가 완료 트랜잭션에서 자동 수행한다. 저장 실패를 화면에서 성공으로 표시하지 않는다. 회원 생성 결과는 계정 이력, 비회원 결과는 현재 익명 세션에 연결됐다는 표시를 제공한다.
 
 비회원 상담 중 로그인하면 새 회원 상담을 시작한다. 회원 이력은 로그인한 상태에서 생성한 결과만 보여준다. 익명 결과를 계정에 옮기는 버튼·API는 초기 범위에서 제외한다. 기존 익명 결과는 유효한 현재 익명 토큰으로만 조회할 수 있다.
@@ -73,11 +75,15 @@ frontend/src/
 
 결과 상태는 SAFETY_PRIORITY, OUT_OF_SCOPE, NEED_MORE_INFO, NEED_CONFIRMATION, GUIDANCE_AVAILABLE이다. 서버 문구를 승인·비용 확정 표현으로 바꾸지 않는다. LAW_CRITERIA와 LH_OPERATION을 분리하고 Citation.use=RELATED는 참고 자료로 표시한다.
 
+법령 설명만을 요청한 대화에서 LAW_CRITERIA에 근거한 GUIDANCE_AVAILABLE·GROUNDED는 ‘법령 기준 설명’으로 표시한다. 법령 인용의 APPLICABLE을 LH 운영 적용으로 표시하지 않는다. 운영 근거가 없는 설문·보수·교체·비용 문의는 NEED_CONFIRMATION과 직접 문의를 유지한다.
+
 정보가 부족하면 안내 불가·직접 문의 문구를 표시한다. 기관 이름은 표시할 수 있지만 연락처·전화번호·이메일·전화 링크를 답변·문의 문구에 넣지 않는다. “대신 웹에서 찾아볼게요” 동작은 없다. 출처 원문 링크는 검토된 근거 확인용이며 임의 검색 기능이 아니다.
 
 회원 이력은 만료한 상담 세션과 독립적으로 /me/results에서 조회한다. 과거 결과의 isCurrent=false는 현재 상담·기준과 같지 않다는 의미다. 본문과 생성 당시 출처는 기록으로 보여주고 새 상담을 제공한다. 이력 삭제 성공 시 목록·상세 캐시를 제거한다.
 
 회원 대화는 answerMode와 인용을 표시한다. TEMPLATE·CLARIFY는 정상적인 대체·추가 확인 응답이다. followUpQuestions는 확인 질문으로 표시하고 사용자가 기존 카탈로그에서 다시 선택하면 맥락을 저장한다. 모델 답변에서 ID를 추출해 자동 변경하지 않는다. 메시지 목록·재생 답변의 isCurrent=false는 과거 기록으로 표시한다. MVP는 완성 JSON 응답을 사용한다.
+
+GET .../chat/messages는 ChatHistory={items: ChatResponse[], nextCursor}를 반환한다. POST 응답과 같은 질문·답변 쌍 컴포넌트를 사용해 answerMode·status·followUpQuestions·disclaimer를 새로고침 뒤에도 복원한다. requestId로 중복을 제거하고 서버의 쌍 정렬과 cursor를 따른다. 표시 복원 때문에 전송 API를 다시 호출하지 않는다.
 
 ## 6. 오류·네트워크
 
@@ -90,6 +96,7 @@ frontend/src/
 | CONTEXT_CONFLICT | 최신 입력과 미저장 입력 비교 |
 | SESSION_BUSY·REQUEST_IN_PROGRESS | 대기·동일 requestId 상태 조회 |
 | REQUEST_FAILED | 실패 설명; 사용자가 재시도할 때 새 requestId 생성 |
+| REQUEST_DELETED | 삭제됨 표시·관련 캐시 제거; 자동 재시도 금지 |
 | IDEMPOTENCY_CONFLICT | 같은 ID의 입력이 달라 실행되지 않았음을 설명 |
 | INVALID_SELECTION·INVALID_ANSWER·VALIDATION_ERROR | 필드 오류 |
 | NOT_FOUND | 자원 없음 또는 소유권 없음 안내 |

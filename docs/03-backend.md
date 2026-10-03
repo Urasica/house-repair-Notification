@@ -2,6 +2,8 @@
 
 상위 문서: [전체 안내](README.md) · 연계: [DB](04-database.md), [RAG](05-ai-rag.md), [운영](06-qa-operations.md)
 
+이 문서는 목표 계약이다. M01~M03 기반 구현 이후 수정한 DELETED·REQUEST_DELETED·ChatHistory 계약은 아직 코드에 반영되지 않았으며 [후속 반영 항목](09-development-standards.md#5-계획-정합성-개정과-후속-반영)에 따라 구현한다.
+
 ## 1. 책임과 구조
 
 FastAPI 한 앱이 계정·익명 세션·권한, 설문, 결과 저장·이력, 장기 질문 기록, 내부 RAG와 OpenAI 호출을 제어한다. PostgreSQL + pgvector 한 DB에 업무 데이터와 안내 지식을 함께 저장한다. 마이크로서비스·별도 작업 큐·캐시는 초기 구성에 없다.
@@ -56,7 +58,8 @@ backend/app/
 | GET /sessions/{id}/questions | 세션 소유권 | 200 {catalogVersion, revision, questions} |
 | POST /sessions/{id}/evaluations | 세션 소유권, requestId·expectedRevision | 201 GuidanceResult; 완료 재생은 200 |
 | GET /sessions/{id}/results/{resultId} | 세션 소유권 | 200 GuidanceResult |
-| GET/POST /sessions/{id}/chat/messages | 회원 소유권; POST requestId·expectedRevision·content | 200 메시지 목록 또는 ChatResponse |
+| GET /sessions/{id}/chat/messages?cursor=...&limit=... | 회원 소유권 | 200 ChatHistory; 질문·답변 쌍과 표시 정보 |
+| POST /sessions/{id}/chat/messages | 회원 소유권; requestId·expectedRevision·content | 200 ChatResponse |
 | GET /sessions/{id}/requests/{requestId} | 평가: 세션 소유권; 채팅: 회원 | 200 RequestState |
 | DELETE /sessions/{id} | 세션 소유권 | 204 상담 종료; 장기 기록 일괄 삭제와 구분 |
 | GET /me/results?cursor=...&limit=... | 계정 | 200 {items, nextCursor} |
@@ -164,12 +167,16 @@ type ChatResponse = {requestId: string; contextRevision: number;
   userMessage: ChatMessage; assistantMessage: ChatMessage;
   followUpQuestions: string[]; disclaimer: string; isCurrent: boolean};
 
+type ChatHistory = {items: ChatResponse[]; nextCursor: string | null};
+
 type RequestState = {requestId: string; kind: "SURVEY" | "CHAT";
-  state: "PROCESSING" | "COMPLETED" | "FAILED";
+  state: "PROCESSING" | "COMPLETED" | "FAILED" | "DELETED";
   retryAfterMs: number | null; response: GuidanceResult | ChatResponse | null};
 ```
 
 회원 채팅은 1~2,000자이며 공백만 있으면 거부한다. 실패한 처리 중 입력은 완료 대화 목록에 넣지 않는다. 원본 대화의 단기 저장과 장기 질문 기록은 분리한다.
+
+ChatHistory.items는 COMPLETED인 CHAT 요청의 저장된 ChatResponse를 사용한다. 각 항목에 질문·답변·answerMode·status·followUpQuestions·disclaimer·contextRevision을 함께 반환하며 응답과 두 메시지의 isCurrent는 조회 시 재계산한다. 정렬은 요청 created_at·id 오름차순, limit는 질문·답변 쌍 기준 기본 20·최대 50이다. nextCursor 이후의 쌍을 조회하고 마지막은 null이다. PROCESSING·FAILED·DELETED는 제외한다. 새로고침 시 같은 표시 정보를 복원하며 조회 때문에 모델을 재호출하지 않는다.
 
 ## 5. 설문·RAG·OpenAI 처리
 
@@ -179,19 +186,23 @@ type RequestState = {requestId: string; kind: "SURVEY" | "CHAT";
 
 회원 챗봇은 같은 판단·검색을 거친 뒤 OpenAI Responses API를 호출한다. tools=[]로 웹 검색·브라우징·MCP·임의 URL 요청을 제공하지 않는다. 적격 근거가 없으면 생성 호출 없이 직접 문의 템플릿을 반환한다. 근거가 있더라도 모델 사전 지식의 기간·비용·보수 조건을 추가하지 못하게 검증한다. 구체 계약·모델 설정은 05를 따른다.
 
+근거 적격성은 요청의 목적을 기준으로 판단한다. 공통 안전·범위·필수 정보 확인을 통과한 회원의 명시적인 조문·별표 설명 질문은 LAW_CRITERIA만으로도 설명에 필요한 근거가 충분하면 GUIDANCE_AVAILABLE·GROUNDED로 답할 수 있다. 이때 APPLICABLE은 법령 설명에 대한 적격성이며 LH 운영 적용을 뜻하지 않는다. 설문과 LH 보수·교체·비용 문의는 운영 근거가 없으면 NEED_CONFIRMATION이며, 챗봇은 TEMPLATE로 직접 문의를 안내한다. 이때 법령은 RELATED 참고로만 표시한다. 법령 설명과 운영 판단이 섞이거나 목적이 불분명하면 운영 판단을 요구하는 것으로 처리하며 모델이 임의로 설명 질문으로 바꿔 우회하지 않는다.
+
 사용자의 질문 통계는 자료 개선용이며 RAG 지식으로 자동 복사하지 않는다. 서버는 입력·대화·근거 중 식별정보를 제거한 최소 내용만 OpenAI에 전달한다. 결과 문구·안전 안내·문의 문구에서 전화번호·이메일·연락처 패턴이 검출되면 제거 또는 템플릿 대체한다. 출처 URL은 검토된 원문 확인용만 허용한다.
 
 ## 6. 단일 프로세스 동시성·중복 방지
 
-설문 평가와 채팅 모두 request_runs의 (consultation_id, request_id) UNIQUE로 중복을 구분한다. 요청 ID·입력 해시·PROCESSING/COMPLETED/FAILED·완료 응답만 저장한다. 영속 큐·lease·attempt·자동 재처리는 없다. 평가 예산은 임베딩·검색 포함 10초, 채팅은 포함 25초다.
+설문 평가와 채팅 모두 request_runs의 (consultation_id, request_id) UNIQUE로 중복을 구분한다. 요청 ID·입력 해시·PROCESSING/COMPLETED/FAILED/DELETED·완료 응답을 저장한다. DELETED는 본문 없는 재실행 차단 기록이다. 영속 큐·lease·attempt·자동 재처리는 없다. 평가 예산은 임베딩·검색 포함 10초, 채팅은 포함 25초다.
 
-1. 인증·기능 권한을 검사한다. 같은 ID의 kind·본문·expectedRevision이 다르면 409 IDEMPOTENCY_CONFLICT다. COMPLETED는 추가 검색·모델 호출 없이 응답을 재생하고 isCurrent를 다시 계산한다. PROCESSING은 409 REQUEST_IN_PROGRESS, FAILED는 409 REQUEST_FAILED다.
+1. 인증·기능 권한을 검사한다. DELETED인 동일 ID 재전송은 입력 비교 전에 410 REQUEST_DELETED로 차단한다. 나머지는 같은 ID의 kind·본문·expectedRevision이 다르면 409 IDEMPOTENCY_CONFLICT다. COMPLETED는 추가 검색·모델 호출 없이 응답을 재생하고 isCurrent를 다시 계산한다. PROCESSING은 409 REQUEST_IN_PROGRESS, FAILED는 409 REQUEST_FAILED다.
 2. 상담별 메모리 잠금을 즉시 획득한다. 다른 변경이 실행 중이면 409 SESSION_BUSY다. 맥락 저장·평가·채팅·상담 삭제·연결된 결과 삭제에도 같은 잠금을 적용하며 읽기는 허용한다. 계정 질문 일괄 삭제도 연결된 상담의 동일 잠금을 확인·획득해 실행 중인 요청과 겹치지 않는다. 서로 다른 상담은 비동기로 함께 처리한다.
 3. 짧은 DB 트랜잭션에서 소유권·revision·한도를 확인하고 PROCESSING을 기록한다. 트랜잭션을 닫고 내부 검색·OpenAI·출력 검증을 수행한다.
 4. 마지막 짧은 **단일 DB 트랜잭션**에서 요청이 여전히 PROCESSING인지, 세션·계정 인증·revision·근거가 유효한지 확인한다. 필요한 지식 묶음·원문 행을 잠그고 결과 또는 메시지, 정제 질문, 요청 완료를 함께 커밋한다. 저장 실패는 503이며 성공으로 표시하지 않는다.
 5. OpenAI 장애·자료 부족은 DB가 정상인 경우 연락처 없는 TEMPLATE/CLARIFY로 완료한다. 예상하지 못한 실패·취소는 가능한 짧은 정리 트랜잭션으로 FAILED를 기록하고 잠금을 해제한다. 실패 또는 취소가 확정된 작업의 늦은 응답은 완료 조건을 통과하지 못하며 저장하지 않는다.
 
 GET .../requests/{requestId}는 상태를 조회한다. 실패한 ID를 다시 실행하지 않으며, 사용자가 실패를 확인하고 재시도할 때 새 ID를 발급한다. 응답 유실은 먼저 같은 ID로 확인하므로 완료 기록·질문 통계·메시지가 늘지 않는다.
+
+삭제된 요청의 상태 조회는 200과 state=DELETED, response=null, retryAfterMs=null을 반환한다. 재전송·조회는 삭제 내용을 복원하지 않으며 새 ID 자동 재시도도 금지한다. 사용자가 명시적으로 새 평가를 시작하면 새 ID를 사용할 수 있다. DELETED 기록은 상담 행 정리까지 유지하며 상담 만료 뒤에는 기존 만료·소유권 규칙으로 접근을 차단한다.
 
 프로세스 재시작은 이전 프로세스가 완전히 종료된 후 수행한다. 새 프로세스가 요청을 받기 전에 남은 PROCESSING을 FAILED로 바꾼다. 실행 중 DB 장애로 실패 정리도 불가능했다면 새 변경을 막고 활성 변경 요청을 취소·종료한 뒤, DB 복구 후 남은 PROCESSING을 FAILED로 정리한다. 그동안 readiness는 실패다. 외부 호출 이후 중단·명시적 재시도에 따른 추가 API 과금까지 한 번으로 보장하지 않는다.
 
@@ -203,6 +214,8 @@ GET .../requests/{requestId}는 상태를 조회한다. 실패한 ID를 다시 �
 
 회원 이력에는 로그인 상태에서 생성한 결과만 연결한다. 비회원에서 로그인하면 새 회원 상담을 시작한다. 익명 결과의 계정 이전은 초기 범위에서 제외한다. 로그아웃·세션 종료는 계정 이력을 삭제하지 않는다. DELETE /me/results/{id}는 본인 결과·연결된 질문 기록·재생 캐시를 삭제하고 복구용 삭제 기록을 남긴다.
 
+결과 삭제는 동일 상담 잠금과 한 DB 트랜잭션에서 결과·연결 질문을 삭제하고, 연결 요청이 남아 있으면 COMPLETED → DELETED 및 response_json=null로 바꾼다. 요청 행·ID·해시·종료 시각은 유지한다. 삭제 기록도 같은 트랜잭션에 저장한다. 단기 정리로 요청이 이미 없으면 다시 만들지 않는다. 질문 분석 기록만 삭제할 때는 결과·완료 응답을 유지하되, 완료 응답 재생이 질문 기록을 다시 생성하지 않도록 한다.
+
 장기 question_records에는 설문 질문·답 코드·당시 라벨, 정제된 질문 내용, 카탈로그 버전, SURVEY/CHAT 구분, 상태, 검색 청크 ID·점수 등의 제한된 메타데이터를 저장한다. origin_key UNIQUE로 요청당 한 번만 기록한다. 비회원·회원 모두 적용하며 기본 5년·허용 범위 3~5년이다. 주요 질문은 GROUP BY로 집계하고 미리 계산한 통계 테이블은 두지 않는다. 원본 비밀번호·토큰·IP·연락처는 포함하지 않는다.
 
 세션 DELETE는 상담 종료다. 원본 세션·대화·요청은 정리하고 장기 정제 질문·회원 이력은 정해진 기간에 유지한다. 현재 익명 세션의 장기 질문까지 삭제하려면 DELETE /sessions/{id}?eraseRecords=true를 사용한다. 회원은 결과별 또는 /me/question-records로 명시적으로 삭제할 수 있다. 명시적 삭제가 장기 보존보다 우선한다.
@@ -213,7 +226,7 @@ GET .../requests/{requestId}는 상태를 조회한다. 실패한 ID를 다시 �
 {"error":{"code":"AUTH_REQUIRED","message":"로그인 후 이용해 주세요.","details":{},"traceId":"public-correlation-id"}}
 ```
 
-401 인증·만료, 404 타인·없는 자원, 409 카탈로그·맥락·요청 충돌, 422 입력 오류, 429 RATE_LIMITED, 503 SERVICE_UNAVAILABLE/CATALOG_NOT_READY로 통일한다. 부족한 정보·범위 밖·자료 없음은 정상 2xx 안내 결과다. 내부 SQL·모델 원문·비밀은 오류 details에 넣지 않는다.
+401 인증·만료, 404 타인·없는 자원, 409 카탈로그·맥락·요청 충돌, 410 REQUEST_DELETED(삭제된 요청 재전송), 422 입력 오류, 429 RATE_LIMITED, 503 SERVICE_UNAVAILABLE/CATALOG_NOT_READY로 통일한다. 삭제된 결과 직접 조회는 404다. 부족한 정보·범위 밖·자료 없음은 정상 2xx 안내 결과다. 내부 SQL·모델 원문·비밀은 오류 details에 넣지 않는다.
 
 ready는 DB·필수 설정·중단 요청 정리 여부를 확인한다. catalogReady=false여도 준비 중 화면을 제공할 수 있으나 상담 시작은 CATALOG_NOT_READY다. 지식 미게시·OpenAI 비활성은 ragReady=false로 표시하며 DB가 정상이면 기본 안내·회원 이력을 유지한다. DB 장애는 ready와 저장·이력 조회를 503으로 실패시킨다. 마이그레이션·자료 반입·만료 정리는 같은 이미지의 일회성 관리 명령이다.
 
