@@ -8,23 +8,21 @@ React + TypeScript + Vite, React Router, TanStack Query, React Hook Form을 사�
 
 ```text
 frontend/src/
-  app/                        # Router, QueryClient, 인증 초기화
+  App.tsx, main.tsx            # Router, QueryClient, 인증 초기화
   pages/                      # Home, Select, Survey, Chat, Result, Login, History
   features/auth/              # 로그인·가입·로그아웃·CSRF
-  features/consultation/      # 세션·맥락·설문 저장
-  features/chat/              # 회원 대화·요청 복구
-  features/history/           # 본인 결과 목록·상세·삭제
-  components/                 # Field, Alert, SourceGroups, ContactDraft
+  features/survey/            # 상담·맥락·설문·결과·이력 API, 저장소, 요청 복구
+  components/                 # Consultation, Feedback, ResultView, EndConsultation
   api/generated/              # OpenAPI 타입; 직접 수정 금지
-  styles/                     # 디자인 토큰·반응형
-  test/                       # 테스트 전용 합성 데이터
+  styles.css                  # 기본 스타일·반응형
+  features/*/*.test.*          # 시험과 시험 전용 합성 fixture
 ```
 
 ## 2. 인증과 권한
 
 로그인 계정은 서버의 HttpOnly·Secure·SameSite=Lax 쿠키를 사용한다. 브라우저 저장소에 계정 토큰·비밀번호를 저장하지 않는다. 앱 초기화 시 GET /auth/me로 로그인 상태와 CSRF 토큰을 조회한다. 계정 쿠키를 사용하는 변경 요청에 X-CSRF-Token을 보낸다. 자세한 예외·Origin 정책은 03을 따른다.
 
-M04에서 로그인/가입·계정 초기화·회원 화면 접근 제한·로그아웃을 연결했다. 로그인 계정 변경과 로그아웃 때 이전 계정의 Query 캐시와 회원 상담 ID를 제거하고, 인증 만료 401에서도 회원 캐시를 지운다. 회원 챗봇/이력 화면의 본문 기능은 M06/M10에서 연결한다. 로컬 HTTP 쿠키 예외는 백엔드 설계를 따른다.
+M04에서 로그인/가입·계정 초기화·회원 화면 접근 제한·로그아웃, M07에서 상담·설문·결과·이력/삭제를 연결했다. 로그인 계정 변경·계정 재확인·로그아웃·인증 만료에서 이전 사용자 Query 캐시와 양쪽 상담 복구 정보를 제거하고 늦은 변경 응답을 반영하지 않는다. 회원 챗봇 본문은 M10에서 연결한다. 로컬 HTTP 쿠키 예외는 백엔드 설계를 따른다.
 
 비로그인 설문 세션만 sessionStorage에 세션 ID·익명 Bearer 토큰·만료 시각을 보관한다. 토큰·입력은 URL에 넣지 않는다. 회원 상담은 세션 ID만 보관하고 계정 쿠키로 소유권을 확인한다. 쿠키 인증과 익명 토큰을 같은 것으로 취급하지 않는다.
 

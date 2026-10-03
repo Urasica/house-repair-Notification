@@ -8,6 +8,10 @@ import { useAuth } from './features/auth/useAuth'
 import { anonymous, replaceAuth } from './features/auth/state'
 import Home from './pages/Home'
 import Login from './pages/Login'
+import Select from './pages/Select'
+import Survey from './pages/Survey'
+import Result from './pages/Result'
+import History, { HistoryDetail } from './pages/History'
 
 export default function App() {
   const auth = useAuth()
@@ -44,9 +48,12 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/select" element={<Select />} />
+      <Route path="/survey" element={<Survey />} />
+      <Route path="/result/:resultId" element={<Result />} />
       <Route path="/chat" element={<MemberOnly><section className="notice member-panel"><h1>회원 챗봇</h1><p>검토된 안내 자료와 대화 기능을 준비하고 있어요.</p></section></MemberOnly>} />
-      <Route path="/history" element={<MemberOnly><section className="notice member-panel"><h1>이전 결과</h1><p>이전 결과 조회 기능을 준비하고 있어요.</p></section></MemberOnly>} />
-      <Route path="/history/:resultId" element={<MemberOnly><section className="notice member-panel"><h1>이전 결과 상세</h1><p>조회 기능을 준비하고 있어요.</p></section></MemberOnly>} />
+      <Route path="/history" element={<MemberOnly><History /></MemberOnly>} />
+      <Route path="/history/:resultId" element={<MemberOnly><HistoryDetail /></MemberOnly>} />
       <Route path="*" element={<section className="notice"><h1>페이지를 찾을 수 없어요</h1><Link to="/">홈으로 돌아가기</Link></section>} />
     </Routes>
     <footer>실제 보수 여부는 담당 기관 확인이 필요해요.</footer>

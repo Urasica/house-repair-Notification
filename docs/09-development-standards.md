@@ -1,6 +1,6 @@
 # 개발 기준과 입력 형식
 
-작성: 2026-10-03 · 적용: M01~M06 코드 및 후속 구현
+작성: 2026-10-03 · 적용: M01~M07 코드 및 후속 구현
 
 기준: [전체 안내](README.md) · 진행: [MVP 작업](../progress/README.md)
 
@@ -16,9 +16,9 @@
 
 질문은 singleChoice이며 options·required·interruptValues·order·conditions를 포함한다. 조건은 housingType·roomId·facilityId·symptomId 또는 answers.질문ID의 equals/in만 허용한다. COMPLETE_VERIFIED 검토에는 검토자·검토일과 비어 있지 않은 목록이 필요하다. 실제 목록은 아직 제공되지 않았으며 자동 게시하지 않는다.
 
-M05는 5개 주택 유형·고유한 옵션/연결·실제 조건 값·앞선 질문 참조를 검증한다. 게시본은 새 migration의 DB trigger로 수정·삭제를 차단하며 동일 게시 재전송은 기존 시각을 유지한다. [목록 작성·명령·설문 정책](11-catalog-publication.md)에 세부 규칙을 기록했다. 실제 목록 게시와 상담/설문 API 연결은 각각 자료 확보 후와 M06의 작업이다.
+M05는 5개 주택 유형·고유한 옵션/연결·실제 조건 값·앞선 질문 참조를 검증한다. 게시본은 새 migration의 DB trigger로 수정·삭제를 차단하며 동일 게시 재전송은 기존 시각을 유지한다. [목록 작성·명령·설문 정책](11-catalog-publication.md)에 세부 규칙을 기록했다. M06 API와 M07 화면은 연결했고 실제 목록 작성·검토·게시는 M08 이후 M08A다.
 
-backend/tests/fixtures/catalog.test.json은 구조 검증용 시험 데이터다. 공개 목록·개발 홈·운영 목록에 게시하지 않는다. 기존 예시 증상은 복사하지 않는다.
+backend/tests/fixtures/catalog.test.json과 frontend/src/features/survey/test-fixtures.ts는 시험 전용 합성 데이터다. 공개 목록·개발 홈·운영 목록에 게시하지 않는다. 기존 예시 증상은 복사하지 않는다.
 
 원문은 제6조의2·제7~45조·실제 별표 2 전체를 먼저 정리하고 coverage·누락·시행일·조건·각주·검토·해시를 기록한다. 실제 추출 지시와 전체 정리 검토 전에는 청킹·임베딩하지 않는다.
 
@@ -40,7 +40,7 @@ Python 3.12, Node 22 계열을 기준으로 한다. FastAPI 0.142.2·Pydantic 2.
 
 ## 5. 계획 정합성 개정과 후속 반영
 
-2026-10-03 계획 점검의 권장안을 문서에 반영했다. 해당 계획 개정 당시에는 코드·생성 타입·DB를 변경하지 않았다. 이후 M06에서 DELETED·REQUEST_DELETED와 삭제 경계를 구현·검증했고, ChatHistory와 실제 근거 정책은 후속 단계에서 연결한다. M01~M03 완료 기록은 당시 검증한 기반을 뜻한다.
+2026-10-03 계획 점검의 권장안을 문서에 반영했다. 해당 계획 개정 당시에는 코드·생성 타입·DB를 변경하지 않았다. 이후 M06에서 DELETED·REQUEST_DELETED와 삭제 경계, M07에서 삭제/복구 화면을 구현·검증했다. ChatHistory와 실제 근거 정책은 후속 단계에서 연결한다. M01~M03 완료 기록은 당시 검증한 기반을 뜻한다.
 
 | 확정한 변경 | 반영 단계·산출물 | 필수 검증 |
 | --- | --- | --- |

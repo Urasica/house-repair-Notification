@@ -3,7 +3,7 @@ import type { components } from './generated/schema'
 type ErrorCode = components['schemas']['ErrorCode']
 
 export class ApiError extends Error {
-  constructor(public code: ErrorCode, message: string, public status: number, public retryAfter: number | null = null) {
+  constructor(public code: ErrorCode, message: string, public status: number, public retryAfter: number | null = null, public details: Record<string, unknown> = {}) {
     super(message)
   }
 }
@@ -16,9 +16,11 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   if (!response.ok) {
     const body = await response.json().catch(() => null) as components['schemas']['ErrorResponse'] | null
     const retry = response.headers.get('Retry-After')
+    if (body?.error.code === 'AUTH_EXPIRED' && typeof window !== 'undefined') window.dispatchEvent(new Event('auth-expired'))
+    if (typeof window !== 'undefined' && ['SESSION_EXPIRED', 'UNAUTHORIZED'].includes(body?.error.code ?? '') && path.startsWith('/sessions/')) window.dispatchEvent(new CustomEvent('session-unavailable', { detail: { id: path.split('/')[2] } }))
     throw new ApiError(body?.error.code ?? 'SERVICE_UNAVAILABLE',
       body?.error.message ?? '서비스에 연결하지 못했어요. 잠시 후 다시 시도해 주세요.',
-      response.status, retry ? Number(retry) : null)
+      response.status, retry ? Number(retry) : null, body?.error.details ?? {})
   }
   if (response.status === 204) return undefined as T
   return response.json() as Promise<T>
