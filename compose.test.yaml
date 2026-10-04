@@ -10,3 +10,4 @@ services:
     restart: "no"
     volumes:
       - ./schemas:/schemas:ro
+      - ./data/catalog:/data/catalog:ro

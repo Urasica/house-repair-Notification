@@ -1,8 +1,8 @@
 # 카탈로그 작성·검증·게시 안내
 
-작성: 2026-10-03 · M05 코드/시험 완료 · 실제 목록은 M08 이후 M08A
+작성: 2026-10-03 · 갱신: 2026-10-04 · M05 및 M08A 완료
 
-사용자가 제공한 완성 목록을 검토한 뒤 한 번에 게시한다. 실제 공간·시설물·증상·질문 목록은 아직 없다. 시험 fixture는 전용 시험 DB에서만 사용하고 공개 개발 DB에는 넣지 않는다. 원문 추출·청킹·임베딩은 이 명령의 기능에 포함되지 않는다.
+사용자 지시에 따라 실제 M08 원문으로 작성한 목록을 검토한 뒤 게시한다. [m08a-20261004-v2](../data/catalog/m08a-20261004/README.md)은 COMPLETE_VERIFIED이며 로컬 개발 DB에 게시했다. 시험 fixture는 전용 시험 DB에서만 사용하고 공개 개발 DB에는 넣지 않는다. 원문 추출·청킹·임베딩은 이 명령의 기능에 포함되지 않는다.
 
 ## 1. 작성 형식과 검토
 
@@ -44,7 +44,7 @@ DRAFT도 형식 검증할 수 있으며 reviewComplete=false로 표시한다. va
 
 ## 4. 일회성 게시
 
-먼저 M05 migration `0002_m05`를 적용한다. migration은 기존 API 중단 후 관리자 연결로 실행하고, 게시 명령은 DML 앱 연결만 사용한다. [Docker 절차](10-local-development.md)를 따른다.
+먼저 현재 migration head `0003_m06`까지 적용한다. 게시본 불변성은 M05의 `0002_m05`에서 추가했다. migration은 기존 API 중단 후 관리자 연결로 실행하고, 게시 명령은 DML 앱 연결만 사용한다. [Docker 절차](10-local-development.md)를 따른다.
 
 검토한 실제 파일을 읽기 전용으로 마운트해 같은 API 이미지에서 실행한다. 아래 예시의 `/absolute/path/catalog.json`을 실제 절대 경로로 바꾼다. Windows에서는 `C:/.../catalog.json` 형태로 지정할 수 있다.
 
@@ -55,12 +55,12 @@ docker compose --env-file .env run --rm --no-deps --volume /absolute/path/catalo
 
 publish는 완료 검토·현재 migration·파일 연결을 확인하고 한 트랜잭션에서 게시한다. API 시작 복구를 실행하지 않아 활성 PROCESSING 상담을 실패로 바꾸지 않는다. 게시 시각은 서버가 정한다. 같은 버전의 동일한 정규화 JSON 재전송은 기존 게시 시각을 유지한다. 같은 버전에 다른 내용은 409 CATALOG_UPDATED이며 새 버전을 사용해야 한다.
 
-게시본은 DB trigger로 UPDATE/DELETE를 차단한다. 과거 게시본은 `/api/v1/catalog?version=...`에서 조회하며 최신 조회는 게시 시각·버전 순으로 정한다. 최신 버전 상담 시작 검사 함수는 예전 버전에 409 CATALOG_UPDATED와 최신 catalogVersion을 반환한다. 이 함수와 질문 응답 DTO의 상담 API 연결은 M06에서 한다.
+게시본은 DB trigger로 UPDATE/DELETE를 차단한다. 과거 게시본은 `/api/v1/catalog?version=...`에서 조회하며 최신 조회는 게시 시각·버전 순으로 정한다. 최신 버전 상담 시작 검사 함수는 예전 버전에 409 CATALOG_UPDATED와 최신 catalogVersion을 반환한다. 이 함수와 질문 응답 DTO는 M06 상담 API에 연결되어 있다.
 
 `test-`/`test_`로 시작하는 버전·항목/질문 ID·검토자는 시험 전용으로 예약한다. 해당 자료는 APP_ENV=test이면서 DB 이름이 repair_guide_test인 경우에만 게시 함수를 사용할 수 있다. 시험은 트랜잭션을 되돌린다. 공개용으로 시험 ID를 바꾸는 작업은 실제 목록 검토를 대신하지 못한다.
 
 ## 5. 확인 기록과 남은 작업
 
-자동 시험은 구조 오류·분기·답 정리·5개 주택 범위·모름·위험 우선순위·검토 미완료·시험 목록 게시 거부와 실제 PostgreSQL의 게시 재전송·새 버전·과거 조회·DB 불변성을 검증한다. 실제 공개 DB의 목록은 비어 있고 catalogReady=false·CATALOG_NOT_READY를 유지한다.
+자동 시험은 구조 오류·분기·답 정리·5개 주택 범위·모름·위험 우선순위·검토 미완료·시험 목록 게시 거부와 실제 PostgreSQL의 게시 재전송·새 버전·과거 조회·DB 불변성을 검증한다. M08A 완료 후 로컬 개발 DB는 catalogReady=true이며 m08a-20261004-v2을 반환한다. ragReady=false는 유지한다. 아직 목록을 게시하지 않은 새 환경에서는 catalogReady=false·CATALOG_NOT_READY다.
 
-사용자 요청에 따라 M08 전체 원문 정리 이후 M08A에서 실제 목록을 작성하고 ID/연결/용어/모름/위험 정책을 검토한 뒤 게시한다. M06~M07 실데이터 통합 검증도 M08A에서 수행한다. M05는 코드·자동 시험 완료이며 실제 목록 검토 작업은 M08A로 이동했다.
+2026-10-04 M08A에서 실제 목록의 ID/연결/용어/모름/위험 정책을 검토하고 게시했으며 M06~M07 실데이터 통합 검증을 마쳤다. [완료 기록](../progress/03-m08a-catalog-review.md)에 출처/목록 해시·검토 범위·게시 시각·시험 결과를 기록했다. 원문/법률 적용 검토와 목록 완전성 검토는 구분하며 LH 운영 근거가 없으면 NEED_CONFIRMATION을 유지한다.

@@ -1,0 +1,1717 @@
+{
+  "state": "COMPLETE_VERIFIED",
+  "catalogVersion": "m08a-20261004-v1",
+  "reviewScope": "목록·용어·연결·질문·분기와 보수적 위험 중단 정책; 법률·LH 운영 승인 아님",
+  "source": {
+    "url": "https://www.law.go.kr/admRulLsInfoP.do?chrClsCd=&admRulSeq=2100000282400#AJAX",
+    "title": "공동주택 하자의 조사, 보수비용 산정 및 하자판정기준",
+    "version": "국토교통부고시 제2026-360호",
+    "effectiveDate": "2026-07-08",
+    "m08ManifestSha256": "e8d39ff480b738cd2da15cc248fb37796ba7fca81a7228b7acf6c0dde53304a4",
+    "m08ManifestPath": "../../private/m08/2026-10-04/manifest.json"
+  },
+  "policy": {
+    "operationalEvidenceAvailable": false,
+    "legalThresholdsUsedForDecisions": false,
+    "legalApplicabilityApproved": false,
+    "unknownSelection": "공간 모름은 시설 선택을 열어 두고 시설/증상 모름은 별도 관찰 불확실성 경로로 수집. 모름은 확인 또는 직접 문의로 연결.",
+    "risk": "immediate-danger=YES 또는 detail-light-defect=BURN_SMOKE/SPARK만 중단. UNKNOWN은 위험 없음을 뜻하지 않으며 적격 운영 자료가 없어 NEED_CONFIRMATION으로 안내.",
+    "aliases": "검색/표시용 동의어. 조문에 직접 없는 일상어·공간 분류는 UX 편집이며 법적 동등성 주장 아님.",
+    "unresolved": [
+      "별표 4 파손 및 손상은 증상 접수만 제공하고 자동 하자 판정 금지",
+      "제45조 등 외부 규정은 질문 분류만 사용; 법적 적합성 판단 금지",
+      "제35조제2항 적용례의 신청일과 승인일·준공일 혼동 금지",
+      "법령만으로 LH 보수 의무·비용·교체 주기 판단 금지"
+    ]
+  },
+  "symptoms": {
+    "concrete-crack": {
+      "sources": [
+        "제7조"
+      ],
+      "facilityIds": [
+        "concrete"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-concrete-crack",
+        "disaster-context"
+      ]
+    },
+    "rebar-exposed": {
+      "sources": [
+        "제8조"
+      ],
+      "facilityIds": [
+        "concrete"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-rebar-exposed",
+        "disaster-context"
+      ]
+    },
+    "plaster-damage": {
+      "sources": [
+        "제9조"
+      ],
+      "facilityIds": [
+        "finish"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-plaster-damage",
+        "disaster-context"
+      ]
+    },
+    "paint-damage": {
+      "sources": [
+        "제9조"
+      ],
+      "facilityIds": [
+        "finish"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-paint-damage",
+        "disaster-context"
+      ]
+    },
+    "leak": {
+      "sources": [
+        "제10조",
+        "별표 2"
+      ],
+      "facilityIds": [
+        "waterproof",
+        "pipe",
+        "window",
+        "concrete"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-leak",
+        "disaster-context",
+        "leak-pattern"
+      ]
+    },
+    "joint-defect": {
+      "sources": [
+        "제11조"
+      ],
+      "facilityIds": [
+        "joint"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-joint-defect",
+        "disaster-context"
+      ]
+    },
+    "tie-remains": {
+      "sources": [
+        "제12조"
+      ],
+      "facilityIds": [
+        "concrete"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-tie-remains",
+        "disaster-context"
+      ]
+    },
+    "penetration-gap": {
+      "sources": [
+        "제13조"
+      ],
+      "facilityIds": [
+        "penetration"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-penetration-gap",
+        "disaster-context"
+      ]
+    },
+    "duct-finish": {
+      "sources": [
+        "제14조"
+      ],
+      "facilityIds": [
+        "duct"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-duct-finish",
+        "disaster-context"
+      ]
+    },
+    "condensation": {
+      "sources": [
+        "제15조"
+      ],
+      "facilityIds": [
+        "finish",
+        "window",
+        "floor"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-condensation",
+        "disaster-context",
+        "condensation-heating",
+        "installed-by"
+      ]
+    },
+    "sink-unfinished": {
+      "sources": [
+        "제16조"
+      ],
+      "facilityIds": [
+        "sink"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-sink-unfinished",
+        "disaster-context"
+      ]
+    },
+    "bath-threshold": {
+      "sources": [
+        "제17조"
+      ],
+      "facilityIds": [
+        "bath-finish"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-bath-threshold",
+        "disaster-context"
+      ]
+    },
+    "mirror-color": {
+      "sources": [
+        "제17조"
+      ],
+      "facilityIds": [
+        "bath-finish"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-mirror-color",
+        "disaster-context"
+      ]
+    },
+    "tile-defect": {
+      "sources": [
+        "제18조"
+      ],
+      "facilityIds": [
+        "tile"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-tile-defect",
+        "disaster-context"
+      ]
+    },
+    "trench-defect": {
+      "sources": [
+        "제19조"
+      ],
+      "facilityIds": [
+        "drain"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-trench-defect",
+        "disaster-context"
+      ]
+    },
+    "drain-slope": {
+      "sources": [
+        "제20조"
+      ],
+      "facilityIds": [
+        "drain",
+        "floor"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-drain-slope",
+        "disaster-context"
+      ]
+    },
+    "door-edge": {
+      "sources": [
+        "제21조"
+      ],
+      "facilityIds": [
+        "door"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-door-edge",
+        "disaster-context"
+      ]
+    },
+    "opening-function": {
+      "sources": [
+        "제22조"
+      ],
+      "facilityIds": [
+        "door",
+        "window"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-opening-function",
+        "disaster-context"
+      ]
+    },
+    "light-wiring": {
+      "sources": [
+        "제23조"
+      ],
+      "facilityIds": [
+        "light"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-light-wiring",
+        "disaster-context"
+      ]
+    },
+    "light-defect": {
+      "sources": [
+        "제24조"
+      ],
+      "facilityIds": [
+        "light"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-light-defect",
+        "disaster-context"
+      ]
+    },
+    "air-defect": {
+      "sources": [
+        "제25조"
+      ],
+      "facilityIds": [
+        "air"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-air-defect",
+        "disaster-context"
+      ]
+    },
+    "heating-control": {
+      "sources": [
+        "제26조"
+      ],
+      "facilityIds": [
+        "heating"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-heating-control",
+        "disaster-context"
+      ]
+    },
+    "sanitary-defect": {
+      "sources": [
+        "제27조"
+      ],
+      "facilityIds": [
+        "sanitary"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-sanitary-defect",
+        "disaster-context"
+      ]
+    },
+    "intercom-defect": {
+      "sources": [
+        "제28조"
+      ],
+      "facilityIds": [
+        "intercom"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-intercom-defect",
+        "disaster-context"
+      ]
+    },
+    "cctv-defect": {
+      "sources": [
+        "제29조"
+      ],
+      "facilityIds": [
+        "cctv"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-cctv-defect",
+        "disaster-context"
+      ]
+    },
+    "tree-health": {
+      "sources": [
+        "제30조"
+      ],
+      "facilityIds": [
+        "tree"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-tree-health",
+        "disaster-context"
+      ]
+    },
+    "root-binding": {
+      "sources": [
+        "제31조"
+      ],
+      "facilityIds": [
+        "tree"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-root-binding",
+        "disaster-context",
+        "root-material",
+        "root-age"
+      ]
+    },
+    "tree-planting": {
+      "sources": [
+        "제32조"
+      ],
+      "facilityIds": [
+        "tree"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-tree-planting",
+        "disaster-context"
+      ]
+    },
+    "tree-size": {
+      "sources": [
+        "제33조"
+      ],
+      "facilityIds": [
+        "tree"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-tree-size",
+        "disaster-context"
+      ]
+    },
+    "wallpaper-defect": {
+      "sources": [
+        "제34조"
+      ],
+      "facilityIds": [
+        "wallpaper"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-wallpaper-defect",
+        "disaster-context"
+      ]
+    },
+    "floor-finish": {
+      "sources": [
+        "제35조"
+      ],
+      "facilityIds": [
+        "floor"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-floor-finish",
+        "disaster-context"
+      ]
+    },
+    "floor-layer": {
+      "sources": [
+        "제35조",
+        "부칙 제2025-58호 제2조"
+      ],
+      "facilityIds": [
+        "floor"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-floor-layer",
+        "disaster-context",
+        "floor-approval"
+      ]
+    },
+    "stone-defect": {
+      "sources": [
+        "제36조"
+      ],
+      "facilityIds": [
+        "stone"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-stone-defect",
+        "disaster-context"
+      ]
+    },
+    "furniture-defect": {
+      "sources": [
+        "제37조"
+      ],
+      "facilityIds": [
+        "furniture"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-furniture-defect",
+        "disaster-context",
+        "installed-by"
+      ]
+    },
+    "insulation-defect": {
+      "sources": [
+        "제38조"
+      ],
+      "facilityIds": [
+        "insulation"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-insulation-defect",
+        "disaster-context"
+      ]
+    },
+    "appliance-defect": {
+      "sources": [
+        "제39조"
+      ],
+      "facilityIds": [
+        "appliance"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-appliance-defect",
+        "disaster-context",
+        "installed-by"
+      ]
+    },
+    "elevator-defect": {
+      "sources": [
+        "제40조"
+      ],
+      "facilityIds": [
+        "elevator"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-elevator-defect",
+        "disaster-context"
+      ]
+    },
+    "pavement-defect": {
+      "sources": [
+        "제41조"
+      ],
+      "facilityIds": [
+        "pavement"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-pavement-defect",
+        "disaster-context"
+      ]
+    },
+    "parking-defect": {
+      "sources": [
+        "제42조",
+        "별표 3"
+      ],
+      "facilityIds": [
+        "parking-fixture"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-parking-defect",
+        "disaster-context"
+      ]
+    },
+    "retaining-defect": {
+      "sources": [
+        "제43조",
+        "별표 4"
+      ],
+      "facilityIds": [
+        "retaining"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-retaining-defect",
+        "disaster-context"
+      ]
+    },
+    "fire-defect": {
+      "sources": [
+        "제45조"
+      ],
+      "facilityIds": [
+        "fire"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-fire-defect",
+        "disaster-context"
+      ]
+    },
+    "gas-defect": {
+      "sources": [
+        "제45조"
+      ],
+      "facilityIds": [
+        "gas"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-gas-defect",
+        "disaster-context"
+      ]
+    },
+    "electric-defect": {
+      "sources": [
+        "제45조"
+      ],
+      "facilityIds": [
+        "electric"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-electric-defect",
+        "disaster-context"
+      ]
+    },
+    "railing-defect": {
+      "sources": [
+        "제45조"
+      ],
+      "facilityIds": [
+        "railing"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-railing-defect",
+        "disaster-context"
+      ]
+    },
+    "unknown": {
+      "sources": [
+        "UX_POLICY"
+      ],
+      "facilityIds": [
+        "concrete",
+        "finish",
+        "waterproof",
+        "pipe",
+        "window",
+        "joint",
+        "penetration",
+        "duct",
+        "sink",
+        "bath-finish",
+        "tile",
+        "drain",
+        "door",
+        "light",
+        "air",
+        "heating",
+        "sanitary",
+        "intercom",
+        "cctv",
+        "tree",
+        "wallpaper",
+        "floor",
+        "stone",
+        "furniture",
+        "insulation",
+        "appliance",
+        "elevator",
+        "pavement",
+        "parking-fixture",
+        "retaining",
+        "fire",
+        "gas",
+        "electric",
+        "railing",
+        "unknown"
+      ],
+      "questionIds": [
+        "immediate-danger",
+        "shared-use",
+        "detail-unknown",
+        "disaster-context"
+      ]
+    }
+  },
+  "questions": {
+    "immediate-danger": {
+      "sources": [
+        "UX_SAFETY_POLICY",
+        "제37조",
+        "제40조",
+        "제43조"
+      ],
+      "purpose": "사용자가 직접 보고한 현재 위험에 대한 보수적 상담 중단. 법령 하자 판정·위험 진단·수리 지시가 아님. 모름을 안전하다고 판정하지 않음."
+    },
+    "shared-use": {
+      "sources": [
+        "제6조의2"
+      ],
+      "purpose": "사용 형태만 확인. 구조부·스프링클러 등 예외가 있으므로 답만으로 전유/공용 확정 금지."
+    },
+    "detail-concrete-crack": {
+      "sources": [
+        "제7조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-rebar-exposed": {
+      "sources": [
+        "제8조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-plaster-damage": {
+      "sources": [
+        "제9조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-paint-damage": {
+      "sources": [
+        "제9조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-leak": {
+      "sources": [
+        "제10조",
+        "별표 2"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-joint-defect": {
+      "sources": [
+        "제11조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-tie-remains": {
+      "sources": [
+        "제12조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-penetration-gap": {
+      "sources": [
+        "제13조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-duct-finish": {
+      "sources": [
+        "제14조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-condensation": {
+      "sources": [
+        "제15조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-sink-unfinished": {
+      "sources": [
+        "제16조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-bath-threshold": {
+      "sources": [
+        "제17조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-mirror-color": {
+      "sources": [
+        "제17조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-tile-defect": {
+      "sources": [
+        "제18조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-trench-defect": {
+      "sources": [
+        "제19조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-drain-slope": {
+      "sources": [
+        "제20조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-door-edge": {
+      "sources": [
+        "제21조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-opening-function": {
+      "sources": [
+        "제22조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-light-wiring": {
+      "sources": [
+        "제23조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-light-defect": {
+      "sources": [
+        "제24조"
+      ],
+      "purpose": "제24조제2호에 명시된 타는 냄새·연기·스파크 보고는 안전 확인 우선으로 중단. 작동 시험을 요구하지 않고 보수 의무를 판정하지 않음."
+    },
+    "detail-air-defect": {
+      "sources": [
+        "제25조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-heating-control": {
+      "sources": [
+        "제26조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-sanitary-defect": {
+      "sources": [
+        "제27조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-intercom-defect": {
+      "sources": [
+        "제28조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-cctv-defect": {
+      "sources": [
+        "제29조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-tree-health": {
+      "sources": [
+        "제30조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-root-binding": {
+      "sources": [
+        "제31조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-tree-planting": {
+      "sources": [
+        "제32조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-tree-size": {
+      "sources": [
+        "제33조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-wallpaper-defect": {
+      "sources": [
+        "제34조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-floor-finish": {
+      "sources": [
+        "제35조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-floor-layer": {
+      "sources": [
+        "제35조",
+        "부칙 제2025-58호 제2조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-stone-defect": {
+      "sources": [
+        "제36조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-furniture-defect": {
+      "sources": [
+        "제37조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-insulation-defect": {
+      "sources": [
+        "제38조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-appliance-defect": {
+      "sources": [
+        "제39조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-elevator-defect": {
+      "sources": [
+        "제40조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-pavement-defect": {
+      "sources": [
+        "제41조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-parking-defect": {
+      "sources": [
+        "제42조",
+        "별표 3"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-retaining-defect": {
+      "sources": [
+        "제43조",
+        "별표 4"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-fire-defect": {
+      "sources": [
+        "제45조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-gas-defect": {
+      "sources": [
+        "제45조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-electric-defect": {
+      "sources": [
+        "제45조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-railing-defect": {
+      "sources": [
+        "제45조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "detail-unknown": {
+      "sources": [
+        "UX_POLICY"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "leak-pattern": {
+      "sources": [
+        "제10조",
+        "별표 2"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "condensation-heating": {
+      "sources": [
+        "제15조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "installed-by": {
+      "sources": [
+        "제15조",
+        "제37조",
+        "제39조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "floor-approval": {
+      "sources": [
+        "제35조",
+        "부칙 제2025-58호 제2조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "root-material": {
+      "sources": [
+        "제31조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "root-age": {
+      "sources": [
+        "제31조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    },
+    "disaster-context": {
+      "sources": [
+        "제44조"
+      ],
+      "purpose": "관찰 사실·불확실성 수집. 하자 또는 보수 의무 판정에 사용하지 않음."
+    }
+  },
+  "facilities": {
+    "concrete": {
+      "sources": [
+        "별표 2",
+        "제10조",
+        "제12조",
+        "제7조",
+        "제8조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "finish": {
+      "sources": [
+        "제15조",
+        "제9조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "waterproof": {
+      "sources": [
+        "별표 2",
+        "제10조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "pipe": {
+      "sources": [
+        "별표 2",
+        "제10조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "window": {
+      "sources": [
+        "별표 2",
+        "제10조",
+        "제15조",
+        "제22조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "joint": {
+      "sources": [
+        "제11조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "penetration": {
+      "sources": [
+        "제13조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "duct": {
+      "sources": [
+        "제14조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "sink": {
+      "sources": [
+        "제16조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "bath-finish": {
+      "sources": [
+        "제17조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "tile": {
+      "sources": [
+        "제18조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "drain": {
+      "sources": [
+        "제19조",
+        "제20조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "door": {
+      "sources": [
+        "제21조",
+        "제22조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "light": {
+      "sources": [
+        "제23조",
+        "제24조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "air": {
+      "sources": [
+        "제25조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "heating": {
+      "sources": [
+        "제26조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "sanitary": {
+      "sources": [
+        "제27조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "intercom": {
+      "sources": [
+        "제28조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "cctv": {
+      "sources": [
+        "제29조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "tree": {
+      "sources": [
+        "제30조",
+        "제31조",
+        "제32조",
+        "제33조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "wallpaper": {
+      "sources": [
+        "제34조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "floor": {
+      "sources": [
+        "부칙 제2025-58호 제2조",
+        "제15조",
+        "제20조",
+        "제35조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "stone": {
+      "sources": [
+        "제36조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "furniture": {
+      "sources": [
+        "제37조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "insulation": {
+      "sources": [
+        "제38조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "appliance": {
+      "sources": [
+        "제39조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "elevator": {
+      "sources": [
+        "제40조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "pavement": {
+      "sources": [
+        "제41조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "parking-fixture": {
+      "sources": [
+        "별표 3",
+        "제42조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "retaining": {
+      "sources": [
+        "별표 4",
+        "제43조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "fire": {
+      "sources": [
+        "제45조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "gas": {
+      "sources": [
+        "제45조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "electric": {
+      "sources": [
+        "제45조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "railing": {
+      "sources": [
+        "제45조"
+      ],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    },
+    "unknown": {
+      "sources": [],
+      "roomMapping": "거주자가 위치를 선택하기 위한 UX 분류; 법령 적용 범위가 아님"
+    }
+  },
+  "rooms": {
+    "living": {
+      "basis": "UX_LOCATION_GROUP",
+      "label": "거실"
+    },
+    "bedroom": {
+      "basis": "UX_LOCATION_GROUP",
+      "label": "침실"
+    },
+    "kitchen": {
+      "basis": "UX_LOCATION_GROUP",
+      "label": "주방"
+    },
+    "bathroom": {
+      "basis": "UX_LOCATION_GROUP",
+      "label": "욕실"
+    },
+    "laundry": {
+      "basis": "UX_LOCATION_GROUP",
+      "label": "세탁실"
+    },
+    "balcony": {
+      "basis": "UX_LOCATION_GROUP",
+      "label": "발코니"
+    },
+    "entrance": {
+      "basis": "UX_LOCATION_GROUP",
+      "label": "현관"
+    },
+    "common": {
+      "basis": "UX_LOCATION_GROUP",
+      "label": "공용 복도·계단"
+    },
+    "parking": {
+      "basis": "UX_LOCATION_GROUP",
+      "label": "지하주차장"
+    },
+    "roof": {
+      "basis": "UX_LOCATION_GROUP",
+      "label": "옥상"
+    },
+    "outdoor": {
+      "basis": "UX_LOCATION_GROUP",
+      "label": "단지 외부·조경"
+    },
+    "unknown": {
+      "basis": "UX_LOCATION_GROUP",
+      "label": "공간을 잘 모르겠어요"
+    }
+  },
+  "articleCoverage": {
+    "제6조의2": {
+      "symptoms": [],
+      "questions": [
+        "shared-use"
+      ]
+    },
+    "제7조": {
+      "symptoms": [
+        "concrete-crack"
+      ],
+      "questions": [
+        "detail-concrete-crack"
+      ]
+    },
+    "제8조": {
+      "symptoms": [
+        "rebar-exposed"
+      ],
+      "questions": [
+        "detail-rebar-exposed"
+      ]
+    },
+    "제9조": {
+      "symptoms": [
+        "plaster-damage",
+        "paint-damage"
+      ],
+      "questions": [
+        "detail-plaster-damage",
+        "detail-paint-damage"
+      ]
+    },
+    "제10조": {
+      "symptoms": [
+        "leak"
+      ],
+      "questions": [
+        "detail-leak",
+        "leak-pattern"
+      ]
+    },
+    "제11조": {
+      "symptoms": [
+        "joint-defect"
+      ],
+      "questions": [
+        "detail-joint-defect"
+      ]
+    },
+    "제12조": {
+      "symptoms": [
+        "tie-remains"
+      ],
+      "questions": [
+        "detail-tie-remains"
+      ]
+    },
+    "제13조": {
+      "symptoms": [
+        "penetration-gap"
+      ],
+      "questions": [
+        "detail-penetration-gap"
+      ]
+    },
+    "제14조": {
+      "symptoms": [
+        "duct-finish"
+      ],
+      "questions": [
+        "detail-duct-finish"
+      ]
+    },
+    "제15조": {
+      "symptoms": [
+        "condensation"
+      ],
+      "questions": [
+        "detail-condensation",
+        "condensation-heating",
+        "installed-by"
+      ]
+    },
+    "제16조": {
+      "symptoms": [
+        "sink-unfinished"
+      ],
+      "questions": [
+        "detail-sink-unfinished"
+      ]
+    },
+    "제17조": {
+      "symptoms": [
+        "bath-threshold",
+        "mirror-color"
+      ],
+      "questions": [
+        "detail-bath-threshold",
+        "detail-mirror-color"
+      ]
+    },
+    "제18조": {
+      "symptoms": [
+        "tile-defect"
+      ],
+      "questions": [
+        "detail-tile-defect"
+      ]
+    },
+    "제19조": {
+      "symptoms": [
+        "trench-defect"
+      ],
+      "questions": [
+        "detail-trench-defect"
+      ]
+    },
+    "제20조": {
+      "symptoms": [
+        "drain-slope"
+      ],
+      "questions": [
+        "detail-drain-slope"
+      ]
+    },
+    "제21조": {
+      "symptoms": [
+        "door-edge"
+      ],
+      "questions": [
+        "detail-door-edge"
+      ]
+    },
+    "제22조": {
+      "symptoms": [
+        "opening-function"
+      ],
+      "questions": [
+        "detail-opening-function"
+      ]
+    },
+    "제23조": {
+      "symptoms": [
+        "light-wiring"
+      ],
+      "questions": [
+        "detail-light-wiring"
+      ]
+    },
+    "제24조": {
+      "symptoms": [
+        "light-defect"
+      ],
+      "questions": [
+        "detail-light-defect"
+      ]
+    },
+    "제25조": {
+      "symptoms": [
+        "air-defect"
+      ],
+      "questions": [
+        "detail-air-defect"
+      ]
+    },
+    "제26조": {
+      "symptoms": [
+        "heating-control"
+      ],
+      "questions": [
+        "detail-heating-control"
+      ]
+    },
+    "제27조": {
+      "symptoms": [
+        "sanitary-defect"
+      ],
+      "questions": [
+        "detail-sanitary-defect"
+      ]
+    },
+    "제28조": {
+      "symptoms": [
+        "intercom-defect"
+      ],
+      "questions": [
+        "detail-intercom-defect"
+      ]
+    },
+    "제29조": {
+      "symptoms": [
+        "cctv-defect"
+      ],
+      "questions": [
+        "detail-cctv-defect"
+      ]
+    },
+    "제30조": {
+      "symptoms": [
+        "tree-health"
+      ],
+      "questions": [
+        "detail-tree-health"
+      ]
+    },
+    "제31조": {
+      "symptoms": [
+        "root-binding"
+      ],
+      "questions": [
+        "detail-root-binding",
+        "root-material",
+        "root-age"
+      ]
+    },
+    "제32조": {
+      "symptoms": [
+        "tree-planting"
+      ],
+      "questions": [
+        "detail-tree-planting"
+      ]
+    },
+    "제33조": {
+      "symptoms": [
+        "tree-size"
+      ],
+      "questions": [
+        "detail-tree-size"
+      ]
+    },
+    "제34조": {
+      "symptoms": [
+        "wallpaper-defect"
+      ],
+      "questions": [
+        "detail-wallpaper-defect"
+      ]
+    },
+    "제35조": {
+      "symptoms": [
+        "floor-finish",
+        "floor-layer"
+      ],
+      "questions": [
+        "detail-floor-finish",
+        "detail-floor-layer",
+        "floor-approval"
+      ]
+    },
+    "제36조": {
+      "symptoms": [
+        "stone-defect"
+      ],
+      "questions": [
+        "detail-stone-defect"
+      ]
+    },
+    "제37조": {
+      "symptoms": [
+        "furniture-defect"
+      ],
+      "questions": [
+        "immediate-danger",
+        "detail-furniture-defect",
+        "installed-by"
+      ]
+    },
+    "제38조": {
+      "symptoms": [
+        "insulation-defect"
+      ],
+      "questions": [
+        "detail-insulation-defect"
+      ]
+    },
+    "제39조": {
+      "symptoms": [
+        "appliance-defect"
+      ],
+      "questions": [
+        "detail-appliance-defect",
+        "installed-by"
+      ]
+    },
+    "제40조": {
+      "symptoms": [
+        "elevator-defect"
+      ],
+      "questions": [
+        "immediate-danger",
+        "detail-elevator-defect"
+      ]
+    },
+    "제41조": {
+      "symptoms": [
+        "pavement-defect"
+      ],
+      "questions": [
+        "detail-pavement-defect"
+      ]
+    },
+    "제42조": {
+      "symptoms": [
+        "parking-defect"
+      ],
+      "questions": [
+        "detail-parking-defect"
+      ]
+    },
+    "제43조": {
+      "symptoms": [
+        "retaining-defect"
+      ],
+      "questions": [
+        "immediate-danger",
+        "detail-retaining-defect"
+      ]
+    },
+    "제44조": {
+      "symptoms": [],
+      "questions": [
+        "disaster-context"
+      ]
+    },
+    "제45조": {
+      "symptoms": [
+        "fire-defect",
+        "gas-defect",
+        "electric-defect",
+        "railing-defect"
+      ],
+      "questions": [
+        "detail-fire-defect",
+        "detail-gas-defect",
+        "detail-electric-defect",
+        "detail-railing-defect"
+      ]
+    },
+    "별표 2": {
+      "symptoms": [
+        "leak"
+      ],
+      "questions": [
+        "detail-leak",
+        "leak-pattern"
+      ]
+    },
+    "별표 3": {
+      "symptoms": [
+        "parking-defect"
+      ],
+      "questions": [
+        "detail-parking-defect"
+      ]
+    },
+    "별표 4": {
+      "symptoms": [
+        "retaining-defect"
+      ],
+      "questions": [
+        "detail-retaining-defect"
+      ]
+    },
+    "부칙 제2025-58호 제2조": {
+      "symptoms": [
+        "floor-layer"
+      ],
+      "questions": [
+        "detail-floor-layer",
+        "floor-approval"
+      ]
+    }
+  },
+  "reviewer": "Codex — M08 원문 기반 목록·연결·질문 검토",
+  "reviewedAt": "2026-10-03T16:17:36.488462+00:00",
+  "catalogSha256": "4c43f20ceee05c759a27088ce4874f299a59b8e0a497ea08c44f9b39890d2cea",
+  "reviewChecks": [
+    "40개 대상 조문 및 직접 별표의 관찰 범주 대응",
+    "12개 공간/35개 시설/45개 증상의 연결 의미 검토",
+    "54개 질문의 단일선택·모름·필수/선택·분기 검토",
+    "수치 임계값으로 자동 하자·운영 판단하지 않음",
+    "위험 중단 3개 답 값 검토",
+    "동의어 그룹 내 중복 없음; UX 편집 표현 구분",
+    "별표4·외부규정·부칙 적용 한계 보존"
+  ]
+}

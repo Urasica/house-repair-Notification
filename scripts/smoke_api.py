@@ -18,6 +18,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", default="http://localhost:8080")
     parser.add_argument("--database-unavailable", action="store_true")
+    parser.add_argument(
+        "--catalog-version", help="Expect this reviewed catalog to be published"
+    )
     args = parser.parse_args()
     status, _, html = fetch(args.url, "/")
     assert status == 200 and '<div id="root">' in html
@@ -26,15 +29,35 @@ def main():
     status, headers, ready = fetch(args.url, "/health/ready")
     assert headers["Cache-Control"] == "no-store"
     if args.database_unavailable:
-        assert status == 503 and json.loads(ready)["error"]["code"] == "SERVICE_UNAVAILABLE"
+        assert (
+            status == 503
+            and json.loads(ready)["error"]["code"] == "SERVICE_UNAVAILABLE"
+        )
     else:
         assert status == 200
-        assert json.loads(ready) == {"status": "ok", "catalogReady": False, "ragReady": False}
+        assert json.loads(ready) == {
+            "status": "ok",
+            "catalogReady": bool(args.catalog_version),
+            "ragReady": False,
+        }
     status, headers, catalog = fetch(args.url, "/api/v1/catalog")
-    error = json.loads(catalog)["error"]
-    assert status == 503
-    assert error["code"] == ("SERVICE_UNAVAILABLE" if args.database_unavailable else "CATALOG_NOT_READY")
-    assert headers["Cache-Control"] == "no-store" and headers["X-Trace-Id"] == error["traceId"]
+    if args.catalog_version and not args.database_unavailable:
+        data = json.loads(catalog)
+        assert status == 200 and data["version"] == args.catalog_version
+        assert all(
+            data[key] for key in ("housingTypes", "rooms", "facilities", "symptoms")
+        )
+        assert headers["Cache-Control"] == "no-store"
+    else:
+        error = json.loads(catalog)["error"]
+        assert status == 503
+        assert error["code"] == (
+            "SERVICE_UNAVAILABLE" if args.database_unavailable else "CATALOG_NOT_READY"
+        )
+        assert (
+            headers["Cache-Control"] == "no-store"
+            and headers["X-Trace-Id"] == error["traceId"]
+        )
     status, _, missing = fetch(args.url, "/api/v1/missing")
     assert status == 404 and json.loads(missing)["error"]["code"] == "NOT_FOUND"
     if not args.database_unavailable:
@@ -43,7 +66,7 @@ def main():
         assert headers["Cache-Control"] == "no-store"
         status, _, history = fetch(args.url, "/api/v1/me/results")
         assert status == 401 and json.loads(history)["error"]["code"] == "AUTH_REQUIRED"
-    print("Smoke checks passed: web, live, ready, empty catalog, auth, API errors")
+    print("Smoke checks passed: web, live, ready, catalog state, auth, API errors")
 
 
 if __name__ == "__main__":

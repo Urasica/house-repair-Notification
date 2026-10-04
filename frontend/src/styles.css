@@ -43,7 +43,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px
 .required-note, #description-hint { font-size: 15px; color: #59695f; }
 .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 22px; }
 .button-link { text-decoration: none; min-height: 48px; }
-.button-link.secondary { color: #325d52; }
+.button-link.secondary { color: #325d52; background: #e7eee8; }
 .end-panel, .delete-panel { margin-top: 32px; padding-top: 20px; border-top: 1px solid #cad8cd; }
 .continue-link, .notice p.continue-link { margin-top: 20px; margin-bottom: 0; }
 .recovery-panel, .past-note { background: #f3f0df; border-radius: 8px; padding: 16px; margin-block: 18px; }

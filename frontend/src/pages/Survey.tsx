@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { ApiError } from '../api/client'
@@ -29,19 +29,33 @@ function SurveyActive({ session, reference }: { session: Session; reference: Ses
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<unknown>(null)
   const guard = useRef(false)
+  const answerFocus = useRef<{ id: string; value: string; revision: number | null } | null>(null)
   const delay = useRetryDelay()
   const matching = questions.data?.revision === session.revision && questions.data?.catalogVersion === session.catalogVersion
   const locked = saving || delay.waiting || evaluation.busy || !!evaluation.pending
+  useEffect(() => {
+    if (locked || !matching || !questions.data || !answerFocus.current || answerFocus.current.revision !== session.revision) return
+    const target = answerFocus.current
+    answerFocus.current = null
+    // Revision changes remount the fields. Restore a lost focus, but never take it
+    // back when the user has already moved to another control while saving.
+    if (document.activeElement !== document.body) return
+    const input = [...document.getElementsByName(target.id)].find(element => element instanceof HTMLInputElement && element.value === target.value)
+    if (input instanceof HTMLInputElement) input.focus({ preventScroll: true })
+  }, [locked, matching, questions.data, session.revision])
   async function answer(id: string, value: string) {
     if (guard.current || locked || !matching) return
+    const focused = document.activeElement
+    answerFocus.current = focused instanceof HTMLInputElement && focused.name === id ? { id, value, revision: null } : null
     const epoch = identityEpoch()
     guard.current = true; setSaving(true); setSaveError(null)
     try {
       const saved = await saveContext(reference, session, { ...session.context, answers: { ...session.context.answers, [id]: value } }, auth.data?.csrfToken)
       if (!referenceIsActive(reference, epoch)) return
+      if (answerFocus.current) answerFocus.current.revision = saved.revision
       client.setQueryData(['session', reference.id], saved)
       if (questions.data!.questions.find(question => question.questionId === id)?.interruptValues?.includes(value)) evaluation.start(saved)
-    } catch (cause) { if (referenceIsActive(reference, epoch)) { setSaveError(cause); delay.pause(cause) } }
+    } catch (cause) { if (referenceIsActive(reference, epoch)) { if (answerFocus.current) answerFocus.current.revision = session.revision; setSaveError(cause); delay.pause(cause) } }
     finally { guard.current = false; if (referenceIsActive(reference, epoch)) setSaving(false) }
   }
   async function reload() {

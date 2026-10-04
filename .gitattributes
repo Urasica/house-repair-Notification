@@ -2,3 +2,5 @@
 *.png binary
 *.jpg binary
 *.pdf binary
+# Reviewed catalog artifacts use byte-level SHA256; preserve their recorded bytes.
+/data/catalog/**/*.json -text whitespace=trailing-space,space-before-tab,cr-at-eol

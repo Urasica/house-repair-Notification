@@ -13,7 +13,7 @@ from app.schemas.catalog import CatalogDefinition
 from app.schemas.contracts import GuidanceResult, ResultSummary, Session
 from app.services.survey_policy import survey_policy
 
-ENGINE_VERSION = "survey-v1"
+ENGINE_VERSION = "survey-v2"
 
 
 def add_years(value: datetime, years: int) -> datetime:
@@ -88,12 +88,18 @@ async def evaluate_survey(
         ),
         guidance=guidance,
         checks=[],
-        follow_up_questions=[
-            "주택 유형을 확인해 주세요."
-            if field == "housingType"
-            else "선택 항목과 표시된 필수 질문을 확인해 주세요."
-            for field in dict.fromkeys(policy.missing_fields)
-        ],
+        follow_up_questions=(
+            list(
+                dict.fromkeys(
+                    "주택 유형을 확인해 주세요."
+                    if field == "housingType"
+                    else "선택 항목과 표시된 필수 질문을 확인해 주세요."
+                    for field in policy.missing_fields
+                )
+            )
+            if policy.status == GuidanceStatus.NEED_MORE_INFO
+            else []
+        ),
         contact_draft="보수 대상과 증상을 확인하고 필요한 절차를 안내해 주세요.",
         citations=[],
         disclaimer=DISCLAIMER,

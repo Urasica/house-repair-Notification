@@ -14,13 +14,13 @@
 
 완성 목록은 schemas/catalog.schema.json의 JSON Schema와 CatalogDefinition의 연결 검증을 따른다. version, review, housingTypes, rooms, facilities, symptoms, questions를 사용한다. ID는 안정적인 문자열이며 시설물은 roomIds, 증상은 facilityIds, 질문은 symptomIds로 연결한다.
 
-질문은 singleChoice이며 options·required·interruptValues·order·conditions를 포함한다. 조건은 housingType·roomId·facilityId·symptomId 또는 answers.질문ID의 equals/in만 허용한다. COMPLETE_VERIFIED 검토에는 검토자·검토일과 비어 있지 않은 목록이 필요하다. 실제 목록은 아직 제공되지 않았으며 자동 게시하지 않는다.
+질문은 singleChoice이며 options·required·interruptValues·order·conditions를 포함한다. 조건은 housingType·roomId·facilityId·symptomId 또는 answers.질문ID의 equals/in만 허용한다. COMPLETE_VERIFIED 검토에는 검토자·검토일과 비어 있지 않은 목록이 필요하다. 실제 목록은 M08A에서 사용자 지시에 따라 원문 기반으로 작성·검토했고 명시적 게시 명령으로 반영했다.
 
-M05는 5개 주택 유형·고유한 옵션/연결·실제 조건 값·앞선 질문 참조를 검증한다. 게시본은 새 migration의 DB trigger로 수정·삭제를 차단하며 동일 게시 재전송은 기존 시각을 유지한다. [목록 작성·명령·설문 정책](11-catalog-publication.md)에 세부 규칙을 기록했다. M06 API와 M07 화면은 연결했고 실제 목록 작성·검토·게시는 M08 이후 M08A다.
+M05는 5개 주택 유형·고유한 옵션/연결·실제 조건 값·앞선 질문 참조를 검증한다. 게시본은 새 migration의 DB trigger로 수정·삭제를 차단하며 동일 게시 재전송은 기존 시각을 유지한다. [목록 작성·명령·설문 정책](11-catalog-publication.md)에 세부 규칙을 기록했다. M06 API와 M07 화면은 연결했고 M08A 실제 목록 검증·로컬 게시·통합 시험을 완료했다. [검토 기록](../progress/03-m08a-catalog-review.md)을 따른다.
 
 backend/tests/fixtures/catalog.test.json과 frontend/src/features/survey/test-fixtures.ts는 시험 전용 합성 데이터다. 공개 목록·개발 홈·운영 목록에 게시하지 않는다. 기존 예시 증상은 복사하지 않는다.
 
-원문은 제6조의2·제7~45조·실제 별표 2 전체를 먼저 정리하고 coverage·누락·시행일·조건·각주·검토·해시를 기록한다. 실제 추출 지시와 전체 정리 검토 전에는 청킹·임베딩하지 않는다.
+원문은 제6조의2·제7~45조·실제 별표 2·3·4 전체를 먼저 정리하고 coverage·누락·시행일·조건·각주·검토·해시를 기록한다. 실제 추출 지시와 전체 정리 검토 전에는 청킹·임베딩하지 않는다. 2026-10-04 [M08 완전성 검토](../progress/02-m08-source-review.md)를 완료했으며 법률·운영 적용 승인은 별도다.
 
 ## 3. 실행 설정과 버전
 

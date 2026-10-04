@@ -160,6 +160,40 @@ it('does not evaluate an interrupt answer whose save failed and marks the radio 
   expect(button('안내 결과 확인').disabled).toBe(true)
   expect(host.querySelector('input[value="RISK"]')?.getAttribute('aria-describedby')).toBe('answer-error')
 })
+it('restores keyboard focus to the selected radio after saving reveals a follow-up question', async () => {
+  current = filledSession()
+  await render('/survey', true)
+  await until(() => expect(host.querySelector('input[value="TEST"]')).not.toBeNull())
+  const before = host.querySelector<HTMLInputElement>('input[value="TEST"]')!
+  await act(async () => before.focus())
+  await click(before)
+  await until(() => {
+    const after = host.querySelector<HTMLInputElement>('input[value="TEST"]')!
+    expect(after).not.toBe(before)
+    expect(after.checked).toBe(true)
+    expect(document.activeElement).toBe(after)
+    expect(host.textContent).toContain('시험용 분기 질문')
+  })
+})
+it('does not steal focus when the user moves elsewhere during answer saving', async () => {
+  current = filledSession()
+  const original = fetcher.getMockImplementation()!
+  let completeSave: (() => void) | undefined
+  fetcher.mockImplementation(async (url: string, opts: RequestInit = {}) => {
+    if (url.endsWith('/context')) await new Promise<void>(resolve => { completeSave = resolve })
+    return original(url, opts)
+  })
+  await render('/survey', true)
+  await until(() => expect(host.querySelector('input[value="TEST"]')).not.toBeNull())
+  const input = host.querySelector<HTMLInputElement>('input[value="TEST"]')!
+  await act(async () => input.focus()); await click(input)
+  await until(() => expect(completeSave).toBeDefined())
+  const link = host.querySelector<HTMLAnchorElement>('a')!
+  await act(async () => link.focus())
+  await act(async () => completeSave!())
+  await until(() => expect(host.querySelector<HTMLInputElement>('input[value="TEST"]')?.checked).toBe(true))
+  expect(document.activeElement).toBe(link)
+})
 it('recovers a lost completed response by reading request state without another evaluation', async () => {
   current = filledSession(); evaluationMode = 'LOST'
   await render('/survey', true)

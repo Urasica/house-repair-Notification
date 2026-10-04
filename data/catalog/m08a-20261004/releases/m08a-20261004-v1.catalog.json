@@ -1,0 +1,2892 @@
+{
+  "version": "m08a-20261004-v1",
+  "review": {
+    "state": "COMPLETE_VERIFIED",
+    "reviewer": "Codex — M08 원문 기반 목록·연결·질문 검토",
+    "reviewedAt": "2026-10-03T16:17:36.488462+00:00"
+  },
+  "housingTypes": [
+    {
+      "id": "LH_CONSTRUCTION_RENTAL",
+      "label": "LH 건설임대주택",
+      "supported": true
+    },
+    {
+      "id": "LH_RENTAL_BEFORE_SALE",
+      "label": "분양전환형 임대주택 (현재 임대 거주 중)",
+      "supported": true
+    },
+    {
+      "id": "SOLD_OR_PRIVATE",
+      "label": "분양주택·분양전환 이후",
+      "supported": false
+    },
+    {
+      "id": "OTHER",
+      "label": "그 밖의 주택 유형",
+      "supported": false
+    },
+    {
+      "id": "UNKNOWN",
+      "label": "주택 유형을 잘 모르겠어요",
+      "supported": false
+    }
+  ],
+  "rooms": [
+    {
+      "id": "living",
+      "label": "거실",
+      "aliases": [
+        "거실 공간"
+      ]
+    },
+    {
+      "id": "bedroom",
+      "label": "침실",
+      "aliases": [
+        "방"
+      ]
+    },
+    {
+      "id": "kitchen",
+      "label": "주방",
+      "aliases": [
+        "부엌"
+      ]
+    },
+    {
+      "id": "bathroom",
+      "label": "욕실",
+      "aliases": [
+        "화장실"
+      ]
+    },
+    {
+      "id": "laundry",
+      "label": "세탁실",
+      "aliases": [
+        "다용도실"
+      ]
+    },
+    {
+      "id": "balcony",
+      "label": "발코니",
+      "aliases": [
+        "베란다"
+      ]
+    },
+    {
+      "id": "entrance",
+      "label": "현관",
+      "aliases": [
+        "출입구"
+      ]
+    },
+    {
+      "id": "common",
+      "label": "공용 복도·계단",
+      "aliases": [
+        "공용부"
+      ]
+    },
+    {
+      "id": "parking",
+      "label": "지하주차장",
+      "aliases": [
+        "주차 공간"
+      ]
+    },
+    {
+      "id": "roof",
+      "label": "옥상",
+      "aliases": [
+        "지붕"
+      ]
+    },
+    {
+      "id": "outdoor",
+      "label": "단지 외부·조경",
+      "aliases": [
+        "외부 공간"
+      ]
+    },
+    {
+      "id": "unknown",
+      "label": "공간을 잘 모르겠어요",
+      "aliases": []
+    }
+  ],
+  "facilities": [
+    {
+      "id": "concrete",
+      "label": "콘크리트 벽·기둥·바닥",
+      "aliases": [
+        "구조체"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "parking",
+        "roof",
+        "unknown"
+      ]
+    },
+    {
+      "id": "finish",
+      "label": "벽·천장 마감",
+      "aliases": [
+        "미장",
+        "도장"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "parking",
+        "roof",
+        "unknown"
+      ]
+    },
+    {
+      "id": "waterproof",
+      "label": "방수 부위",
+      "aliases": [
+        "방수층"
+      ],
+      "roomIds": [
+        "bathroom",
+        "laundry",
+        "balcony",
+        "parking",
+        "roof",
+        "unknown"
+      ]
+    },
+    {
+      "id": "pipe",
+      "label": "급수·온수·배수 배관",
+      "aliases": [
+        "수도관",
+        "우수관",
+        "오수관"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "parking",
+        "roof",
+        "unknown"
+      ]
+    },
+    {
+      "id": "window",
+      "label": "창문·창틀",
+      "aliases": [
+        "창호"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "unknown"
+      ]
+    },
+    {
+      "id": "joint",
+      "label": "바닥 줄눈",
+      "aliases": [
+        "신축줄눈",
+        "조절 줄눈"
+      ],
+      "roomIds": [
+        "roof",
+        "parking",
+        "unknown"
+      ]
+    },
+    {
+      "id": "penetration",
+      "label": "배관·배선이 통과하는 벽·바닥",
+      "aliases": [
+        "관통부"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "parking",
+        "roof",
+        "unknown"
+      ]
+    },
+    {
+      "id": "duct",
+      "label": "환기·배관 통로",
+      "aliases": [
+        "덕트"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "parking",
+        "roof",
+        "unknown"
+      ]
+    },
+    {
+      "id": "sink",
+      "label": "싱크대 하부·뒤쪽",
+      "aliases": [
+        "싱크대 배면"
+      ],
+      "roomIds": [
+        "kitchen",
+        "unknown"
+      ]
+    },
+    {
+      "id": "bath-finish",
+      "label": "욕실 문턱·거울",
+      "aliases": [
+        "욕실 마감"
+      ],
+      "roomIds": [
+        "bathroom",
+        "unknown"
+      ]
+    },
+    {
+      "id": "tile",
+      "label": "타일",
+      "aliases": [
+        "타일 마감"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "parking",
+        "unknown"
+      ]
+    },
+    {
+      "id": "drain",
+      "label": "바닥·배수로",
+      "aliases": [
+        "트렌치",
+        "배수구"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "parking",
+        "roof",
+        "outdoor",
+        "unknown"
+      ]
+    },
+    {
+      "id": "door",
+      "label": "문·문틀",
+      "aliases": [
+        "방문",
+        "문짝"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "unknown"
+      ]
+    },
+    {
+      "id": "light",
+      "label": "조명·조명 배선",
+      "aliases": [
+        "등기구",
+        "전등"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "parking",
+        "roof",
+        "outdoor",
+        "unknown"
+      ]
+    },
+    {
+      "id": "air",
+      "label": "환풍기·에어컨·후드",
+      "aliases": [
+        "공기조화설비"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "unknown"
+      ]
+    },
+    {
+      "id": "heating",
+      "label": "난방 조절 설비",
+      "aliases": [
+        "난방조절기"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "unknown"
+      ]
+    },
+    {
+      "id": "sanitary",
+      "label": "수전·세면기·욕조",
+      "aliases": [
+        "위생기구",
+        "수도꼭지"
+      ],
+      "roomIds": [
+        "bathroom",
+        "kitchen",
+        "laundry",
+        "balcony",
+        "unknown"
+      ]
+    },
+    {
+      "id": "intercom",
+      "label": "인터폰·홈오토메이션",
+      "aliases": [
+        "월패드"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "unknown"
+      ]
+    },
+    {
+      "id": "cctv",
+      "label": "CCTV",
+      "aliases": [
+        "감시카메라"
+      ],
+      "roomIds": [
+        "common",
+        "parking",
+        "outdoor",
+        "unknown"
+      ]
+    },
+    {
+      "id": "tree",
+      "label": "조경수",
+      "aliases": [
+        "나무"
+      ],
+      "roomIds": [
+        "outdoor",
+        "unknown"
+      ]
+    },
+    {
+      "id": "wallpaper",
+      "label": "벽지·시트지",
+      "aliases": [
+        "도배지"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "unknown"
+      ]
+    },
+    {
+      "id": "floor",
+      "label": "실내 바닥·바닥구조",
+      "aliases": [
+        "바닥재"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "unknown"
+      ]
+    },
+    {
+      "id": "stone",
+      "label": "석재 마감",
+      "aliases": [
+        "돌 마감"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "parking",
+        "roof",
+        "outdoor",
+        "unknown"
+      ]
+    },
+    {
+      "id": "furniture",
+      "label": "주방·수납 가구",
+      "aliases": [
+        "붙박이장"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "unknown"
+      ]
+    },
+    {
+      "id": "insulation",
+      "label": "배관·덕트 보온재",
+      "aliases": [
+        "보온 덮개"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "parking",
+        "roof",
+        "unknown"
+      ]
+    },
+    {
+      "id": "appliance",
+      "label": "시공사가 설치한 가전",
+      "aliases": [
+        "빌트인 가전"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "unknown"
+      ]
+    },
+    {
+      "id": "elevator",
+      "label": "승강기",
+      "aliases": [
+        "엘리베이터"
+      ],
+      "roomIds": [
+        "common",
+        "parking",
+        "unknown"
+      ]
+    },
+    {
+      "id": "pavement",
+      "label": "보도·차도·경계석",
+      "aliases": [
+        "단지 포장"
+      ],
+      "roomIds": [
+        "outdoor",
+        "unknown"
+      ]
+    },
+    {
+      "id": "parking-fixture",
+      "label": "주차장 시설·마감",
+      "aliases": [
+        "코너가드",
+        "램프 연석"
+      ],
+      "roomIds": [
+        "parking",
+        "unknown"
+      ]
+    },
+    {
+      "id": "retaining",
+      "label": "옹벽",
+      "aliases": [
+        "보강토 옹벽",
+        "석축"
+      ],
+      "roomIds": [
+        "outdoor",
+        "unknown"
+      ]
+    },
+    {
+      "id": "fire",
+      "label": "스프링클러·화재탐지 설비",
+      "aliases": [
+        "감지기",
+        "시각경보장치"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "parking",
+        "roof",
+        "unknown"
+      ]
+    },
+    {
+      "id": "gas",
+      "label": "가스 배관·계량기·안전장치",
+      "aliases": [
+        "가스설비"
+      ],
+      "roomIds": [
+        "kitchen",
+        "balcony",
+        "common",
+        "outdoor",
+        "unknown"
+      ]
+    },
+    {
+      "id": "electric",
+      "label": "전기 설비",
+      "aliases": [
+        "전기시설"
+      ],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "parking",
+        "roof",
+        "outdoor",
+        "unknown"
+      ]
+    },
+    {
+      "id": "railing",
+      "label": "난간",
+      "aliases": [
+        "안전난간"
+      ],
+      "roomIds": [
+        "balcony",
+        "common",
+        "roof",
+        "outdoor",
+        "unknown"
+      ]
+    },
+    {
+      "id": "unknown",
+      "label": "시설물을 잘 모르겠어요",
+      "aliases": [],
+      "roomIds": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "entrance",
+        "common",
+        "parking",
+        "roof",
+        "outdoor",
+        "unknown"
+      ]
+    }
+  ],
+  "symptoms": [
+    {
+      "id": "concrete-crack",
+      "label": "콘크리트가 갈라졌어요",
+      "aliases": [
+        "콘크리트 균열"
+      ],
+      "facilityIds": [
+        "concrete"
+      ]
+    },
+    {
+      "id": "rebar-exposed",
+      "label": "콘크리트 안의 철근이 보여요",
+      "aliases": [
+        "철근 노출"
+      ],
+      "facilityIds": [
+        "concrete"
+      ]
+    },
+    {
+      "id": "plaster-damage",
+      "label": "미장 면이 갈라지거나 떨어져요",
+      "aliases": [
+        "미장 균열",
+        "박리"
+      ],
+      "facilityIds": [
+        "finish"
+      ]
+    },
+    {
+      "id": "paint-damage",
+      "label": "도장이 갈라지거나 벗겨져요",
+      "aliases": [
+        "도막 갈라짐",
+        "도장 박락"
+      ],
+      "facilityIds": [
+        "finish"
+      ]
+    },
+    {
+      "id": "leak",
+      "label": "물이 새거나 물 자국이 있어요",
+      "aliases": [
+        "누수",
+        "누수 흔적"
+      ],
+      "facilityIds": [
+        "waterproof",
+        "pipe",
+        "window",
+        "concrete"
+      ]
+    },
+    {
+      "id": "joint-defect",
+      "label": "바닥 줄눈이 없거나 도면과 달라요",
+      "aliases": [
+        "줄눈 미시공"
+      ],
+      "facilityIds": [
+        "joint"
+      ]
+    },
+    {
+      "id": "tie-remains",
+      "label": "벽에 고정 철물이 튀어나오거나 구멍이 남았어요",
+      "aliases": [
+        "긴결재",
+        "폼타이"
+      ],
+      "facilityIds": [
+        "concrete"
+      ]
+    },
+    {
+      "id": "penetration-gap",
+      "label": "배관·배선 주위가 덜 메워졌어요",
+      "aliases": [
+        "관통부 틈"
+      ],
+      "facilityIds": [
+        "penetration"
+      ]
+    },
+    {
+      "id": "duct-finish",
+      "label": "덕트 벽면 마감이 빠져 있어요",
+      "aliases": [
+        "덕트 미장 누락"
+      ],
+      "facilityIds": [
+        "duct"
+      ]
+    },
+    {
+      "id": "condensation",
+      "label": "표면에 물방울이나 곰팡이가 생겨요",
+      "aliases": [
+        "결로"
+      ],
+      "facilityIds": [
+        "finish",
+        "window",
+        "floor"
+      ]
+    },
+    {
+      "id": "sink-unfinished",
+      "label": "싱크대 아래·뒤쪽 마감이 없어요",
+      "aliases": [
+        "싱크대 하부 미마감"
+      ],
+      "facilityIds": [
+        "sink"
+      ]
+    },
+    {
+      "id": "bath-threshold",
+      "label": "욕실 문턱이 낮거나 도면과 달라요",
+      "aliases": [
+        "욕실 단차"
+      ],
+      "facilityIds": [
+        "bath-finish"
+      ]
+    },
+    {
+      "id": "mirror-color",
+      "label": "욕실 거울의 색이 변했어요",
+      "aliases": [
+        "거울 변색"
+      ],
+      "facilityIds": [
+        "bath-finish"
+      ]
+    },
+    {
+      "id": "tile-defect",
+      "label": "타일이 깨지거나 들뜨고 떨어져요",
+      "aliases": [
+        "타일 파손",
+        "타일 들뜸"
+      ],
+      "facilityIds": [
+        "tile"
+      ]
+    },
+    {
+      "id": "trench-defect",
+      "label": "배수로가 없거나 물이 고여요",
+      "aliases": [
+        "트렌치 시공 불량"
+      ],
+      "facilityIds": [
+        "drain"
+      ]
+    },
+    {
+      "id": "drain-slope",
+      "label": "물이 배수구로 흐르지 않고 고여요",
+      "aliases": [
+        "배수물매",
+        "역물매"
+      ],
+      "facilityIds": [
+        "drain",
+        "floor"
+      ]
+    },
+    {
+      "id": "door-edge",
+      "label": "목재 문 위·아래 끝면 마감이 없어요",
+      "aliases": [
+        "문짝 마구리면"
+      ],
+      "facilityIds": [
+        "door"
+      ]
+    },
+    {
+      "id": "opening-function",
+      "label": "문·창문이 잘 닫히거나 잠기지 않아요",
+      "aliases": [
+        "개폐 불량"
+      ],
+      "facilityIds": [
+        "door",
+        "window"
+      ]
+    },
+    {
+      "id": "light-wiring",
+      "label": "조명 연결 배선이 도면과 달라요",
+      "aliases": [
+        "조명 옥내배선"
+      ],
+      "facilityIds": [
+        "light"
+      ]
+    },
+    {
+      "id": "light-defect",
+      "label": "조명이 안 켜지거나 고정 상태가 불량해요",
+      "aliases": [
+        "조명 불량"
+      ],
+      "facilityIds": [
+        "light"
+      ]
+    },
+    {
+      "id": "air-defect",
+      "label": "환풍기·에어컨·후드가 작동하지 않아요",
+      "aliases": [
+        "환기설비 불량"
+      ],
+      "facilityIds": [
+        "air"
+      ]
+    },
+    {
+      "id": "heating-control",
+      "label": "방별로 난방을 조절할 수 없어요",
+      "aliases": [
+        "난방 조절 불량"
+      ],
+      "facilityIds": [
+        "heating"
+      ]
+    },
+    {
+      "id": "sanitary-defect",
+      "label": "수전·위생기구가 새거나 작동이 불량해요",
+      "aliases": [
+        "급배수 불량"
+      ],
+      "facilityIds": [
+        "sanitary"
+      ]
+    },
+    {
+      "id": "intercom-defect",
+      "label": "인터폰의 통화·영상·연결이 불량해요",
+      "aliases": [
+        "인터폰 불량"
+      ],
+      "facilityIds": [
+        "intercom"
+      ]
+    },
+    {
+      "id": "cctv-defect",
+      "label": "CCTV가 없거나 화면 식별이 어려워요",
+      "aliases": [
+        "CCTV 사각지대"
+      ],
+      "facilityIds": [
+        "cctv"
+      ]
+    },
+    {
+      "id": "tree-health",
+      "label": "나무가 말라 죽거나 쓰러졌어요",
+      "aliases": [
+        "조경수 고사"
+      ],
+      "facilityIds": [
+        "tree"
+      ]
+    },
+    {
+      "id": "root-binding",
+      "label": "나무 뿌리의 결속재가 지표면에 보여요",
+      "aliases": [
+        "뿌리분 결속재"
+      ],
+      "facilityIds": [
+        "tree"
+      ]
+    },
+    {
+      "id": "tree-planting",
+      "label": "나무 종류·식재가 도면과 달라요",
+      "aliases": [
+        "조경수 식재 불일치"
+      ],
+      "facilityIds": [
+        "tree"
+      ]
+    },
+    {
+      "id": "tree-size",
+      "label": "나무의 크기가 도면보다 작아 보여요",
+      "aliases": [
+        "조경수 규격미달"
+      ],
+      "facilityIds": [
+        "tree"
+      ]
+    },
+    {
+      "id": "wallpaper-defect",
+      "label": "벽지가 들뜨거나 주름·틈이 생겼어요",
+      "aliases": [
+        "도배 들뜸"
+      ],
+      "facilityIds": [
+        "wallpaper"
+      ]
+    },
+    {
+      "id": "floor-finish",
+      "label": "바닥재가 깨지거나 들뜨고 삐걱거려요",
+      "aliases": [
+        "바닥재 결함"
+      ],
+      "facilityIds": [
+        "floor"
+      ]
+    },
+    {
+      "id": "floor-layer",
+      "label": "바닥 구성층이 도면과 달라요",
+      "aliases": [
+        "완충재 누락"
+      ],
+      "facilityIds": [
+        "floor"
+      ]
+    },
+    {
+      "id": "stone-defect",
+      "label": "석재가 깨지거나 떨어지고 변색돼요",
+      "aliases": [
+        "석재 하자"
+      ],
+      "facilityIds": [
+        "stone"
+      ]
+    },
+    {
+      "id": "furniture-defect",
+      "label": "설치된 가구가 깨지거나 잘 열리지 않아요",
+      "aliases": [
+        "가구 고정 불량"
+      ],
+      "facilityIds": [
+        "furniture"
+      ]
+    },
+    {
+      "id": "insulation-defect",
+      "label": "보온재가 없거나 배관이 얼었어요",
+      "aliases": [
+        "보온재 미시공",
+        "동파"
+      ],
+      "facilityIds": [
+        "insulation"
+      ]
+    },
+    {
+      "id": "appliance-defect",
+      "label": "설치된 가전이 없거나 작동하지 않아요",
+      "aliases": [
+        "가전기기 불량"
+      ],
+      "facilityIds": [
+        "appliance"
+      ]
+    },
+    {
+      "id": "elevator-defect",
+      "label": "승강기의 작동·문턱·마감에 문제가 있어요",
+      "aliases": [
+        "승강기 불량"
+      ],
+      "facilityIds": [
+        "elevator"
+      ]
+    },
+    {
+      "id": "pavement-defect",
+      "label": "보도·차도가 깨지거나 솟고 물이 고여요",
+      "aliases": [
+        "포장 침하"
+      ],
+      "facilityIds": [
+        "pavement"
+      ]
+    },
+    {
+      "id": "parking-defect",
+      "label": "주차장 폭·보호시설·마감에 문제가 있어요",
+      "aliases": [
+        "주차장 시설 불량"
+      ],
+      "facilityIds": [
+        "parking-fixture"
+      ]
+    },
+    {
+      "id": "retaining-defect",
+      "label": "옹벽에 균열·침하·배수 문제가 보여요",
+      "aliases": [
+        "옹벽 이상"
+      ],
+      "facilityIds": [
+        "retaining"
+      ]
+    },
+    {
+      "id": "fire-defect",
+      "label": "소방 설비의 설치·작동을 확인하고 싶어요",
+      "aliases": [
+        "화재탐지 설비 확인"
+      ],
+      "facilityIds": [
+        "fire"
+      ]
+    },
+    {
+      "id": "gas-defect",
+      "label": "가스 설비의 설치·기능에 문제가 있어요",
+      "aliases": [
+        "가스 안전장치 불량"
+      ],
+      "facilityIds": [
+        "gas"
+      ]
+    },
+    {
+      "id": "electric-defect",
+      "label": "전기 설비의 상태를 확인하고 싶어요",
+      "aliases": [
+        "전기설비 확인"
+      ],
+      "facilityIds": [
+        "electric"
+      ]
+    },
+    {
+      "id": "railing-defect",
+      "label": "난간의 설치 상태를 확인하고 싶어요",
+      "aliases": [
+        "난간 확인"
+      ],
+      "facilityIds": [
+        "railing"
+      ]
+    },
+    {
+      "id": "unknown",
+      "label": "증상을 잘 모르겠어요",
+      "aliases": [],
+      "facilityIds": [
+        "concrete",
+        "finish",
+        "waterproof",
+        "pipe",
+        "window",
+        "joint",
+        "penetration",
+        "duct",
+        "sink",
+        "bath-finish",
+        "tile",
+        "drain",
+        "door",
+        "light",
+        "air",
+        "heating",
+        "sanitary",
+        "intercom",
+        "cctv",
+        "tree",
+        "wallpaper",
+        "floor",
+        "stone",
+        "furniture",
+        "insulation",
+        "appliance",
+        "elevator",
+        "pavement",
+        "parking-fixture",
+        "retaining",
+        "fire",
+        "gas",
+        "electric",
+        "railing",
+        "unknown"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "questionId": "immediate-danger",
+      "type": "singleChoice",
+      "label": "지금 이 시설로 사람이 다칠 위험이 있다고 느끼나요? 위험을 확인하려고 만지거나 작동시키지 마세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "YES",
+          "label": "네, 지금 사람이 다칠 우려가 있어요"
+        },
+        {
+          "value": "NO",
+          "label": "지금은 그런 우려가 없어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [
+        "YES"
+      ],
+      "symptomIds": [
+        "concrete-crack",
+        "rebar-exposed",
+        "plaster-damage",
+        "paint-damage",
+        "leak",
+        "joint-defect",
+        "tie-remains",
+        "penetration-gap",
+        "duct-finish",
+        "condensation",
+        "sink-unfinished",
+        "bath-threshold",
+        "mirror-color",
+        "tile-defect",
+        "trench-defect",
+        "drain-slope",
+        "door-edge",
+        "opening-function",
+        "light-wiring",
+        "light-defect",
+        "air-defect",
+        "heating-control",
+        "sanitary-defect",
+        "intercom-defect",
+        "cctv-defect",
+        "tree-health",
+        "root-binding",
+        "tree-planting",
+        "tree-size",
+        "wallpaper-defect",
+        "floor-finish",
+        "floor-layer",
+        "stone-defect",
+        "furniture-defect",
+        "insulation-defect",
+        "appliance-defect",
+        "elevator-defect",
+        "pavement-defect",
+        "parking-defect",
+        "retaining-defect",
+        "fire-defect",
+        "gas-defect",
+        "electric-defect",
+        "railing-defect",
+        "unknown"
+      ],
+      "conditions": [],
+      "order": 0
+    },
+    {
+      "questionId": "shared-use",
+      "type": "singleChoice",
+      "label": "문제가 생긴 시설은 누가 사용하나요?",
+      "required": true,
+      "options": [
+        {
+          "value": "HOUSEHOLD",
+          "label": "우리 세대가 단독으로 사용해요"
+        },
+        {
+          "value": "SHARED",
+          "label": "여러 세대가 함께 사용해요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "concrete-crack",
+        "rebar-exposed",
+        "plaster-damage",
+        "paint-damage",
+        "leak",
+        "joint-defect",
+        "tie-remains",
+        "penetration-gap",
+        "duct-finish",
+        "condensation",
+        "sink-unfinished",
+        "bath-threshold",
+        "mirror-color",
+        "tile-defect",
+        "trench-defect",
+        "drain-slope",
+        "door-edge",
+        "opening-function",
+        "light-wiring",
+        "light-defect",
+        "air-defect",
+        "heating-control",
+        "sanitary-defect",
+        "intercom-defect",
+        "cctv-defect",
+        "tree-health",
+        "root-binding",
+        "tree-planting",
+        "tree-size",
+        "wallpaper-defect",
+        "floor-finish",
+        "floor-layer",
+        "stone-defect",
+        "furniture-defect",
+        "insulation-defect",
+        "appliance-defect",
+        "elevator-defect",
+        "pavement-defect",
+        "parking-defect",
+        "retaining-defect",
+        "fire-defect",
+        "gas-defect",
+        "electric-defect",
+        "railing-defect",
+        "unknown"
+      ],
+      "conditions": [],
+      "order": 5
+    },
+    {
+      "questionId": "detail-concrete-crack",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "LEAK",
+          "label": "갈라진 곳에서 물도 새어요"
+        },
+        {
+          "value": "CRACK",
+          "label": "갈라짐이 보여요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "concrete-crack"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-rebar-exposed",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "EXPOSED",
+          "label": "철근이 밖으로 드러나 있어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "rebar-exposed"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-plaster-damage",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "CRACK",
+          "label": "잔갈라짐이 보여요"
+        },
+        {
+          "value": "DETACH",
+          "label": "들뜨거나 떨어져요"
+        },
+        {
+          "value": "COLOR",
+          "label": "색이 변하거나 부식됐어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "plaster-damage"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-paint-damage",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "CRACK",
+          "label": "도장 표면이 갈라져요"
+        },
+        {
+          "value": "DETACH",
+          "label": "들뜨거나 벗겨져요"
+        },
+        {
+          "value": "COLOR",
+          "label": "색이 변하거나 부식됐어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "paint-damage"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-leak",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "FLOWING",
+          "label": "현재 물이 새거나 젖어 있어요"
+        },
+        {
+          "value": "TRACE",
+          "label": "지금은 마르고 물 자국만 있어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "leak"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-joint-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "MISSING",
+          "label": "줄눈이 없어요"
+        },
+        {
+          "value": "DIFFERENT",
+          "label": "폭·깊이·간격이 도면과 달라 보여요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "joint-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-tie-remains",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "PROTRUDING",
+          "label": "철물이 튀어나와 있어요"
+        },
+        {
+          "value": "HOLE",
+          "label": "철물이 있던 구멍이 덜 메워졌어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "tie-remains"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-penetration-gap",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "SMELL",
+          "label": "주위 틈으로 냄새가 전달돼요"
+        },
+        {
+          "value": "NOISE",
+          "label": "주위 틈으로 소음이 전달돼요"
+        },
+        {
+          "value": "MATERIAL",
+          "label": "도면과 다른 충전재가 보여요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "penetration-gap"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-duct-finish",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "AIR",
+          "label": "환기 통로의 미장이 없어요"
+        },
+        {
+          "value": "PIPE",
+          "label": "배관 통로의 미장이 없어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "duct-finish"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-condensation",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "DROPS",
+          "label": "표면에 물방울이 맺혀요"
+        },
+        {
+          "value": "MOLD",
+          "label": "곰팡이가 생겼어요"
+        },
+        {
+          "value": "BOTH",
+          "label": "물방울과 곰팡이가 함께 있어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "condensation"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-sink-unfinished",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "BOTTOM",
+          "label": "싱크대 아래쪽이에요"
+        },
+        {
+          "value": "BACK",
+          "label": "싱크대 뒤쪽이에요"
+        },
+        {
+          "value": "BOTH",
+          "label": "아래와 뒤쪽 모두예요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "sink-unfinished"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-bath-threshold",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "OVERFLOW",
+          "label": "물청소할 때 문 밖으로 물이 넘쳐요"
+        },
+        {
+          "value": "DRAWING",
+          "label": "문턱 깊이나 단차가 도면과 달라요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "bath-threshold"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-mirror-color",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "COLOR",
+          "label": "거울에 변색·부식이 보여요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "mirror-color"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-tile-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "CRACK",
+          "label": "갈라지거나 깨졌어요"
+        },
+        {
+          "value": "DETACH",
+          "label": "들뜨거나 떨어졌어요"
+        },
+        {
+          "value": "DEFORM",
+          "label": "솟거나 처졌어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "tile-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-trench-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "MISSING",
+          "label": "설계된 배수로가 없어요"
+        },
+        {
+          "value": "SMALL",
+          "label": "깊이나 폭이 도면보다 작아 보여요"
+        },
+        {
+          "value": "POND",
+          "label": "배수로에 물이 고여요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "trench-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-drain-slope",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "POND",
+          "label": "바닥에 물이 고여요"
+        },
+        {
+          "value": "REVERSE",
+          "label": "배수구 반대쪽으로 물이 흘러요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "drain-slope"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-door-edge",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "WET",
+          "label": "욕실·세탁실 등 물을 쓰는 곳의 문이에요"
+        },
+        {
+          "value": "DRY",
+          "label": "물을 쓰지 않는 곳의 문이에요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "door-edge"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-opening-function",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "CLOSE",
+          "label": "잘 열리거나 닫히지 않아요"
+        },
+        {
+          "value": "HANDLE",
+          "label": "손잡이가 없거나 작동이 안 돼요"
+        },
+        {
+          "value": "LOCK",
+          "label": "잠금장치가 작동하지 않아요"
+        },
+        {
+          "value": "GAP",
+          "label": "닫아도 틈새가 보여요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "opening-function"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-light-wiring",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "MATERIAL",
+          "label": "전선·보호관의 종류가 도면과 달라요"
+        },
+        {
+          "value": "EXPOSED",
+          "label": "조명 연결 배선의 보호 상태를 확인하고 싶어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "light-wiring"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-light-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "BURN_SMOKE",
+          "label": "조명 내부에서 타는 냄새나 연기가 나요"
+        },
+        {
+          "value": "SPARK",
+          "label": "조명 내부에서 스파크가 나요"
+        },
+        {
+          "value": "FUNCTION",
+          "label": "조명이 켜지지 않거나 기능이 불량해요"
+        },
+        {
+          "value": "FIXING",
+          "label": "조명 기구가 떨어지거나 고정이 불량해요"
+        },
+        {
+          "value": "SWITCH",
+          "label": "스위치·배선 연결이 불량해요"
+        },
+        {
+          "value": "SPEC",
+          "label": "설계된 조명과 규격이 달라요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [
+        "BURN_SMOKE",
+        "SPARK"
+      ],
+      "symptomIds": [
+        "light-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-air-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "FUNCTION",
+          "label": "작동하지 않거나 기능이 불량해요"
+        },
+        {
+          "value": "CONNECT",
+          "label": "기구·배관·배선 연결이 불량해요"
+        },
+        {
+          "value": "SPEC",
+          "label": "설계된 제품과 규격이 달라요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "air-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-heating-control",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "MAIN",
+          "label": "거실이나 침실의 난방 조절이 안 돼요"
+        },
+        {
+          "value": "ANNEX",
+          "label": "드레스룸·알파룸 등 부속공간이에요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "heating-control"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-sanitary-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "LEAK",
+          "label": "기구와 배관 연결부에서 물이 새어요"
+        },
+        {
+          "value": "BROKEN",
+          "label": "기구가 깨지거나 고정이 불량해요"
+        },
+        {
+          "value": "FLOW",
+          "label": "물이 약하게 나오거나 온수가 충분히 따뜻하지 않아요"
+        },
+        {
+          "value": "RUST",
+          "label": "녹물이 나와요"
+        },
+        {
+          "value": "SPEC",
+          "label": "설계된 기구와 규격이 달라요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "sanitary-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-intercom-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "FUNCTION",
+          "label": "통화나 영상이 불량해요"
+        },
+        {
+          "value": "CONNECT",
+          "label": "배선 연결이 불량해요"
+        },
+        {
+          "value": "SPEC",
+          "label": "설계된 제품과 규격이 달라요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "intercom-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-cctv-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "MISSING",
+          "label": "설계된 카메라가 없어요"
+        },
+        {
+          "value": "IMAGE",
+          "label": "영상에서 주요 부분을 식별하기 어려워요"
+        },
+        {
+          "value": "BLIND",
+          "label": "사람·차량 이동 경로가 보이지 않아요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "cctv-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-tree-health",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "DEAD",
+          "label": "가지가 말라 죽거나 생육이 불량해요"
+        },
+        {
+          "value": "FALLEN",
+          "label": "지지대가 부실해 나무가 쓰러졌어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "tree-health"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-root-binding",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "VISIBLE",
+          "label": "뿌리를 묶은 재료가 드러나 있어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "root-binding"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-tree-planting",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "SPECIES",
+          "label": "나무 종류가 달라요"
+        },
+        {
+          "value": "MISSING",
+          "label": "설계된 나무가 없어요"
+        },
+        {
+          "value": "MOVED",
+          "label": "나무 위치가 달라요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "tree-planting"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-tree-size",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "SMALL",
+          "label": "나무 굵기나 높이가 도면보다 작아 보여요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "tree-size"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-wallpaper-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "LIFT",
+          "label": "벽지가 들떠요"
+        },
+        {
+          "value": "WRINKLE",
+          "label": "벽지에 주름이 있어요"
+        },
+        {
+          "value": "SEAM",
+          "label": "이음부가 벌어졌어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "wallpaper-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-floor-finish",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "DAMAGE",
+          "label": "깨지거나 들떴어요"
+        },
+        {
+          "value": "NOISE",
+          "label": "밟으면 삐걱거려요"
+        },
+        {
+          "value": "GAP",
+          "label": "벌어짐·단차·솟음이 있어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "floor-finish"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-floor-layer",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "THICKNESS",
+          "label": "구성층 두께가 도면보다 부족해요"
+        },
+        {
+          "value": "BUFFER",
+          "label": "측면 완충재가 없거나 위치가 달라요"
+        },
+        {
+          "value": "QUALITY",
+          "label": "구성 재료의 품질이 도면과 달라요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "floor-layer"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-stone-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "DAMAGE",
+          "label": "깨짐·갈라짐·탈락이 보여요"
+        },
+        {
+          "value": "LEVEL",
+          "label": "처짐·단차가 보여요"
+        },
+        {
+          "value": "COLOR",
+          "label": "오염·백화가 보여요"
+        },
+        {
+          "value": "SPEC",
+          "label": "규격이나 시공방법이 도면과 달라요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "stone-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-furniture-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "DAMAGE",
+          "label": "깨지거나 들떴어요"
+        },
+        {
+          "value": "FIXING",
+          "label": "기울거나 고정이 불량해요"
+        },
+        {
+          "value": "OPEN",
+          "label": "잘 열리지 않거나 이음매가 불량해요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "furniture-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-insulation-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "MISSING",
+          "label": "보온재가 없거나 도면보다 적게 시공됐어요"
+        },
+        {
+          "value": "FROZEN",
+          "label": "배관이 얼거나 동파됐어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "insulation-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-appliance-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "MISSING",
+          "label": "계획된 가전이 없어요"
+        },
+        {
+          "value": "FUNCTION",
+          "label": "작동·고정 상태가 불량하거나 손상됐어요"
+        },
+        {
+          "value": "SPEC",
+          "label": "계획된 사양과 달라요"
+        },
+        {
+          "value": "SPACE",
+          "label": "안내받은 사양의 가전이 설치 공간에 맞지 않아요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "appliance-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-elevator-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "CALL",
+          "label": "버튼·호출 기능이 불량해요"
+        },
+        {
+          "value": "EMERGENCY",
+          "label": "비상통화가 작동하지 않아요"
+        },
+        {
+          "value": "LEVEL",
+          "label": "승강장과의 틈이나 높이 차이가 커 보여요"
+        },
+        {
+          "value": "FINISH",
+          "label": "내부 마감이 깨지거나 고정이 불량해요"
+        },
+        {
+          "value": "INSPECTION",
+          "label": "점검·검사에서 문제가 확인됐어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "elevator-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-pavement-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "DAMAGE",
+          "label": "포장·경계석이 깨졌어요"
+        },
+        {
+          "value": "LEVEL",
+          "label": "솟거나 내려앉았어요"
+        },
+        {
+          "value": "POND",
+          "label": "물이 심하게 고여요"
+        },
+        {
+          "value": "SPEC",
+          "label": "설계도서와 다르게 시공됐어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "pavement-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-parking-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "WIDTH",
+          "label": "주차·주행로 폭이 도면과 달라요"
+        },
+        {
+          "value": "GUARD",
+          "label": "코너가드·안전페인트가 없거나 불량해요"
+        },
+        {
+          "value": "CURB",
+          "label": "램프 연석이 없거나 깨졌어요"
+        },
+        {
+          "value": "FINISH",
+          "label": "뿜칠·에폭시가 없거나 벗겨졌어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "parking-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-retaining-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "CRACK",
+          "label": "갈라짐이 보여요"
+        },
+        {
+          "value": "DAMAGE",
+          "label": "파손·손상이 보여요"
+        },
+        {
+          "value": "SETTLE",
+          "label": "내려앉거나 기울어 보여요"
+        },
+        {
+          "value": "DRAIN",
+          "label": "배수공에서 흙이 섞여 나온 흔적이 있어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "retaining-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-fire-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "SPRINKLER",
+          "label": "스프링클러 헤드 관련이에요"
+        },
+        {
+          "value": "DETECTOR",
+          "label": "자동화재탐지·시각경보장치 관련이에요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "fire-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-gas-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "PIPE",
+          "label": "배관·호스 관련이에요"
+        },
+        {
+          "value": "METER",
+          "label": "계량기·중간밸브 관련이에요"
+        },
+        {
+          "value": "SAFETY",
+          "label": "가스누출 관련 안전장치가 작동하지 않아요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "gas-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-electric-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "INSTALL",
+          "label": "설치 상태 관련이에요"
+        },
+        {
+          "value": "FUNCTION",
+          "label": "작동 상태 관련이에요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "electric-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-railing-defect",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "INSTALL",
+          "label": "난간 설치 상태 관련이에요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "railing-defect"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "detail-unknown",
+      "type": "singleChoice",
+      "label": "어떤 상태인지 가장 가까운 항목을 골라 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "UNCERTAIN",
+          "label": "어떤 증상인지 구분하기 어려워요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "unknown"
+      ],
+      "conditions": [],
+      "order": 20
+    },
+    {
+      "questionId": "leak-pattern",
+      "type": "singleChoice",
+      "label": "물이 새는 때는 언제인가요?",
+      "required": true,
+      "options": [
+        {
+          "value": "CONTINUOUS",
+          "label": "계속 새어요"
+        },
+        {
+          "value": "RAIN",
+          "label": "비가 올 때 새어요"
+        },
+        {
+          "value": "WATER_USE",
+          "label": "물을 사용할 때 새어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "leak"
+      ],
+      "conditions": [
+        {
+          "path": "answers.detail-leak",
+          "operator": "equals",
+          "value": "FLOWING"
+        }
+      ],
+      "order": 30
+    },
+    {
+      "questionId": "condensation-heating",
+      "type": "singleChoice",
+      "label": "물방울·곰팡이가 생긴 공간에 난방이 되나요?",
+      "required": true,
+      "options": [
+        {
+          "value": "HEATED",
+          "label": "난방이 되는 공간이에요"
+        },
+        {
+          "value": "UNHEATED",
+          "label": "난방이 안 되는 공간이에요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "condensation"
+      ],
+      "conditions": [],
+      "order": 30
+    },
+    {
+      "questionId": "installed-by",
+      "type": "singleChoice",
+      "label": "문제가 있는 시설은 누가 설치했나요?",
+      "required": true,
+      "options": [
+        {
+          "value": "BUILDER",
+          "label": "시공사가 설치했어요"
+        },
+        {
+          "value": "RESIDENT",
+          "label": "입주 후 직접 설치하거나 교체했어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "condensation",
+        "furniture-defect",
+        "appliance-defect"
+      ],
+      "conditions": [],
+      "order": 35
+    },
+    {
+      "questionId": "floor-approval",
+      "type": "singleChoice",
+      "label": "사업계획승인 신청일을 알고 있나요? 확인된 문서가 있는 경우만 선택해 주세요.",
+      "required": true,
+      "options": [
+        {
+          "value": "SINCE_20220804",
+          "label": "2022년 8월 4일 이후 신청했어요"
+        },
+        {
+          "value": "BEFORE_20220804",
+          "label": "2022년 8월 4일 이전 신청했어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "floor-layer"
+      ],
+      "conditions": [],
+      "order": 30
+    },
+    {
+      "questionId": "root-material",
+      "type": "singleChoice",
+      "label": "보이는 결속재가 분해되는 재료인지 알고 있나요?",
+      "required": true,
+      "options": [
+        {
+          "value": "DECOMPOSABLE",
+          "label": "분해되는 재료로 확인했어요"
+        },
+        {
+          "value": "OTHER",
+          "label": "분해되지 않는 재료로 확인했어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "root-binding"
+      ],
+      "conditions": [],
+      "order": 30
+    },
+    {
+      "questionId": "root-age",
+      "type": "singleChoice",
+      "label": "준공 후 2년이 지났는지 알고 있나요?",
+      "required": true,
+      "options": [
+        {
+          "value": "OVER_TWO",
+          "label": "2년이 지났어요"
+        },
+        {
+          "value": "WITHIN_TWO",
+          "label": "2년이 지나지 않았어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "root-binding"
+      ],
+      "conditions": [],
+      "order": 35
+    },
+    {
+      "questionId": "disaster-context",
+      "type": "singleChoice",
+      "label": "태풍·호우·지진·폭설 등 재해와 관련해 발생한 문제인가요?",
+      "required": false,
+      "options": [
+        {
+          "value": "YES",
+          "label": "재해와 관련해 발생했어요"
+        },
+        {
+          "value": "NO",
+          "label": "재해와 관련 없이 발생했어요"
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "잘 모르겠어요"
+        }
+      ],
+      "interruptValues": [],
+      "symptomIds": [
+        "concrete-crack",
+        "rebar-exposed",
+        "plaster-damage",
+        "paint-damage",
+        "leak",
+        "joint-defect",
+        "tie-remains",
+        "penetration-gap",
+        "duct-finish",
+        "condensation",
+        "sink-unfinished",
+        "bath-threshold",
+        "mirror-color",
+        "tile-defect",
+        "trench-defect",
+        "drain-slope",
+        "door-edge",
+        "opening-function",
+        "light-wiring",
+        "light-defect",
+        "air-defect",
+        "heating-control",
+        "sanitary-defect",
+        "intercom-defect",
+        "cctv-defect",
+        "tree-health",
+        "root-binding",
+        "tree-planting",
+        "tree-size",
+        "wallpaper-defect",
+        "floor-finish",
+        "floor-layer",
+        "stone-defect",
+        "furniture-defect",
+        "insulation-defect",
+        "appliance-defect",
+        "elevator-defect",
+        "pavement-defect",
+        "parking-defect",
+        "retaining-defect",
+        "fire-defect",
+        "gas-defect",
+        "electric-defect",
+        "railing-defect",
+        "unknown"
+      ],
+      "conditions": [],
+      "order": 90
+    }
+  ]
+}
