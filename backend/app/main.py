@@ -59,7 +59,13 @@ def create_app(settings: Settings | None = None, database: Database | None = Non
     app.state.auth_rate_limiter = AuthRateLimiter()
     app.state.consultation_locks = ConsultationLocks()
     app.state.question_deletion_locks = ConsultationLocks()
-    app.state.evaluate_survey = evaluate_survey
+
+    async def survey_evaluator(snapshot, catalog, runtime_settings):
+        return await evaluate_survey(
+            snapshot, catalog, runtime_settings, database=app.state.database
+        )
+
+    app.state.evaluate_survey = survey_evaluator
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.web_origins,

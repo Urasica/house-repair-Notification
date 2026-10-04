@@ -1,3 +1,4 @@
+# Server secrets: keep real environment files out of Git at every directory level.
 .env
 .env.*
 !.env.example

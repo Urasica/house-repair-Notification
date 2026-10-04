@@ -2,7 +2,7 @@
 
 작성: 2026-10-03 · 기준: [개발 규칙](09-development-standards.md) · 상태: [진행표](../progress/README.md)
 
-이 문서는 M01~M08A 코드·자료와 로컬 검증 기록이다. DELETED·REQUEST_DELETED는 M06 API/DB와 M07 화면에 구현했다. 실제 목록은 M08A에서 게시했고 원문은 M08에서 파일로 정리했다. RAG와 ChatHistory는 [진행표](../progress/README.md)의 후속 단계에서 연결한다.
+이 문서는 M01~M09 코드·자료와 로컬 검증 기록이다. DELETED·REQUEST_DELETED는 M06 API/DB와 M07 화면에 구현했다. 실제 목록은 M08A에서 게시했고 원문은 M08에서 파일로 정리했다. M09에서 실제 RAG 검색을 설문에 연결했다. ChatHistory·생성 답변은 [진행표](../progress/README.md)의 M10에서 연결한다.
 
 ## 1. Docker 실행
 
@@ -17,7 +17,7 @@ docker compose --env-file .env.example up -d --no-build
 docker compose --env-file .env.example ps
 ```
 
-http://localhost:8080에서 홈 화면을 확인한다. /health/live는 API 프로세스, /health/ready는 DB·마이그레이션·초기 중단 요청 정리와 목록/지식 준비 상태를 확인한다. 새 DB에 목록을 게시하기 전에는 catalogReady=false, ragReady=false이며 /api/v1/catalog는 503 CATALOG_NOT_READY다. M08A 목록을 게시한 현재 로컬 DB는 catalogReady=true, ragReady=false이며 실제 목록을 반환한다. OpenAI는 기본 OFF이고 시작에 키가 필요하지 않다. 목록이 없어도 web과 API는 실행된다. DB 장애 시 ready와 catalog는 503 SERVICE_UNAVAILABLE, live는 200이다.
+http://localhost:8080에서 홈 화면을 확인한다. /health/live는 API 프로세스, /health/ready는 DB·마이그레이션·초기 중단 요청 정리와 목록/지식 준비 상태를 확인한다. 새 DB에 목록을 게시하기 전에는 catalogReady=false, ragReady=false이며 /api/v1/catalog는 503 CATALOG_NOT_READY다. M08A 목록과 M09 지식을 게시한 현재 로컬 DB는 catalogReady=true, ragReady=true이며 실제 목록을 반환한다. 예시 환경의 OpenAI는 기본 OFF이고 시작에 키가 필요하지 않다. 현재 로컬 실행은 키가 있는 .env와 OPENAI_ENABLED=true를 사용한다. 목록이 없어도 web과 API는 실행된다. DB 장애 시 ready와 catalog는 503 SERVICE_UNAVAILABLE, live는 200이다.
 
 web·api·db 3개 서비스만 상시 실행한다. API는 1개 워커다. 외부 연결은 로컬 web 포트에만 허용하며 API·DB 포트는 호스트에 공개하지 않는다. PostgreSQL 18 데이터는 /var/lib/postgresql의 named volume에 유지한다.
 
@@ -54,7 +54,7 @@ npm run build
 npm run dev
 ```
 
-macOS/Linux의 venv 경로는 .venv/bin/python이다. M08A 기준 기본 pytest는 DB 시험 63건을 skip하고 독립 시험 115건을 실행한다. 실제 DB 시험은 다음 절차로 별도 실행해야 한다.
+macOS/Linux의 venv 경로는 .venv/bin/python이다. M09 기준 기본 pytest는 DB 시험 69건을 skip하고 독립 시험 132건을 실행한다. 실제 DB 시험은 다음 절차로 별도 실행해야 한다.
 
 프론트 개발 서버는 /api·/health를 127.0.0.1:8000에 프록시한다. API는 backend에서 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1로 실행한다. 기본 Compose의 DB 포트는 비공개이므로 실제 DB 검증은 컨테이너 안에서 실행한다. 호스트 API 개발 시 별도 개발 DB 연결 URL을 설정한다.
 
@@ -73,13 +73,13 @@ docker compose -p repair-guide-test --env-file .env.example --env-file .env.test
 docker compose -p repair-guide-test --env-file .env.example --env-file .env.test.example -f compose.yaml -f compose.test.yaml down
 ```
 
-M08A 기준 백엔드 178건은 계약·설정·오류·잠금·실제 DB 관계/제약·요청 재생/실패·트랜잭션·재시작 정리·벡터/자료 적격성·가입/인증/만료/CSRF/소유권·목록 게시/불변성/분기/선택 정리 시험을 포함한다. M08A 프론트는 인증·저장소·설문/분기·위험 선택·응답 복구·계정 전환·이력/삭제·오류/접근성·초점 복원을 포함해 Vitest 35건과 타입/린트/빌드를 검증한다. jsdom은 개발 시험 의존성이며 서비스에 브라우저 서버를 추가하지 않는다. test 빌드 단계는 같은 API의 일회성 시험 명령용이며 상시 서비스를 추가하지 않는다. upgrade → downgrade base → upgrade → upgrade 반복은 비어 있는 시험 DB에서만 검증한다. 데이터를 가진 개발/운영 DB에는 downgrade base를 실행하지 않는다.
+M09 기준 백엔드 201건은 실제 원문/청크·임베딩·검색·게시/철회 검증 및 계약·설정·오류·잠금·실제 DB 관계/제약·요청 재생/실패·트랜잭션·재시작 정리·벡터/자료 적격성·가입/인증/만료/CSRF/소유권·목록 게시/불변성/분기/선택 정리 시험을 포함한다. M08A 프론트는 인증·저장소·설문/분기·위험 선택·응답 복구·계정 전환·이력/삭제·오류/접근성·초점 복원을 포함해 Vitest 35건과 타입/린트/빌드를 검증한다. jsdom은 개발 시험 의존성이며 서비스에 브라우저 서버를 추가하지 않는다. test 빌드 단계는 같은 API의 일회성 시험 명령용이며 상시 서비스를 추가하지 않는다. upgrade → downgrade base → upgrade → upgrade 반복은 비어 있는 시험 DB에서만 검증한다. 데이터를 가진 개발/운영 DB에는 downgrade base를 실행하지 않는다.
 
 빈 목록 상태의 web·프록시·API 확인은 저장소 루트에서 Python으로 scripts/smoke_api.py를 실행한다. --url http://127.0.0.1:8080도 지원한다. --database-unavailable은 DB가 중단된 상태의 기대 응답을 검사할 뿐 직접 DB를 중단하지 않는다.
 
 ## 4. 계약과 코드 연결
 
-backend/app/db/models.py는 12개 테이블, alembic/versions/0001_m03_initial_business_and_knowledge_schema.py는 최초 변경 이력이다. M05의 0002_m05_immutable_catalogs.py는 게시된 카탈로그의 UPDATE/DELETE를 차단하는 trigger를 추가한다. M06의 0003_m06_deleted_requests.py는 DELETED 요청의 본문 없는 종료 상태를 추가한다. 현재 MIGRATION_HEAD는 0003_m06다. DB 스키마를 바꾸면 새 migration을 추가하고 readiness의 MIGRATION_HEAD를 함께 갱신한다. 앱 시작 시 migration을 자동 실행하지 않는다.
+backend/app/db/models.py는 12개 테이블, alembic/versions/0001_m03_initial_business_and_knowledge_schema.py는 최초 변경 이력이다. M05의 0002_m05_immutable_catalogs.py는 게시된 카탈로그의 UPDATE/DELETE를 차단하는 trigger를 추가한다. M06의 0003_m06_deleted_requests.py는 DELETED 요청의 본문 없는 종료 상태를 추가한다. M09의 0004_m09_knowledge_immutability.py는 게시된 지식 묶음·원문·청크 불변성과 철회 경계를 추가한다. 현재 MIGRATION_HEAD는 0004_m09다. DB 스키마를 바꾸면 새 migration을 추가하고 readiness의 MIGRATION_HEAD를 함께 갱신한다. 앱 시작 시 migration을 자동 실행하지 않는다.
 
 Database는 한 연결 풀과 요청별 AsyncSession을 제공한다. transaction은 호출자 쓰기를 한 번에 확정한다. RequestRepository는 스스로 commit하지 않으며 완료 결과·정제 질문·완료 상태를 같은 트랜잭션에 넣을 수 있다. M04에서 계정/익명 권한·소유권 검사 함수를 구현했다. M06에서 isCurrent·revision·상담/설문/이력/삭제 API를 연결했다.
 
@@ -106,7 +106,7 @@ docker compose --env-file .env -f compose.yaml -f compose.prod.yaml -f compose.a
 docker compose --env-file .env -f compose.yaml -f compose.prod.yaml up -d --no-build
 ```
 
-운영 변경은 먼저 백업을 확인한 뒤 수행한다. OpenAI 연동은 키·모델·사용량 설정과 검토 완료 자료를 확인한 뒤 켠다. 현재 로컬에는 M08 정리 원문과 M08A 게시 목록이 있으며 OpenAI 호출은 없다. 운영 서버 배포는 M12다.
+운영 변경은 먼저 백업을 확인한 뒤 수행한다. OpenAI 연동은 키·모델·사용량 설정과 검토 완료 자료를 확인한 뒤 켠다. 현재 로컬에는 M08 정리 원문·M08A 게시 목록·M09 게시 지식이 있으며 실제 OpenAI 임베딩과 설문 검색을 검증했다. 생성 API 호출은 M10에서 연결한다. 운영 서버 배포는 M12다.
 
 ## 6. 이미지 기준과 확인 기록
 
@@ -125,7 +125,7 @@ Python 3.12.14-slim, Node 22.23.1-alpine, Caddy 2.11.4-alpine, pgvector/pgvector
 
 POST /api/v1/sessions는 게시된 최신 catalogVersion만 허용하며 실제 목록이 없으면 상담 시작을 차단한다. 익명은 응답의 sessionToken을 Bearer로 사용하고 회원은 쿠키·CSRF·Origin을 사용한다. 맥락 저장은 expectedRevision이 일치해야 하며 실제 변경에만 revision을 증가시킨다.
 
-M06 설문은 검토된 카탈로그 정책으로 위험·범위·입력 상태를 확인하고 운영 근거가 연결되지 않았으면 연락처 없는 직접 문의 템플릿을 반환한다. OpenAI/외부 검색을 호출하지 않는다. 결과·정제 질문·완료 요청을 한 트랜잭션에서 저장한다. 장기 질문에는 코드·라벨만 저장하고 자유 입력 원문을 복사하지 않는다.
+M06 당시 설문은 검토된 카탈로그 정책으로 위험·범위·입력 상태를 확인하고 운영 근거가 연결되지 않았으면 연락처 없는 직접 문의 템플릿을 반환한다. 당시에는 OpenAI/외부 검색을 호출하지 않았다. 현재 M09는 검토된 라벨의 질문 임베딩과 내부 검색을 수행한다. 결과·정제 질문·완료 요청을 한 트랜잭션에서 저장한다. 장기 질문에는 코드·라벨만 저장하고 자유 입력 원문을 복사하지 않는다.
 
 완료된 같은 요청은 200으로 재생하고 새 결과/질문을 만들지 않는다. 결과 삭제는 연결 질문과 재생 본문을 삭제하고 DELETED를 유지한다. 같은 ID의 재전송은 입력 해시 비교 전에 410이다. 질문만 삭제한 경우 결과 재생이 질문을 복원하지 않는다. 회원 상담 종료는 결과/질문을 보존하며 익명은 원본 결과를 지우고 정제 질문은 eraseRecords=true일 때만 함께 삭제한다.
 
@@ -150,9 +150,15 @@ M06 설문은 검토된 카탈로그 정책으로 위험·범위·입력 상태�
 ```sh
 docker compose --env-file .env.example run --rm --no-deps --volume C:/Users/dlqnf/Desktop/teamproject/data/catalog/m08a-20261004/catalog.json:/input/catalog.json:ro api python -m app.commands.catalog validate /input/catalog.json
 docker compose --env-file .env.example run --rm --no-deps --volume C:/Users/dlqnf/Desktop/teamproject/data/catalog/m08a-20261004/catalog.json:/input/catalog.json:ro api python -m app.commands.catalog publish /input/catalog.json
-backend/.venv/Scripts/python.exe scripts/smoke_api.py --catalog-version m08a-20261004-v2
+backend/.venv/Scripts/python.exe scripts/smoke_api.py --catalog-version m08a-20261004-v2 --rag-ready
 ```
 
-다른 체크아웃에서는 마운트 원본을 그 환경의 절대 경로로 바꾼다. `compose.test.yaml`은 실제 카탈로그를 시험 컨테이너의 `/data/catalog`에 읽기 전용 마운트한다. 과거/최신 검증용 별도 버전은 전용 시험 DB 트랜잭션 안에서만 만들고 되돌린다. 로컬 개발 DB에는 v1과 외부 공간 연결을 보완한 최신 v2가 있고 두 버전의 조회를 확인했다.
+smoke의 --rag-ready는 M09까지 게시한 현재 로컬 상태 기준이며 목록만 게시한 새 환경에서는 생략한다. 다른 체크아웃에서는 마운트 원본을 그 환경의 절대 경로로 바꾼다. `compose.test.yaml`은 실제 카탈로그를 시험 컨테이너의 `/data/catalog`에 읽기 전용 마운트한다. 과거/최신 검증용 별도 버전은 전용 시험 DB 트랜잭션 안에서만 만들고 되돌린다. 로컬 개발 DB에는 v1과 외부 공간 연결을 보완한 최신 v2가 있고 두 버전의 조회를 확인했다.
 
 M08A에서 `survey-v2`로 결과 생성 규칙을 갱신했다. 위험/범위 밖 결과는 미응답 설문 재개를 요청하지 않으며 입력 부족 확인 질문은 중복 제거한다. 기존 결과는 스냅샷으로 보존하고 이전 엔진 결과의 isCurrent=false 처리를 유지한다. 모바일 설문 저장 후 초점 복원과 보조 링크 색 대비도 수정했다. 검증용 계정·상담은 로컬 개발 데이터이며 실제 사용자 정보를 사용하지 않았다.
+
+## 10. M09 실제 지식 게시와 설문 검색
+
+49개 청크를 text-embedding-3-large·1536차원으로 임베딩하고 카탈로그 태그/명시적 조문 기준 53건 실제 평가 후 로컬 개발 DB에 게시했다. 최종 릴리스는 ebf3dec4-3905-5932-b29e-9651f438a937, 엔진은 survey-v3다. 일반 설문은 LH 운영 근거가 없어 RELATED 법령 인용·NEED_CONFIRMATION을 유지한다. 저장 전 철회·기한·필수 별표/문맥을 재확인한다.
+
+[관리 명령·검색 계약](12-knowledge-publication.md)과 [M09 완료 기록](../progress/04-m09-knowledge-review.md)에 원문 지문·게시 시각·평가·실제 API 증거를 기록했다. M09는 컴퓨터 유즈 없이 CLI·DB·API로 검증했다. GPT 생성과 회원 챗봇 본문은 M10에서 구현한다.

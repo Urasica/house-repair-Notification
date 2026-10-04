@@ -18,6 +18,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", default="http://localhost:8080")
     parser.add_argument("--database-unavailable", action="store_true")
+    parser.add_argument("--rag-ready", action="store_true")
     parser.add_argument(
         "--catalog-version", help="Expect this reviewed catalog to be published"
     )
@@ -38,7 +39,7 @@ def main():
         assert json.loads(ready) == {
             "status": "ok",
             "catalogReady": bool(args.catalog_version),
-            "ragReady": False,
+            "ragReady": args.rag_ready,
         }
     status, headers, catalog = fetch(args.url, "/api/v1/catalog")
     if args.catalog_version and not args.database_unavailable:

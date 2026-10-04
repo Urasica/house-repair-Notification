@@ -1,6 +1,6 @@
 # 개발 기준과 입력 형식
 
-작성: 2026-10-03 · 적용: M01~M07 코드 및 후속 구현
+작성: 2026-10-03 · 적용: M01~M09 코드 및 후속 구현
 
 기준: [전체 안내](README.md) · 진행: [MVP 작업](../progress/README.md)
 
@@ -24,7 +24,7 @@ backend/tests/fixtures/catalog.test.json과 frontend/src/features/survey/test-fi
 
 ## 3. 실행 설정과 버전
 
-.env.example은 로컬 Docker의 공개 개발 기본값이며 실제 비밀은 .env에서만 관리한다. APP_ENV는 development/test/production, OPENAI_ENABLED는 기본 false다. 운영은 별도 DB 비밀번호·HTTPS origin을 요구한다. 질문·회원 결과는 3~5년 기본 5년, 상담·인증 24시간, 단기 기록 정리 유예 7일, 로그·백업 14일, 삭제 기록 15일이다.
+.env.example은 로컬 Docker의 공개 개발 기본값이며 실제 비밀은 .env에서만 관리한다. APP_ENV는 development/test/production, OPENAI_ENABLED는 예시 환경에서 기본 false다. M09를 검증한 로컬 .env는 true이며 생성 모델 gpt-5.4-mini, 임베딩 text-embedding-3-large·1536차원을 사용한다. 사용자 지정에 따라 임베딩 총비용 상한은 두지 않고 요청별 입력·시간 한도는 유지한다. 운영은 별도 DB 비밀번호·HTTPS origin을 요구한다. 질문·회원 결과는 3~5년 기본 5년, 상담·인증 24시간, 단기 기록 정리 유예 7일, 로그·백업 14일, 삭제 기록 15일이다.
 
 Python 3.12, Node 22 계열을 기준으로 한다. FastAPI 0.142.2·Pydantic 2.13.5·SQLAlchemy 2.1.2·Psycopg 3.3.6·Alembic 1.20.0·pgvector Python 0.5.0을 선택했다. 프론트는 React 19.3.0·Vite 8.3.2·TypeScript 5.9.3을 사용한다. OpenAPI 타입 생성 도구의 TypeScript 5.x 호환 범위와 린트 도구의 호환 범위를 함께 만족하는 버전을 선택했다.
 
@@ -36,7 +36,7 @@ Python 3.12, Node 22 계열을 기준으로 한다. FastAPI 0.142.2·Pydantic 2.
 
 작업 단위마다 산출물·필요한 검증·progress 상태를 함께 커밋한다. Python은 Ruff·pytest, 프론트는 타입 검사·ESLint·Vitest·빌드를 사용한다. DB 제약·삭제·벡터 검증은 실제 PostgreSQL + pgvector에서 실행하며 SQLite로 대체하지 않는다.
 
-현재 대기 항목은 완성 목록·실제 원문 추출 지시·검토 완료 원문·운영 OpenAI 설정·배포 대상이다. M01~M03의 개발 환경에서는 OpenAI를 호출하지 않는다.
+M08 원문 검토, M08A 목록 게시, M09 OpenAI 임베딩·검색 평가·로컬 지식 게시를 마쳤다. 현재 남은 외부 입력은 LH 운영 근거와 운영 배포 대상·비밀/백업 설정이다. 생성 모델의 데이터 공유 무료 사용량에 대한 계정 자격은 별도 확인 대상이며 M10 생성 호출·출력 검증은 아직 구현하지 않았다.
 
 ## 5. 계획 정합성 개정과 후속 반영
 

@@ -28,7 +28,8 @@ from app.schemas.contracts import (
 from app.services.catalog import require_latest_catalog
 from app.services.consultations import check_revision, latest_knowledge, pinned_catalog, session_dto
 from app.services.deletion import delete_questions, delete_result, log_deletion
-from app.services.guidance import add_years, result_dto
+from app.services.guidance import add_years, result_dto, unavailable_result
+from app.services.retrieval import revalidate_citations
 from app.services.survey_policy import survey_policy
 
 
@@ -173,6 +174,8 @@ async def evaluate(
                 async with db.transaction() as session:
                     row = await own_consultation(request, session, consultation_id, mutation=True)
                     check_revision(row, snapshot.revision)
+                    if not await revalidate_citations(session, result, settings):
+                        result = unavailable_result(result)
                     record = QuestionRecord(
                         owner_user_id=row.owner_user_id,
                         consultation_id=row.id,
@@ -187,7 +190,10 @@ async def evaluate(
                             "answerLabels": result.summary.answer_labels,
                         },
                         masked_question=None,
-                        retrieval_meta_json={"status": result.status, "chunkIds": []},
+                        retrieval_meta_json={
+                            "status": result.status,
+                            "chunkIds": [str(c.chunk_id) for c in result.citations],
+                        },
                         retained_until=add_years(
                             result.generated_at, settings.question_retention_years
                         ),

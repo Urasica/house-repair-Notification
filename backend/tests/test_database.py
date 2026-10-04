@@ -73,13 +73,13 @@ async def seed_consultation(session, *, member=False):
     return consultation, user
 
 
-async def seed_knowledge(session):
+async def seed_knowledge(session, *, published=True):
     catalog = await seed_catalog(session, published=True)
     now = datetime.now(UTC)
     knowledge = KnowledgeSet(
         catalog_version=catalog.version,
-        status="PUBLISHED",
-        embedding_model="text-embedding-3-small",
+        status="BUILDING",
+        embedding_model=Settings(_env_file=None).openai_embedding_model,
         embedding_dimensions=1536,
         manifest_json={"state": "COMPLETE_VERIFIED"},
         published_at=now - timedelta(seconds=1),
@@ -115,6 +115,9 @@ async def seed_knowledge(session):
     )
     session.add(chunk)
     await session.flush()
+    if published:
+        knowledge.status = "PUBLISHED"
+        await session.flush()
     return knowledge, document, chunk
 
 
@@ -389,14 +392,14 @@ async def test_catalog_only_exposes_verified_published_payload_and_utc(pg_sessio
     "invalidity", ["expired", "withdrawn", "stale-hash", "building", "wrong-model", "unverified"]
 )
 async def test_rag_readiness_filters_ineligible_sources(pg_session, invalidity):
-    knowledge, document, chunk = await seed_knowledge(pg_session)
+    knowledge, document, chunk = await seed_knowledge(pg_session, published=False)
     settings = Settings(
         _env_file=None,
         openai_enabled=True,
         openai_api_key="test-only",
         openai_chat_model="test-only",
     )
-    assert (await get_readiness(pg_session, settings)).rag_ready
+    assert not (await get_readiness(pg_session, settings)).rag_ready
     if invalidity == "expired":
         document.review_until = datetime.now(UTC) - timedelta(days=1)
     elif invalidity == "withdrawn":
@@ -412,6 +415,9 @@ async def test_rag_readiness_filters_ineligible_sources(pg_session, invalidity):
     else:
         knowledge.manifest_json = {"state": "DRAFT"}
     await pg_session.flush()
+    if invalidity != "building":
+        knowledge.status = "PUBLISHED"
+        await pg_session.flush()
     assert not (await get_readiness(pg_session, settings)).rag_ready
 
 

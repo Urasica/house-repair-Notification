@@ -68,7 +68,7 @@ DELETED 요청은 식별자·kind·입력 해시·시각·상태만 유지하고
 
 ## 4. 벡터와 검색
 
-초기 임베딩은 OpenAI text-embedding-3-small·1536차원·cosine을 제안한다. 생성 모델은 별도다. 지식 묶음에 모델·차원을 고정하고 문서·질문 모두 같은 공간을 사용한다. 차원 변경은 스키마·데이터 이전과 새 묶음 게시로 처리하며 다차원 범용 저장 구조를 미리 만들지 않는다. [OpenAI Embeddings](https://developers.openai.com/api/docs/guides/embeddings)
+사용자 확정 임베딩은 OpenAI text-embedding-3-large·1536차원·cosine이다. large 요청에 dimensions=1536을 명시한다. 생성 모델은 별도다. 지식 묶음에 모델·차원을 고정하고 문서·질문 모두 같은 공간을 사용한다. 차원 변경은 스키마·데이터 이전과 새 묶음 게시로 처리하며 다차원 범용 저장 구조를 미리 만들지 않는다. [OpenAI Embeddings](https://developers.openai.com/api/docs/guides/embeddings)
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
@@ -122,7 +122,7 @@ pgvector는 정확 검색을 기본으로 제공한다. 근사 인덱스 도입�
 
 백업은 한 DB의 pg_dump와 검토 파일을 대상으로 한다. 정적 이미지·볼륨 자체를 백업으로 오인하지 않는다. 복원 시 최신 삭제 로그를 확보해 retained_until·단기 만료·명시적 삭제를 적용한 뒤 서비스를 연결한다. 삭제 로그 최신본은 DB 백업과 별도로 작은 암호화 파일로 보관하며 전용 복제 서비스는 두지 않는다. 상세 절차는 06을 따른다.
 
-빈 DB와 기존 스키마에서 Alembic을 검증한다. 확장 설치·DB 준비 뒤 migration을 한 번 실행하고 API의 각 시작마다 경쟁 실행하지 않는다. M03에서 12개 테이블과 최초 migration을 구현하고 실제 PostgreSQL + pgvector의 빈 개발/시험 DB에서 검증했다. 공개 카탈로그·지식 데이터는 아직 없다. pg_dump 백업·복원과 보존 정리 명령은 M11에서 구현한다.
+빈 DB와 기존 스키마에서 Alembic을 검증한다. 확장 설치·DB 준비 뒤 migration을 한 번 실행하고 API의 각 시작마다 경쟁 실행하지 않는다. M03에서 12개 테이블과 최초 migration을 구현하고 실제 PostgreSQL + pgvector의 빈 개발/시험 DB에서 검증했다. M08A 카탈로그와 M09 지식 49개 청크를 로컬 개발 DB에 게시했다. 현재 migration head는 0004_m09이며 게시 지식 묶음·원문·청크의 변경/삭제를 차단하고 명시적 철회만 허용한다. [M09 명령과 검증](12-knowledge-publication.md)을 따른다. pg_dump 백업·복원과 보존 정리 명령은 M11에서 구현한다.
 
 ## 8. 인수 조건
 

@@ -1,0 +1,28 @@
+{
+  "readiness": {
+    "status": "ok",
+    "catalogReady": true,
+    "ragReady": true
+  },
+  "releaseId": "ebf3dec4-3905-5932-b29e-9651f438a937",
+  "engineVersion": "survey-v3",
+  "status": "NEED_CONFIRMATION",
+  "reasonCodes": [
+    "NO_APPLICABLE_SOURCE"
+  ],
+  "citations": [
+    {
+      "locator": "제10조",
+      "use": "RELATED",
+      "kind": "LAW_CRITERIA"
+    },
+    {
+      "locator": "별표 2",
+      "use": "RELATED",
+      "kind": "LAW_CRITERIA"
+    }
+  ],
+  "isCurrent": true,
+  "replayHttpStatus": 200,
+  "sameResult": true
+}

@@ -44,7 +44,7 @@ DRAFT도 형식 검증할 수 있으며 reviewComplete=false로 표시한다. va
 
 ## 4. 일회성 게시
 
-먼저 현재 migration head `0003_m06`까지 적용한다. 게시본 불변성은 M05의 `0002_m05`에서 추가했다. migration은 기존 API 중단 후 관리자 연결로 실행하고, 게시 명령은 DML 앱 연결만 사용한다. [Docker 절차](10-local-development.md)를 따른다.
+먼저 현재 migration head `0004_m09`까지 적용한다. 게시본 불변성은 M05의 `0002_m05`에서 추가했다. migration은 기존 API 중단 후 관리자 연결로 실행하고, 게시 명령은 DML 앱 연결만 사용한다. [Docker 절차](10-local-development.md)를 따른다.
 
 검토한 실제 파일을 읽기 전용으로 마운트해 같은 API 이미지에서 실행한다. 아래 예시의 `/absolute/path/catalog.json`을 실제 절대 경로로 바꾼다. Windows에서는 `C:/.../catalog.json` 형태로 지정할 수 있다.
 
@@ -61,6 +61,6 @@ publish는 완료 검토·현재 migration·파일 연결을 확인하고 한 �
 
 ## 5. 확인 기록과 남은 작업
 
-자동 시험은 구조 오류·분기·답 정리·5개 주택 범위·모름·위험 우선순위·검토 미완료·시험 목록 게시 거부와 실제 PostgreSQL의 게시 재전송·새 버전·과거 조회·DB 불변성을 검증한다. M08A 완료 후 로컬 개발 DB는 catalogReady=true이며 m08a-20261004-v2을 반환한다. ragReady=false는 유지한다. 아직 목록을 게시하지 않은 새 환경에서는 catalogReady=false·CATALOG_NOT_READY다.
+자동 시험은 구조 오류·분기·답 정리·5개 주택 범위·모름·위험 우선순위·검토 미완료·시험 목록 게시 거부와 실제 PostgreSQL의 게시 재전송·새 버전·과거 조회·DB 불변성을 검증한다. M08A 완료 후 로컬 개발 DB는 catalogReady=true이며 m08a-20261004-v2을 반환한다. M08A 당시 ragReady=false였으며 M09 지식 게시 후 현재 로컬은 ragReady=true다. [지식 게시 안내](12-knowledge-publication.md)를 따른다. 아직 목록을 게시하지 않은 새 환경에서는 catalogReady=false·CATALOG_NOT_READY다.
 
 2026-10-04 M08A에서 실제 목록의 ID/연결/용어/모름/위험 정책을 검토하고 게시했으며 M06~M07 실데이터 통합 검증을 마쳤다. [완료 기록](../progress/03-m08a-catalog-review.md)에 출처/목록 해시·검토 범위·게시 시각·시험 결과를 기록했다. 원문/법률 적용 검토와 목록 완전성 검토는 구분하며 LH 운영 근거가 없으면 NEED_CONFIRMATION을 유지한다.

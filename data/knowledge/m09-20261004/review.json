@@ -1,0 +1,22 @@
+{
+  "state": "APPROVED",
+  "reviewer": "Codex M09 scoped source review",
+  "reviewedAt": "2026-10-04T08:47:18.868600+00:00",
+  "reviewUntil": "2027-01-02T08:47:18.868600+00:00",
+  "manifestSha256": "e8d39ff480b738cd2da15cc248fb37796ba7fca81a7228b7acf6c0dde53304a4",
+  "catalogVersion": "m08a-20261004-v2",
+  "kind": "LAW_CRITERIA",
+  "operationalUse": false,
+  "housingTypes": [
+    "LH_CONSTRUCTION_RENTAL",
+    "LH_RENTAL_BEFORE_SALE"
+  ],
+  "referenceTemplate": "선택한 증상과 관련된 법령을 참고할 수 있어요. 이 자료만으로 LH의 보수 대상·비용·교체 여부를 판단할 수는 없어요.",
+  "reviewScope": "원문 설명 및 관련 법령 참고에 한정한 서비스 적격성 검토. 사람의 법률 승인 또는 LH 운영 승인 아님.",
+  "excludedApplicability": [
+    "별표 4 및 제43조의 미확인 손상 문구",
+    "제45조 및 외부 인용 규정의 내용 미검증",
+    "LH 보수·비용·교체 판정"
+  ],
+  "contextPolicy": "총칙 제1~5조와 부칙 전체를 모든 본문/별표 근거 묶음의 필수 문맥으로 보존. 법령 설명의 APPLICABLE은 LH 운영 적용 승인이 아님."
+}

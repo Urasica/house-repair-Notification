@@ -10,7 +10,7 @@ from app.core.errors import AppError
 from app.db.requests import RequestRepository
 from app.domain.constants import ErrorCode
 
-MIGRATION_HEAD = "0003_m06"
+MIGRATION_HEAD = "0004_m09"
 
 
 class Database:

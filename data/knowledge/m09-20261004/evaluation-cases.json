@@ -1,0 +1,751 @@
+[
+  {
+    "id": "operation-concrete-crack",
+    "question": "콘크리트가 갈라졌어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "concrete",
+      "symptomId": "concrete-crack"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제7조"
+    ]
+  },
+  {
+    "id": "operation-rebar-exposed",
+    "question": "콘크리트 안의 철근이 보여요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "concrete",
+      "symptomId": "rebar-exposed"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제8조"
+    ]
+  },
+  {
+    "id": "operation-plaster-damage",
+    "question": "미장 면이 갈라지거나 떨어져요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "finish",
+      "symptomId": "plaster-damage"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제9조"
+    ]
+  },
+  {
+    "id": "operation-paint-damage",
+    "question": "도장이 갈라지거나 벗겨져요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "finish",
+      "symptomId": "paint-damage"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제9조"
+    ]
+  },
+  {
+    "id": "operation-leak",
+    "question": "물이 새거나 물 자국이 있어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "bathroom",
+      "facilityId": "waterproof",
+      "symptomId": "leak"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제10조",
+      "별표 2"
+    ]
+  },
+  {
+    "id": "operation-joint-defect",
+    "question": "바닥 줄눈이 없거나 도면과 달라요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "roof",
+      "facilityId": "joint",
+      "symptomId": "joint-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제11조"
+    ]
+  },
+  {
+    "id": "operation-tie-remains",
+    "question": "벽에 고정 철물이 튀어나오거나 구멍이 남았어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "concrete",
+      "symptomId": "tie-remains"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제12조"
+    ]
+  },
+  {
+    "id": "operation-penetration-gap",
+    "question": "배관·배선 주위가 덜 메워졌어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "penetration",
+      "symptomId": "penetration-gap"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제13조"
+    ]
+  },
+  {
+    "id": "operation-duct-finish",
+    "question": "덕트 벽면 마감이 빠져 있어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "duct",
+      "symptomId": "duct-finish"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제14조"
+    ]
+  },
+  {
+    "id": "operation-condensation",
+    "question": "표면에 물방울이나 곰팡이가 생겨요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "finish",
+      "symptomId": "condensation"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제15조"
+    ]
+  },
+  {
+    "id": "operation-sink-unfinished",
+    "question": "싱크대 아래·뒤쪽 마감이 없어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "kitchen",
+      "facilityId": "sink",
+      "symptomId": "sink-unfinished"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제16조"
+    ]
+  },
+  {
+    "id": "operation-bath-threshold",
+    "question": "욕실 문턱이 낮거나 도면과 달라요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "bathroom",
+      "facilityId": "bath-finish",
+      "symptomId": "bath-threshold"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제17조"
+    ]
+  },
+  {
+    "id": "operation-mirror-color",
+    "question": "욕실 거울의 색이 변했어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "bathroom",
+      "facilityId": "bath-finish",
+      "symptomId": "mirror-color"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제17조"
+    ]
+  },
+  {
+    "id": "operation-tile-defect",
+    "question": "타일이 깨지거나 들뜨고 떨어져요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "tile",
+      "symptomId": "tile-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제18조"
+    ]
+  },
+  {
+    "id": "operation-trench-defect",
+    "question": "배수로가 없거나 물이 고여요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "drain",
+      "symptomId": "trench-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제19조"
+    ]
+  },
+  {
+    "id": "operation-drain-slope",
+    "question": "물이 배수구로 흐르지 않고 고여요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "drain",
+      "symptomId": "drain-slope"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제20조"
+    ]
+  },
+  {
+    "id": "operation-door-edge",
+    "question": "목재 문 위·아래 끝면 마감이 없어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "door",
+      "symptomId": "door-edge"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제21조"
+    ]
+  },
+  {
+    "id": "operation-opening-function",
+    "question": "문·창문이 잘 닫히거나 잠기지 않아요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "door",
+      "symptomId": "opening-function"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제22조"
+    ]
+  },
+  {
+    "id": "operation-light-wiring",
+    "question": "조명 연결 배선이 도면과 달라요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "light",
+      "symptomId": "light-wiring"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제23조"
+    ]
+  },
+  {
+    "id": "operation-light-defect",
+    "question": "조명이 안 켜지거나 고정 상태가 불량해요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "light",
+      "symptomId": "light-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제24조"
+    ]
+  },
+  {
+    "id": "operation-air-defect",
+    "question": "환풍기·에어컨·후드가 작동하지 않아요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "air",
+      "symptomId": "air-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제25조"
+    ]
+  },
+  {
+    "id": "operation-heating-control",
+    "question": "방별로 난방을 조절할 수 없어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "heating",
+      "symptomId": "heating-control"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제26조"
+    ]
+  },
+  {
+    "id": "operation-sanitary-defect",
+    "question": "수전·위생기구가 새거나 작동이 불량해요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "bathroom",
+      "facilityId": "sanitary",
+      "symptomId": "sanitary-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제27조"
+    ]
+  },
+  {
+    "id": "operation-intercom-defect",
+    "question": "인터폰의 통화·영상·연결이 불량해요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "intercom",
+      "symptomId": "intercom-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제28조"
+    ]
+  },
+  {
+    "id": "operation-cctv-defect",
+    "question": "CCTV가 없거나 화면 식별이 어려워요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "common",
+      "facilityId": "cctv",
+      "symptomId": "cctv-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제29조"
+    ]
+  },
+  {
+    "id": "operation-tree-health",
+    "question": "나무가 말라 죽거나 쓰러졌어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "outdoor",
+      "facilityId": "tree",
+      "symptomId": "tree-health"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제30조"
+    ]
+  },
+  {
+    "id": "operation-root-binding",
+    "question": "나무 뿌리의 결속재가 지표면에 보여요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "outdoor",
+      "facilityId": "tree",
+      "symptomId": "root-binding"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제31조"
+    ]
+  },
+  {
+    "id": "operation-tree-planting",
+    "question": "나무 종류·식재가 도면과 달라요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "outdoor",
+      "facilityId": "tree",
+      "symptomId": "tree-planting"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제32조"
+    ]
+  },
+  {
+    "id": "operation-tree-size",
+    "question": "나무의 크기가 도면보다 작아 보여요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "outdoor",
+      "facilityId": "tree",
+      "symptomId": "tree-size"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제33조"
+    ]
+  },
+  {
+    "id": "operation-wallpaper-defect",
+    "question": "벽지가 들뜨거나 주름·틈이 생겼어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "wallpaper",
+      "symptomId": "wallpaper-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제34조"
+    ]
+  },
+  {
+    "id": "operation-floor-finish",
+    "question": "바닥재가 깨지거나 들뜨고 삐걱거려요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "floor",
+      "symptomId": "floor-finish"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제35조"
+    ]
+  },
+  {
+    "id": "operation-floor-layer",
+    "question": "바닥 구성층이 도면과 달라요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "floor",
+      "symptomId": "floor-layer"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제35조"
+    ]
+  },
+  {
+    "id": "operation-stone-defect",
+    "question": "석재가 깨지거나 떨어지고 변색돼요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "stone",
+      "symptomId": "stone-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제36조"
+    ]
+  },
+  {
+    "id": "operation-furniture-defect",
+    "question": "설치된 가구가 깨지거나 잘 열리지 않아요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "furniture",
+      "symptomId": "furniture-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제37조"
+    ]
+  },
+  {
+    "id": "operation-insulation-defect",
+    "question": "보온재가 없거나 배관이 얼었어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "insulation",
+      "symptomId": "insulation-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제38조"
+    ]
+  },
+  {
+    "id": "operation-appliance-defect",
+    "question": "설치된 가전이 없거나 작동하지 않아요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "appliance",
+      "symptomId": "appliance-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제39조"
+    ]
+  },
+  {
+    "id": "operation-elevator-defect",
+    "question": "승강기의 작동·문턱·마감에 문제가 있어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "common",
+      "facilityId": "elevator",
+      "symptomId": "elevator-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제40조"
+    ]
+  },
+  {
+    "id": "operation-pavement-defect",
+    "question": "보도·차도가 깨지거나 솟고 물이 고여요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "outdoor",
+      "facilityId": "pavement",
+      "symptomId": "pavement-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제41조"
+    ]
+  },
+  {
+    "id": "operation-parking-defect",
+    "question": "주차장 폭·보호시설·마감에 문제가 있어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "parking",
+      "facilityId": "parking-fixture",
+      "symptomId": "parking-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제42조",
+      "별표 3"
+    ]
+  },
+  {
+    "id": "operation-retaining-defect",
+    "question": "옹벽에 균열·침하·배수 문제가 보여요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "outdoor",
+      "facilityId": "retaining",
+      "symptomId": "retaining-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제43조",
+      "별표 4"
+    ]
+  },
+  {
+    "id": "operation-fire-defect",
+    "question": "소방 설비의 설치·작동을 확인하고 싶어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "fire",
+      "symptomId": "fire-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제45조"
+    ]
+  },
+  {
+    "id": "operation-gas-defect",
+    "question": "가스 설비의 설치·기능에 문제가 있어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "kitchen",
+      "facilityId": "gas",
+      "symptomId": "gas-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제45조"
+    ]
+  },
+  {
+    "id": "operation-electric-defect",
+    "question": "전기 설비의 상태를 확인하고 싶어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "living",
+      "facilityId": "electric",
+      "symptomId": "electric-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제45조"
+    ]
+  },
+  {
+    "id": "operation-railing-defect",
+    "question": "난간의 설치 상태를 확인하고 싶어요 LH에서 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "balcony",
+      "facilityId": "railing",
+      "symptomId": "railing-defect"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제45조"
+    ]
+  },
+  {
+    "id": "F10a",
+    "question": "제10조와 별표 2의 누수 기준 내용을 설명해 주세요.",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "bathroom",
+      "facilityId": "waterproof",
+      "symptomId": "leak"
+    },
+    "expectedStatus": "GUIDANCE_AVAILABLE",
+    "expectedLocators": [
+      "제10조",
+      "별표 2"
+    ]
+  },
+  {
+    "id": "F10b",
+    "question": "제10조와 별표 2에 따르면 LH가 무료로 보수해 주나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "bathroom",
+      "facilityId": "waterproof",
+      "symptomId": "leak"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제10조",
+      "별표 2"
+    ]
+  },
+  {
+    "id": "F10c",
+    "question": "제10조 내용을 설명하고 우리집 수리 비용도 알려 주세요.",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "bathroom",
+      "facilityId": "waterproof",
+      "symptomId": "leak"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제10조",
+      "별표 2"
+    ]
+  },
+  {
+    "id": "ambiguous",
+    "question": "누수가 있어요. 어떻게 하나요?",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "bathroom",
+      "facilityId": "waterproof",
+      "symptomId": "leak"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제10조",
+      "별표 2"
+    ]
+  },
+  {
+    "id": "unverified-annex",
+    "question": "별표 4의 파손 및 손상 의미를 설명해 주세요.",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "bathroom",
+      "facilityId": "waterproof",
+      "symptomId": "leak"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "별표 4"
+    ]
+  },
+  {
+    "id": "external-rule",
+    "question": "제45조의 내용을 설명해 주세요.",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "bathroom",
+      "facilityId": "waterproof",
+      "symptomId": "leak"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제45조"
+    ]
+  },
+  {
+    "id": "missing-source",
+    "question": "제99조 내용을 설명해 주세요.",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "bathroom",
+      "facilityId": "waterproof",
+      "symptomId": "leak"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": []
+  },
+  {
+    "id": "partial-missing-law",
+    "question": "제10조와 제99조 내용을 설명해 주세요.",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "bathroom",
+      "facilityId": "waterproof",
+      "symptomId": "leak"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제10조",
+      "별표 2"
+    ]
+  },
+  {
+    "id": "mixed-applicability",
+    "question": "제10조 내용을 설명하고 우리집에 해당하는지 알려 주세요.",
+    "context": {
+      "housingType": "LH_CONSTRUCTION_RENTAL",
+      "roomId": "bathroom",
+      "facilityId": "waterproof",
+      "symptomId": "leak"
+    },
+    "expectedStatus": "NEED_CONFIRMATION",
+    "expectedLocators": [
+      "제10조",
+      "별표 2"
+    ]
+  }
+]

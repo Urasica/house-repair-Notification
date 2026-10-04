@@ -1,0 +1,825 @@
+{
+  "releaseId": "ebf3dec4-3905-5932-b29e-9651f438a937",
+  "fingerprint": "c8176c493d619eec790ac7646a3fe4d53cf482f0b4d38dc97b489c147da075aa",
+  "embeddingModel": "text-embedding-3-large",
+  "embeddingDimensions": 1536,
+  "provider": "OPENAI",
+  "reviewer": "Codex M09 automated evaluation",
+  "evaluationSha256": "14020da9ef24774d6735b6adc7c3fb4d8a019fd374c2e79c0f22af2c2d05f43a",
+  "queryTokens": 1473,
+  "recallAt5": 1.0,
+  "statusAccuracy": 1.0,
+  "unsafeDecisions": 0,
+  "cases": [
+    {
+      "id": "operation-concrete-crack",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제7조"
+      ],
+      "expectedLocators": [
+        "제7조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-rebar-exposed",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제8조"
+      ],
+      "expectedLocators": [
+        "제8조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-plaster-damage",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제9조"
+      ],
+      "expectedLocators": [
+        "제9조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-paint-damage",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제9조"
+      ],
+      "expectedLocators": [
+        "제9조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-leak",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "별표 2",
+        "제10조"
+      ],
+      "expectedLocators": [
+        "별표 2",
+        "제10조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-joint-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제11조"
+      ],
+      "expectedLocators": [
+        "제11조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-tie-remains",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제12조"
+      ],
+      "expectedLocators": [
+        "제12조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-penetration-gap",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제13조"
+      ],
+      "expectedLocators": [
+        "제13조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-duct-finish",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제14조"
+      ],
+      "expectedLocators": [
+        "제14조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-condensation",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제15조"
+      ],
+      "expectedLocators": [
+        "제15조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-sink-unfinished",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제16조"
+      ],
+      "expectedLocators": [
+        "제16조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-bath-threshold",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제17조"
+      ],
+      "expectedLocators": [
+        "제17조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-mirror-color",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제17조"
+      ],
+      "expectedLocators": [
+        "제17조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-tile-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제18조"
+      ],
+      "expectedLocators": [
+        "제18조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-trench-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제19조"
+      ],
+      "expectedLocators": [
+        "제19조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-drain-slope",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제20조"
+      ],
+      "expectedLocators": [
+        "제20조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-door-edge",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제21조"
+      ],
+      "expectedLocators": [
+        "제21조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-opening-function",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제22조"
+      ],
+      "expectedLocators": [
+        "제22조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-light-wiring",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제23조"
+      ],
+      "expectedLocators": [
+        "제23조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-light-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제24조"
+      ],
+      "expectedLocators": [
+        "제24조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-air-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제25조"
+      ],
+      "expectedLocators": [
+        "제25조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-heating-control",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제26조"
+      ],
+      "expectedLocators": [
+        "제26조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-sanitary-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제27조"
+      ],
+      "expectedLocators": [
+        "제27조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-intercom-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제28조"
+      ],
+      "expectedLocators": [
+        "제28조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-cctv-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제29조"
+      ],
+      "expectedLocators": [
+        "제29조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-tree-health",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제30조"
+      ],
+      "expectedLocators": [
+        "제30조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-root-binding",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제31조"
+      ],
+      "expectedLocators": [
+        "제31조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-tree-planting",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제32조"
+      ],
+      "expectedLocators": [
+        "제32조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-tree-size",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제33조"
+      ],
+      "expectedLocators": [
+        "제33조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-wallpaper-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제34조"
+      ],
+      "expectedLocators": [
+        "제34조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-floor-finish",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제35조"
+      ],
+      "expectedLocators": [
+        "제35조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-floor-layer",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제35조"
+      ],
+      "expectedLocators": [
+        "제35조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-stone-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제36조"
+      ],
+      "expectedLocators": [
+        "제36조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-furniture-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제37조"
+      ],
+      "expectedLocators": [
+        "제37조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-insulation-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제38조"
+      ],
+      "expectedLocators": [
+        "제38조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-appliance-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제39조"
+      ],
+      "expectedLocators": [
+        "제39조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-elevator-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제40조"
+      ],
+      "expectedLocators": [
+        "제40조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-pavement-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제41조"
+      ],
+      "expectedLocators": [
+        "제41조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-parking-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "별표 3",
+        "제42조"
+      ],
+      "expectedLocators": [
+        "별표 3",
+        "제42조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-retaining-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "별표 4",
+        "제43조"
+      ],
+      "expectedLocators": [
+        "별표 4",
+        "제43조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-fire-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제45조"
+      ],
+      "expectedLocators": [
+        "제45조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-gas-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제45조"
+      ],
+      "expectedLocators": [
+        "제45조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-electric-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제45조"
+      ],
+      "expectedLocators": [
+        "제45조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "operation-railing-defect",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제45조"
+      ],
+      "expectedLocators": [
+        "제45조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "F10a",
+      "purpose": "LAW_EXPLANATION",
+      "status": "GUIDANCE_AVAILABLE",
+      "expectedStatus": "GUIDANCE_AVAILABLE",
+      "locators": [
+        "별표 2",
+        "제10조"
+      ],
+      "expectedLocators": [
+        "별표 2",
+        "제10조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "F10b",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "별표 2",
+        "제10조"
+      ],
+      "expectedLocators": [
+        "별표 2",
+        "제10조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "F10c",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "별표 2",
+        "제10조"
+      ],
+      "expectedLocators": [
+        "별표 2",
+        "제10조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "ambiguous",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "별표 2",
+        "제10조"
+      ],
+      "expectedLocators": [
+        "별표 2",
+        "제10조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "unverified-annex",
+      "purpose": "LAW_EXPLANATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "별표 4",
+        "제43조"
+      ],
+      "expectedLocators": [
+        "별표 4"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "external-rule",
+      "purpose": "LAW_EXPLANATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "제45조"
+      ],
+      "expectedLocators": [
+        "제45조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "missing-source",
+      "purpose": "LAW_EXPLANATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [],
+      "expectedLocators": [],
+      "recall": null,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "partial-missing-law",
+      "purpose": "LAW_EXPLANATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "별표 2",
+        "제10조"
+      ],
+      "expectedLocators": [
+        "별표 2",
+        "제10조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    },
+    {
+      "id": "mixed-applicability",
+      "purpose": "OPERATION",
+      "status": "NEED_CONFIRMATION",
+      "expectedStatus": "NEED_CONFIRMATION",
+      "locators": [
+        "별표 2",
+        "제10조"
+      ],
+      "expectedLocators": [
+        "별표 2",
+        "제10조"
+      ],
+      "recall": 1.0,
+      "correctStatus": true,
+      "unsafe": false
+    }
+  ]
+}

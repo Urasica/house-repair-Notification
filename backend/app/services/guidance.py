@@ -1,19 +1,19 @@
-"""Conservative survey results until M09 connects approved operational evidence."""
+"""Survey templates with pinned internal evidence; no generative model calls."""
 
 from calendar import monthrange
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
-from sqlalchemy import select
-
 from app.core.config import Settings
-from app.db.models import Consultation, KnowledgeChunk, KnowledgeDocument, KnowledgeSet, Result
+from app.db.models import Consultation, KnowledgeSet, Result
 from app.domain.constants import DISCLAIMER, INSUFFICIENT_INFORMATION_MESSAGE, GuidanceStatus
 from app.schemas.catalog import CatalogDefinition
 from app.schemas.contracts import GuidanceResult, ResultSummary, Session
+from app.services.embeddings import Embeddings, EmbeddingUnavailable
+from app.services.retrieval import retrieve, revalidate_citations
 from app.services.survey_policy import survey_policy
 
-ENGINE_VERSION = "survey-v2"
+ENGINE_VERSION = "survey-v3"
 
 
 def add_years(value: datetime, years: int) -> datetime:
@@ -22,7 +22,12 @@ def add_years(value: datetime, years: int) -> datetime:
 
 
 async def evaluate_survey(
-    snapshot: Session, catalog: CatalogDefinition, settings: Settings
+    snapshot: Session,
+    catalog: CatalogDefinition,
+    settings: Settings,
+    *,
+    database=None,
+    provider=None,
 ) -> GuidanceResult:
     policy = survey_policy(catalog, snapshot.context)
     context = policy.context
@@ -69,7 +74,7 @@ async def evaluate_survey(
         if snapshot.access_mode == "MEMBER"
         else snapshot.expires_at + timedelta(days=settings.raw_record_grace_days)
     )
-    return GuidanceResult(
+    result = GuidanceResult(
         id=uuid4(),
         session_id=snapshot.id,
         saved_to_history=snapshot.access_mode == "MEMBER",
@@ -108,6 +113,62 @@ async def evaluate_survey(
         retained_until=retained_until,
         is_current=True,
     )
+    if (
+        database is not None
+        and settings.openai_enabled
+        and snapshot.knowledge_release_id
+        and policy.status == GuidanceStatus.NEED_CONFIRMATION
+    ):
+        # Only catalog-reviewed labels leave the server; no free-text personal data.
+        query = " · ".join(
+            [
+                result.summary.housing_label,
+                result.summary.room_label,
+                result.summary.facility_label,
+                result.summary.symptom_label,
+                *answers,
+            ]
+        )
+        try:
+            vector = (await (provider or Embeddings(settings)).embed([query])).vectors[0]
+            async with database.session() as session:
+                found = await retrieve(
+                    session,
+                    snapshot.knowledge_release_id,
+                    vector,
+                    settings,
+                    context,
+                    catalog_version=snapshot.catalog_version,
+                )
+            result = result.model_copy(
+                update={
+                    "status": found.status,
+                    "reason_codes": [found.reason],
+                    "citations": found.citations(),
+                    "guidance": found.guidance
+                    + (
+                        [INSUFFICIENT_INFORMATION_MESSAGE]
+                        if found.status == "NEED_CONFIRMATION"
+                        else []
+                    ),
+                }
+            )
+        except EmbeddingUnavailable:
+            result = unavailable_result(result)
+    return result
+
+
+def unavailable_result(result):
+    return result.model_copy(
+        update={
+            "status": GuidanceStatus.NEED_CONFIRMATION,
+            "reason_codes": ["SOURCE_UNAVAILABLE"],
+            "citations": [],
+            "guidance": [INSUFFICIENT_INFORMATION_MESSAGE],
+            "checks": [],
+            "follow_up_questions": [],
+        }
+    )
 
 
 async def result_dto(session, row: Result) -> GuidanceResult:
@@ -131,25 +192,5 @@ async def result_dto(session, row: Result) -> GuidanceResult:
             and release.manifest_json.get("state") == "COMPLETE_VERIFIED"
         )
     if current and result.citations:
-        now = datetime.now(UTC)
-        ids = {citation.chunk_id for citation in result.citations}
-        eligible = set(
-            (
-                await session.scalars(
-                    select(KnowledgeChunk.id)
-                    .join(KnowledgeDocument, KnowledgeDocument.id == KnowledgeChunk.document_id)
-                    .join(KnowledgeSet, KnowledgeSet.id == KnowledgeDocument.knowledge_set_id)
-                    .where(
-                        KnowledgeChunk.id.in_(ids),
-                        KnowledgeSet.id == result.knowledge_release_id,
-                        KnowledgeSet.status == "PUBLISHED",
-                        KnowledgeDocument.status == "APPROVED",
-                        KnowledgeDocument.reviewed_at <= now,
-                        KnowledgeDocument.review_until > now,
-                        KnowledgeChunk.content_hash == KnowledgeChunk.embedded_content_hash,
-                    )
-                )
-            ).all()
-        )
-        current = ids == eligible
+        current = await revalidate_citations(session, result, lock=False)
     return result.model_copy(update={"session_id": row.consultation_id, "is_current": current})
