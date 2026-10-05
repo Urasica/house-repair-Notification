@@ -47,6 +47,6 @@ M08 원문 검토, M08A 목록 게시, M09 OpenAI 임베딩·검색 평가·로�
 | 결과 삭제 시 본문 삭제·DELETED 요청 유지, 재전송 410 REQUEST_DELETED | M06: enum·요청 저장소·RequestState·새 DB migration·OpenAPI/프론트 타입; M07: 삭제/복구 화면 | 실제 PostgreSQL 상태·응답 CHECK, 삭제 후 동일 ID 재전송·늦은 완료 차단·원자성; F26 |
 | 법령 설명 허용과 운영 근거 부족 안내 구분 | M06: 설문 정책; M09: 목적별 적격 근거·평가셋; M10: 생성 전 목적 판단·상태·출력 검증 | F10a~F10c, 혼합·불명확 문의의 운영 게이트 유지 |
 | 대화 조회에 ChatHistory와 ChatResponse 쌍 반환 | M10: DTO·조회 API·저장 응답 연결·OpenAPI/프론트 타입·화면 | F27, 새로고침·페이지 조회·isCurrent 재계산·추가 생성 없음 |
-| 삭제 후 복원에도 DELETED 재적용 | M11: 삭제 로그 복구 절차·통합 검증 | F24·F26, 결과 삭제 전에 연결 요청 확인 |
+| 삭제 후 복원에도 DELETED 재적용 | M11 완료: 별도 암호화 삭제 파일·복구 절차·통합 검증 | F24·F26, 결과 삭제 전에 연결 요청 확인 |
 
 DB 변경은 최초 migration을 고치지 않고 새 migration과 MIGRATION_HEAD 갱신으로 반영한다. DTO·enum 변경 시 OpenAPI와 생성 프론트 타입을 함께 갱신한다. 설계 개정만으로 기존 실행 검증 건수나 단계 완료 여부를 갱신하지 않는다.

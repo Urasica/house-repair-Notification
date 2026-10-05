@@ -17,7 +17,9 @@ export async function replaceAuth(client: QueryClient, state: AuthState) {
 }
 
 export function clearMemberCache(client: QueryClient) {
-  const memberData = { predicate: (query: { queryKey: readonly unknown[] }) => query.queryKey[0] !== 'auth' }
+  // Public catalog queries can mount while the identity-change effect runs.
+  // Cancelling/removing their active observer leaves the new home screen pending.
+  const memberData = { predicate: (query: { queryKey: readonly unknown[] }) => !['auth', 'catalog-ready', 'catalog'].includes(String(query.queryKey[0])) }
   void client.cancelQueries(memberData)
   client.removeQueries(memberData)
   resetSurveyIdentity()

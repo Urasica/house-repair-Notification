@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     chat_user_window_limit: int = Field(default=20, ge=1, le=100)
     chat_daily_limit: int = Field(default=100, ge=1, le=10000)
     chat_max_output_tokens: int = Field(default=4096, ge=512, le=8192)
+    backup_key: SecretStr = SecretStr("")
+    deletion_export_path: str = ""
+    backup_scope: str = "repair-guide"
 
     @property
     def auth_cookie_name(self) -> str:
@@ -52,6 +55,8 @@ class Settings(BaseSettings):
             raise ValueError("OpenAI enabled requires a server key and chat model")
         if self.deletion_log_retention_days < self.backup_retention_days + 1:
             raise ValueError("Deletion markers must outlive backups")
+        if bool(self.deletion_export_path) != bool(self.backup_key.get_secret_value()):
+            raise ValueError("Deletion export requires both path and encryption key")
         if self.app_env == "production":
             if not url.password or url.password == "local-development-only":
                 raise ValueError("Production requires a non-development database password")

@@ -1,6 +1,6 @@
 # 우리집 보수 길잡이 — 전체 개발 안내
 
-최초 작성: 2026-10-02 · 최종 개정: 2026-10-05 · 상태: M01~M10 완료 · 다음 M11
+최초 작성: 2026-10-02 · 최종 개정: 2026-10-06 · 상태: M01~M11 완료 · 다음 M12
 
 이 문서는 서비스의 기본 범위·기술 구성·공통 정책과 문서의 읽는 순서를 안내한다. [기존 초안](../README.md)은 서비스 방향을 참고하는 자료이며 최신 요구와 구현 기준은 이 문서와 연결된 설계를 따른다.
 
@@ -35,7 +35,7 @@
 | 데이터 | 단일 PostgreSQL + pgvector에 업무 데이터·정제 질문·RAG 지식 저장 |
 | AI | OpenAI Responses·Embeddings API, 서버에서만 호출 |
 | 배포 | 한 서버의 Docker Compose: web·api·db 3개 상시 서비스 |
-| 관리 작업 | API 이미지의 일회성 자료 반입·임베딩·게시·정리 명령 |
+| 관리 작업 | API의 일회성 자료/정리 명령과 PostgreSQL 도구를 포함한 ops 백업/복원 이미지 |
 
 ```mermaid
 flowchart LR
@@ -103,3 +103,5 @@ JSON은 camelCase, DB 열은 snake_case, 시간은 UTC이고 화면은 Asia/Seou
 카탈로그: [작성·검증·게시와 설문 정책](11-catalog-publication.md) · 지식: [반입·임베딩·검색·게시](12-knowledge-publication.md) · [M09 완료 기록](../progress/04-m09-knowledge-review.md)
 
 회원 챗봇: [구현·한도·검증](13-member-chat.md)
+
+보존·운영 검증: [정리·집계·암호화 백업/복원](14-retention-backup.md) · [M11 검증 기록](../progress/06-m11-operations-review.md)

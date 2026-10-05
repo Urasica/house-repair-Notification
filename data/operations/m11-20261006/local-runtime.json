@@ -1,0 +1,10 @@
+{
+  "readiness": {
+    "status": "ok",
+    "catalogReady": true,
+    "ragReady": true
+  },
+  "immediateDeletionExport": true,
+  "deletedGuestTokenStatus": 401,
+  "openaiCalls": 0
+}

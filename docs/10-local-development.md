@@ -2,7 +2,9 @@
 
 작성: 2026-10-03 · 기준: [개발 규칙](09-development-standards.md) · 상태: [진행표](../progress/README.md)
 
-이 문서는 M01~M10 코드·자료와 로컬 검증 기록이다. DELETED·REQUEST_DELETED는 M06 API/DB와 M07 화면에 구현했다. 실제 목록은 M08A에서 게시했고 원문은 M08에서 파일로 정리했다. M09에서 실제 RAG 검색을 설문에 연결했다. M10에서 ChatHistory·생성 답변·회원 화면을 연결했다. [구현 안내](13-member-chat.md)를 따른다.
+이 문서는 M01~M11 코드·자료와 로컬 검증 기록이다. DELETED·REQUEST_DELETED는 M06 API/DB와 M07 화면에 구현했다. 실제 목록은 M08A에서 게시했고 원문은 M08에서 파일로 정리했다. M09에서 실제 RAG 검색을 설문에 연결했다. M10에서 ChatHistory·생성 답변·회원 화면을 연결했다. [구현 안내](13-member-chat.md)를 따른다.
+
+M11 이후 로컬 개발 서비스는 `.env.ops`와 `compose.deletions.yaml`을 함께 사용한다. 아래 기본 명령은 초기 환경 구성용이며, 현재 서비스 재생성 시 `--env-file .env --env-file .env.ops -f compose.yaml -f compose.deletions.yaml`을 지정해 즉시 삭제 파일 내보내기를 유지한다. 백업·정리·복원 명령과 별도 ops 이미지는 [보존·백업 안내](14-retention-backup.md), 실제 검증은 [M11 기록](../progress/06-m11-operations-review.md)을 따른다.
 
 ## 1. Docker 실행
 

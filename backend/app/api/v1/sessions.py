@@ -28,6 +28,7 @@ from app.services.catalog import require_latest_catalog
 from app.services.chat import replay_chat
 from app.services.consultations import check_revision, latest_knowledge, pinned_catalog, session_dto
 from app.services.deletion import delete_questions, delete_result, log_deletion
+from app.services.deletion_export import export_after_delete
 from app.services.guidance import add_years, result_dto, unavailable_result
 from app.services.retrieval import revalidate_citations
 from app.services.survey_policy import survey_policy
@@ -316,4 +317,5 @@ async def end_session(
             await session.flush()
             await session.delete(row)
             log_deletion(session, "CONSULTATION", consultation_id, settings)
+    await export_after_delete(db, settings)
     return Response(status_code=204)

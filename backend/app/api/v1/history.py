@@ -15,6 +15,7 @@ from app.db.models import Consultation, QuestionRecord, Result
 from app.domain.constants import ErrorCode
 from app.schemas.contracts import ErrorResponse, GuidanceResult, ResultList, ResultListItem
 from app.services.deletion import delete_questions, delete_result
+from app.services.deletion_export import export_after_delete
 from app.services.guidance import result_dto
 
 router = APIRouter(
@@ -107,6 +108,7 @@ async def remove_result(result_id: UUID, request: Request):
         async with db.transaction() as session:
             row = await own_result(request, session, result_id, mutation=True)
             await delete_result(session, row, settings)
+    await export_after_delete(db, settings)
     return Response(status_code=204)
 
 
@@ -149,4 +151,5 @@ async def remove_questions(request: Request):
                 principal = await account(request, session)
                 require_csrf(request, principal)
                 await delete_questions(session, owner_id=owner_id, settings=settings)
+    await export_after_delete(db, settings)
     return Response(status_code=204)

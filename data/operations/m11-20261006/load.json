@@ -1,0 +1,38 @@
+{
+  "executedAt": "2026-10-05T08:00:08.366659+00:00",
+  "concurrency": 20,
+  "openai": "disabled; provider deadline covered by mock tests",
+  "measurements": {
+    "catalog": {
+      "count": 100,
+      "p95Ms": 176.95,
+      "maxMs": 186.86
+    },
+    "session": {
+      "count": 100,
+      "p95Ms": 145.99,
+      "maxMs": 272.07
+    },
+    "questions": {
+      "count": 100,
+      "p95Ms": 200.05,
+      "maxMs": 322.6
+    },
+    "history": {
+      "count": 100,
+      "p95Ms": 168.72,
+      "maxMs": 247.66
+    },
+    "survey": {
+      "count": 20,
+      "p95Ms": 401.83,
+      "maxMs": 427.67
+    },
+    "chat": {
+      "count": 20,
+      "p95Ms": 406.74,
+      "maxMs": 456.12
+    }
+  },
+  "basicApiTargetPassed": true
+}

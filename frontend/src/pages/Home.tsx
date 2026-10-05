@@ -51,5 +51,11 @@ export default function Home() {
       {auth.isError && <Feedback error={auth.error} retry={() => void auth.refetch()} />}
       {!!error && <Feedback error={error} />}
     </section>
+    <section className="notice" aria-labelledby="privacy-title">
+      <h2 id="privacy-title">입력과 기록은 이렇게 사용해요</h2>
+      <p>상담과 로그인은 24시간 동안 유효해요. 원본 상담·대화·비회원 결과는 상담 만료 후 7일 이내 삭제해요. 회원 안내 결과는 입력·답변·출처와 함께 기본 5년 보관하며 이전 결과에서 삭제할 수 있어요.</p>
+      <p>식별정보를 제외한 질문 분류·선택 정보는 서비스 개선을 위해 기본 5년 보관해요. 회원은 이전 결과에서, 비회원은 상담 종료 전에 질문 기록 삭제를 선택할 수 있어요. 이름·주소·연락처는 입력하지 마세요.</p>
+      <p>자료 검색과 답변을 위해 OpenAI에 선택 라벨·조문 번호와 검토 자료를 보낼 수 있어요. 질문 원문은 보내지 않아요. 답변 저장을 요청하지 않는 설정과 제공자의 데이터 보존 정책은 서로 다르며, 제공자 정책은 별도로 적용돼요.</p>
+    </section>
   </>
 }

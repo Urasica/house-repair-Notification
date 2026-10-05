@@ -1,0 +1,10 @@
+# Use only with -p repair-guide-test and .env.test.example. Public development DB is separate.
+services:
+  api:
+    environment:
+      OPENAI_ENABLED: "false"
+      OPENAI_API_KEY: ""
+      WEB_ORIGINS: '["http://localhost:18080"]'
+  web:
+    ports: !override
+      - "127.0.0.1:18080:80"

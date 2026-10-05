@@ -1,0 +1,9 @@
+# Enable immediate independent deletion export on the API, using the same key/path as ops.
+services:
+  api:
+    environment:
+      BACKUP_KEY: ${BACKUP_KEY:?Set BACKUP_KEY}
+      BACKUP_SCOPE: ${BACKUP_SCOPE:-repair-guide}
+      DELETION_EXPORT_PATH: /deletions/latest.fernet
+    volumes:
+      - ${DELETION_EXPORT_DIR:?Set DELETION_EXPORT_DIR}:/deletions

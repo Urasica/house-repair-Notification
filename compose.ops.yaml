@@ -1,0 +1,22 @@
+# Explicit one-shot profile. Remote directory must be an already-mounted remote filesystem.
+services:
+  ops:
+    profiles: [ops]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.ops
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      DATABASE_URL: ${MIGRATION_DATABASE_URL:?Set MIGRATION_DATABASE_URL}
+      BACKUP_KEY: ${BACKUP_KEY:?Set a separate Fernet BACKUP_KEY}
+      BACKUP_SCOPE: ${BACKUP_SCOPE:-repair-guide}
+      DELETION_EXPORT_PATH: /deletions/latest.fernet
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
+      DELETION_LOG_RETENTION_DAYS: ${DELETION_LOG_RETENTION_DAYS:-15}
+    volumes:
+      - ${DELETION_EXPORT_DIR:?Set DELETION_EXPORT_DIR}:/deletions
+      - ${BACKUP_LOCAL_DIR:?Set BACKUP_LOCAL_DIR}:/backups
+      - ${BACKUP_REMOTE_DIR:?Mount and set BACKUP_REMOTE_DIR}:/remote
+      - ${REVIEWED_FILES_DIR:?Set REVIEWED_FILES_DIR}:/reviewed:ro
+      - ${RESTORE_FILES_DIR:?Set RESTORE_FILES_DIR}:/restored
+    restart: "no"
