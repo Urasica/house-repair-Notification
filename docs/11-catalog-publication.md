@@ -44,7 +44,7 @@ DRAFT도 형식 검증할 수 있으며 reviewComplete=false로 표시한다. va
 
 ## 4. 일회성 게시
 
-먼저 현재 migration head `0004_m09`까지 적용한다. 게시본 불변성은 M05의 `0002_m05`에서 추가했다. migration은 기존 API 중단 후 관리자 연결로 실행하고, 게시 명령은 DML 앱 연결만 사용한다. [Docker 절차](10-local-development.md)를 따른다.
+먼저 현재 migration head `0005_m10`까지 적용한다. 게시본 불변성은 M05의 `0002_m05`에서 추가했다. migration은 기존 API 중단 후 관리자 연결로 실행하고, 게시 명령은 DML 앱 연결만 사용한다. [Docker 절차](10-local-development.md)를 따른다.
 
 검토한 실제 파일을 읽기 전용으로 마운트해 같은 API 이미지에서 실행한다. 아래 예시의 `/absolute/path/catalog.json`을 실제 절대 경로로 바꾼다. Windows에서는 `C:/.../catalog.json` 형태로 지정할 수 있다.
 

@@ -2,7 +2,7 @@
 
 작성: 2026-10-03 · 기준: [개발 규칙](09-development-standards.md) · 상태: [진행표](../progress/README.md)
 
-이 문서는 M01~M09 코드·자료와 로컬 검증 기록이다. DELETED·REQUEST_DELETED는 M06 API/DB와 M07 화면에 구현했다. 실제 목록은 M08A에서 게시했고 원문은 M08에서 파일로 정리했다. M09에서 실제 RAG 검색을 설문에 연결했다. ChatHistory·생성 답변은 [진행표](../progress/README.md)의 M10에서 연결한다.
+이 문서는 M01~M10 코드·자료와 로컬 검증 기록이다. DELETED·REQUEST_DELETED는 M06 API/DB와 M07 화면에 구현했다. 실제 목록은 M08A에서 게시했고 원문은 M08에서 파일로 정리했다. M09에서 실제 RAG 검색을 설문에 연결했다. M10에서 ChatHistory·생성 답변·회원 화면을 연결했다. [구현 안내](13-member-chat.md)를 따른다.
 
 ## 1. Docker 실행
 
@@ -54,7 +54,7 @@ npm run build
 npm run dev
 ```
 
-macOS/Linux의 venv 경로는 .venv/bin/python이다. M09 기준 기본 pytest는 DB 시험 69건을 skip하고 독립 시험 132건을 실행한다. 실제 DB 시험은 다음 절차로 별도 실행해야 한다.
+macOS/Linux의 venv 경로는 .venv/bin/python이다. M10 기준 기본 pytest는 DB 시험 74건을 skip하고 독립 시험 145건을 실행한다. 실제 DB 시험은 다음 절차로 별도 실행해야 한다.
 
 프론트 개발 서버는 /api·/health를 127.0.0.1:8000에 프록시한다. API는 backend에서 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1로 실행한다. 기본 Compose의 DB 포트는 비공개이므로 실제 DB 검증은 컨테이너 안에서 실행한다. 호스트 API 개발 시 별도 개발 DB 연결 URL을 설정한다.
 
@@ -73,17 +73,17 @@ docker compose -p repair-guide-test --env-file .env.example --env-file .env.test
 docker compose -p repair-guide-test --env-file .env.example --env-file .env.test.example -f compose.yaml -f compose.test.yaml down
 ```
 
-M09 기준 백엔드 201건은 실제 원문/청크·임베딩·검색·게시/철회 검증 및 계약·설정·오류·잠금·실제 DB 관계/제약·요청 재생/실패·트랜잭션·재시작 정리·벡터/자료 적격성·가입/인증/만료/CSRF/소유권·목록 게시/불변성/분기/선택 정리 시험을 포함한다. M08A 프론트는 인증·저장소·설문/분기·위험 선택·응답 복구·계정 전환·이력/삭제·오류/접근성·초점 복원을 포함해 Vitest 35건과 타입/린트/빌드를 검증한다. jsdom은 개발 시험 의존성이며 서비스에 브라우저 서버를 추가하지 않는다. test 빌드 단계는 같은 API의 일회성 시험 명령용이며 상시 서비스를 추가하지 않는다. upgrade → downgrade base → upgrade → upgrade 반복은 비어 있는 시험 DB에서만 검증한다. 데이터를 가진 개발/운영 DB에는 downgrade base를 실행하지 않는다.
+M10 기준 백엔드 219건은 회원 챗봇·생성 검증·취소/재생/사용량과 실제 원문/청크·임베딩·검색·게시/철회 검증 및 계약·설정·오류·잠금·실제 DB 관계/제약·요청 재생/실패·트랜잭션·재시작 정리·벡터/자료 적격성·가입/인증/만료/CSRF/소유권·목록 게시/불변성/분기/선택 정리 시험을 포함한다. M08A 프론트는 인증·저장소·설문/분기·위험 선택·응답 복구·계정 전환·이력/삭제·오류/접근성·초점 복원을 포함해 Vitest 35건과 타입/린트/빌드를 검증한다. jsdom은 개발 시험 의존성이며 서비스에 브라우저 서버를 추가하지 않는다. test 빌드 단계는 같은 API의 일회성 시험 명령용이며 상시 서비스를 추가하지 않는다. upgrade → downgrade base → upgrade → upgrade 반복은 비어 있는 시험 DB에서만 검증한다. 데이터를 가진 개발/운영 DB에는 downgrade base를 실행하지 않는다.
 
 빈 목록 상태의 web·프록시·API 확인은 저장소 루트에서 Python으로 scripts/smoke_api.py를 실행한다. --url http://127.0.0.1:8080도 지원한다. --database-unavailable은 DB가 중단된 상태의 기대 응답을 검사할 뿐 직접 DB를 중단하지 않는다.
 
 ## 4. 계약과 코드 연결
 
-backend/app/db/models.py는 12개 테이블, alembic/versions/0001_m03_initial_business_and_knowledge_schema.py는 최초 변경 이력이다. M05의 0002_m05_immutable_catalogs.py는 게시된 카탈로그의 UPDATE/DELETE를 차단하는 trigger를 추가한다. M06의 0003_m06_deleted_requests.py는 DELETED 요청의 본문 없는 종료 상태를 추가한다. M09의 0004_m09_knowledge_immutability.py는 게시된 지식 묶음·원문·청크 불변성과 철회 경계를 추가한다. 현재 MIGRATION_HEAD는 0004_m09다. DB 스키마를 바꾸면 새 migration을 추가하고 readiness의 MIGRATION_HEAD를 함께 갱신한다. 앱 시작 시 migration을 자동 실행하지 않는다.
+backend/app/db/models.py는 13개 테이블, alembic/versions/0001_m03_initial_business_and_knowledge_schema.py는 최초 변경 이력이다. M05의 0002_m05_immutable_catalogs.py는 게시된 카탈로그의 UPDATE/DELETE를 차단하는 trigger를 추가한다. M06의 0003_m06_deleted_requests.py는 DELETED 요청의 본문 없는 종료 상태를 추가한다. M09의 0004_m09_knowledge_immutability.py는 게시된 지식 묶음·원문·청크 불변성과 철회 경계를 추가한다. 0005_m10_chat_usage.py는 상담 삭제와 독립된 사용량 예약 기록을 추가한다. 현재 MIGRATION_HEAD는 0005_m10다. DB 스키마를 바꾸면 새 migration을 추가하고 readiness의 MIGRATION_HEAD를 함께 갱신한다. 앱 시작 시 migration을 자동 실행하지 않는다.
 
 Database는 한 연결 풀과 요청별 AsyncSession을 제공한다. transaction은 호출자 쓰기를 한 번에 확정한다. RequestRepository는 스스로 commit하지 않으며 완료 결과·정제 질문·완료 상태를 같은 트랜잭션에 넣을 수 있다. M04에서 계정/익명 권한·소유권 검사 함수를 구현했다. M06에서 isCurrent·revision·상담/설문/이력/삭제 API를 연결했다.
 
-로컬 `/login`에서 가입/로그인할 수 있고 `/api/v1/auth/me`는 미로그인일 때 user=null을 반환한다. 회원 경로는 미로그인 요청을 서버에서도 401로 차단한다. M06 이력 API와 M07 화면을 연결했고 챗봇은 M10에서 연결한다. 운영 쿠키는 Secure이며 로컬 HTTP에서만 개발 쿠키를 사용한다. API의 프록시 헤더 신뢰 설정은 API 포트 비공개·Caddy 내부 연결을 전제로 한다.
+로컬 `/login`에서 가입/로그인할 수 있고 `/api/v1/auth/me`는 미로그인일 때 user=null을 반환한다. 회원 경로는 미로그인 요청을 서버에서도 401로 차단한다. M06 이력 API와 M07 화면을 연결했고 회원 챗봇도 M10에서 연결했다. 운영 쿠키는 Secure이며 로컬 HTTP에서만 개발 쿠키를 사용한다. API의 프록시 헤더 신뢰 설정은 API 포트 비공개·Caddy 내부 연결을 전제로 한다.
 
 ConsultationLocks는 단일 프로세스의 같은 상담 변경을 즉시 409로 차단하고 다른 상담은 동시에 처리한다. 중단 요청 정리는 이전 프로세스가 완전히 종료된 뒤 시작 때 한 번 실행하며 readiness 조회가 활성 요청을 실패로 바꾸지 않는다. DB 장애 중 활성 변경 취소·재시도 제어는 실제 변경 서비스와 함께 M06에서 연결한다.
 
@@ -106,7 +106,7 @@ docker compose --env-file .env -f compose.yaml -f compose.prod.yaml -f compose.a
 docker compose --env-file .env -f compose.yaml -f compose.prod.yaml up -d --no-build
 ```
 
-운영 변경은 먼저 백업을 확인한 뒤 수행한다. OpenAI 연동은 키·모델·사용량 설정과 검토 완료 자료를 확인한 뒤 켠다. 현재 로컬에는 M08 정리 원문·M08A 게시 목록·M09 게시 지식이 있으며 실제 OpenAI 임베딩과 설문 검색을 검증했다. 생성 API 호출은 M10에서 연결한다. 운영 서버 배포는 M12다.
+운영 변경은 먼저 백업을 확인한 뒤 수행한다. OpenAI 연동은 키·모델·사용량 설정과 검토 완료 자료를 확인한 뒤 켠다. 현재 로컬에는 M08 정리 원문·M08A 게시 목록·M09 게시 지식이 있으며 실제 OpenAI 임베딩과 설문 검색을 검증했다. M10 생성 API와 회원 화면도 로컬 반영했다. 운영 서버 배포는 M12다.
 
 ## 6. 이미지 기준과 확인 기록
 
@@ -135,7 +135,7 @@ M06 당시 설문은 검토된 카탈로그 정책으로 위험·범위·입력 
 
 ## 8. M07 화면·복구 검증
 
-목록이 게시되면 홈에서 새 상담을 생성하고 /select → /survey → /result/:resultId로 진행한다. 현재 로컬 개발 DB에는 M08A 목록이 게시되어 설문을 시작할 수 있다. 회원 이력은 /history와 /history/:resultId에서 제공하며 실제 목록 기반 결과 저장·회원 이력 연결을 M08A에서 확인했다. 회원 챗봇은 접근 제한과 준비 중 안내만 제공한다.
+목록이 게시되면 홈에서 새 상담을 생성하고 /select → /survey → /result/:resultId로 진행한다. 현재 로컬 개발 DB에는 M08A 목록이 게시되어 설문을 시작할 수 있다. 회원 이력은 /history와 /history/:resultId에서 제공하며 실제 목록 기반 결과 저장·회원 이력 연결을 M08A에서 확인했다. 회원 챗봇은 M10에서 대화·근거·저장·복구까지 연결했다.
 
 익명 저장소에는 상담 ID·Bearer·만료 시각, 회원은 상담 ID만 보관한다. 처리 중 평가는 requestId·expectedRevision만 보관하고 원문 입력·답·결과·CSRF·계정 토큰은 저장소에 넣지 않는다. 로그인/로그아웃·인증 만료·계정 재확인에서 신원이 바뀌면 사용자 캐시와 양쪽 상담 복구 정보를 제거한다. 진행 중 변경의 늦은 응답은 이전 화면·캐시를 복원하지 않는다.
 
@@ -161,4 +161,4 @@ M08A에서 `survey-v2`로 결과 생성 규칙을 갱신했다. 위험/범위 �
 
 49개 청크를 text-embedding-3-large·1536차원으로 임베딩하고 카탈로그 태그/명시적 조문 기준 53건 실제 평가 후 로컬 개발 DB에 게시했다. 최종 릴리스는 ebf3dec4-3905-5932-b29e-9651f438a937, 엔진은 survey-v3다. 일반 설문은 LH 운영 근거가 없어 RELATED 법령 인용·NEED_CONFIRMATION을 유지한다. 저장 전 철회·기한·필수 별표/문맥을 재확인한다.
 
-[관리 명령·검색 계약](12-knowledge-publication.md)과 [M09 완료 기록](../progress/04-m09-knowledge-review.md)에 원문 지문·게시 시각·평가·실제 API 증거를 기록했다. M09는 컴퓨터 유즈 없이 CLI·DB·API로 검증했다. GPT 생성과 회원 챗봇 본문은 M10에서 구현한다.
+[관리 명령·검색 계약](12-knowledge-publication.md)과 [M09 완료 기록](../progress/04-m09-knowledge-review.md)에 원문 지문·게시 시각·평가·실제 API 증거를 기록했다. M09는 컴퓨터 유즈 없이 CLI·DB·API로 검증했다. GPT 생성과 회원 챗봇 본문도 M10에서 구현했다. 프론트 40건, 백엔드 219건과 실제 12건 생성/게이트 평가·회원 HTTP 흐름을 검증했다. [M10 실행 안내](13-member-chat.md)와 [완료 기록](../progress/05-m10-chat-review.md)을 따른다.

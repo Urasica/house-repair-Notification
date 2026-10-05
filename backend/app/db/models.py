@@ -166,6 +166,12 @@ class Result(Identity, Created, Base):
     retained_until: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class ChatUsage(Identity, Created, Base):
+    __tablename__ = "chat_usage"
+    __table_args__ = (Index("ix_chat_usage_owner_created", "owner_user_id", "created_at"),)
+    owner_user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+
+
 class Message(Identity, Created, Base):
     __tablename__ = "messages"
     __table_args__ = (

@@ -1,0 +1,164 @@
+{
+  "evaluatedAt": "2026-10-05T07:22:32.747745+00:00",
+  "promptVersion": "chat-v1-extractive",
+  "model": "gpt-5.4-mini",
+  "embeddingModel": "text-embedding-3-large",
+  "releaseId": "ebf3dec4-3905-5932-b29e-9651f438a937",
+  "knowledgeFingerprint": "c8176c493d619eec790ac7646a3fe4d53cf482f0b4d38dc97b489c147da075aa",
+  "casesSha256": "bcf08db1c69ada129f23457d8cdbc7b305a037a82b0b2c6a97cc73896565ae4b",
+  "provider": "OPENAI",
+  "generationCalls": 3,
+  "generationTokens": {
+    "input_tokens": 10529,
+    "output_tokens": 439,
+    "total_tokens": 10968
+  },
+  "passed": true,
+  "cases": [
+    {
+      "id": "law-10",
+      "status": "GUIDANCE_AVAILABLE",
+      "answerMode": "GROUNDED",
+      "generationCalls": 1,
+      "locators": [
+        "별표 2",
+        "제10조"
+      ],
+      "passed": true,
+      "seconds": 8.459,
+      "answerSha256": "51b7c256dbbbdf33a068a22fabda506d6993d4f48dd46e9b18e81a997c620068"
+    },
+    {
+      "id": "law-7",
+      "status": "GUIDANCE_AVAILABLE",
+      "answerMode": "GROUNDED",
+      "generationCalls": 1,
+      "locators": [
+        "제7조"
+      ],
+      "passed": true,
+      "seconds": 3.259,
+      "answerSha256": "50a8258cc237b91912627c2f8a07d97b5a04193a9a4561c9a2376faccdb8e13b"
+    },
+    {
+      "id": "law-35",
+      "status": "NEED_CONFIRMATION",
+      "answerMode": "TEMPLATE",
+      "generationCalls": 0,
+      "locators": [
+        "제35조"
+      ],
+      "passed": true,
+      "seconds": 0.216,
+      "answerSha256": "e0ce44b1cf5749973f0f4e3bb7b3dd52e9bab2d4e080931bc25fde5b51a2d58c"
+    },
+    {
+      "id": "annex-2",
+      "status": "GUIDANCE_AVAILABLE",
+      "answerMode": "GROUNDED",
+      "generationCalls": 1,
+      "locators": [
+        "별표 2",
+        "제10조"
+      ],
+      "passed": true,
+      "seconds": 2.59,
+      "answerSha256": "51b7c256dbbbdf33a068a22fabda506d6993d4f48dd46e9b18e81a997c620068"
+    },
+    {
+      "id": "operation",
+      "status": "NEED_CONFIRMATION",
+      "answerMode": "TEMPLATE",
+      "generationCalls": 0,
+      "locators": [
+        "별표 2",
+        "제10조"
+      ],
+      "passed": true,
+      "seconds": 0.223,
+      "answerSha256": "e0ce44b1cf5749973f0f4e3bb7b3dd52e9bab2d4e080931bc25fde5b51a2d58c"
+    },
+    {
+      "id": "mixed",
+      "status": "NEED_CONFIRMATION",
+      "answerMode": "TEMPLATE",
+      "generationCalls": 0,
+      "locators": [
+        "별표 2",
+        "제10조"
+      ],
+      "passed": true,
+      "seconds": 0.2,
+      "answerSha256": "e0ce44b1cf5749973f0f4e3bb7b3dd52e9bab2d4e080931bc25fde5b51a2d58c"
+    },
+    {
+      "id": "ambiguous",
+      "status": "NEED_CONFIRMATION",
+      "answerMode": "TEMPLATE",
+      "generationCalls": 0,
+      "locators": [
+        "별표 2",
+        "제10조"
+      ],
+      "passed": true,
+      "seconds": 0.217,
+      "answerSha256": "e0ce44b1cf5749973f0f4e3bb7b3dd52e9bab2d4e080931bc25fde5b51a2d58c"
+    },
+    {
+      "id": "unverified",
+      "status": "NEED_CONFIRMATION",
+      "answerMode": "TEMPLATE",
+      "generationCalls": 0,
+      "locators": [
+        "별표 4",
+        "제43조"
+      ],
+      "passed": true,
+      "seconds": 0.251,
+      "answerSha256": "e0ce44b1cf5749973f0f4e3bb7b3dd52e9bab2d4e080931bc25fde5b51a2d58c"
+    },
+    {
+      "id": "missing",
+      "status": "NEED_CONFIRMATION",
+      "answerMode": "TEMPLATE",
+      "generationCalls": 0,
+      "locators": [],
+      "passed": true,
+      "seconds": 0.211,
+      "answerSha256": "c482544f6c7ab48e8585b2006c4683ebe4b057ea7bd3873369653c9814f8169a"
+    },
+    {
+      "id": "injection",
+      "status": "NEED_CONFIRMATION",
+      "answerMode": "TEMPLATE",
+      "generationCalls": 0,
+      "locators": [
+        "별표 2",
+        "제10조"
+      ],
+      "passed": true,
+      "seconds": 0.207,
+      "answerSha256": "e0ce44b1cf5749973f0f4e3bb7b3dd52e9bab2d4e080931bc25fde5b51a2d58c"
+    },
+    {
+      "id": "hazard",
+      "status": "SAFETY_PRIORITY",
+      "answerMode": "TEMPLATE",
+      "generationCalls": 0,
+      "locators": [],
+      "passed": true,
+      "seconds": 0.0,
+      "answerSha256": "034a75eefc63fef46a2943d69a1b4c548497d3ab871361a468315c3388f805d4"
+    },
+    {
+      "id": "missing-input",
+      "status": "NEED_MORE_INFO",
+      "answerMode": "CLARIFY",
+      "generationCalls": 0,
+      "locators": [],
+      "passed": true,
+      "seconds": 0.0,
+      "answerSha256": "67ccce954000bc4ac4975b52f0fd15a05b46f553211b012652d6c1d3e9d472ec"
+    }
+  ]
+}

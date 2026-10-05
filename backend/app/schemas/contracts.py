@@ -172,6 +172,11 @@ class ChatResponse(APIModel):
     is_current: bool
 
 
+class ChatHistory(APIModel):
+    items: list[ChatResponse]
+    next_cursor: str | None
+
+
 class RequestState(APIModel):
     request_id: UUID
     kind: RequestKind
@@ -213,6 +218,7 @@ CONTRACT_MODELS = (
     ResultList,
     ChatMessage,
     ChatResponse,
+    ChatHistory,
     RequestState,
     ErrorResponse,
     Readiness,

@@ -10,7 +10,7 @@
 
 UUID·TIMESTAMPTZ·JSONB를 사용하고 시행일은 DATE, 불명확하면 null이다. 내용 해시는 SHA-256이다. 실제 주택 주소·연락처·토큰 원본을 질문·임베딩에 저장하지 않는다.
 
-## 2. 초기 테이블 12개
+## 2. 테이블 13개
 
 요구를 구현하는 테이블만 둔다. staging 배치·동의어·통계 집계·임베딩 프로필·청크 관계·게시 이벤트를 각각 별도 시스템으로 일반화하지 않는다.
 
@@ -23,6 +23,7 @@ UUID·TIMESTAMPTZ·JSONB를 사용하고 시행일은 DATE, 불명확하면 null
 | request_runs | id, consultation_id FK, request_id, kind, request_hash, state, created_at, finished_at, response_json | UNIQUE(consultation_id, request_id); 실행·완료·실패와 중복 응답 |
 | results | id, consultation_id nullable FK, owner_user_id nullable FK, request_run_id nullable FK, question_record_id nullable FK, input_snapshot_json, payload_json, created_at, retained_until | 양쪽 결과 저장, 회원 이력 |
 | messages | id, consultation_id FK, request_run_id FK, role, content, citations_json, created_at | UNIQUE(request_run_id, role); 단기 대화 |
+| chat_usage | id, owner_user_id FK, created_at | 상담 삭제와 독립된 사용량 예약; 다음 예약 검사에서 2일보다 오래된 행 정리 |
 | question_records | id, consultation_id nullable FK, owner_user_id nullable FK, origin_key UNIQUE, kind, catalog_version, answers_json, masked_question, retrieval_meta_json, created_at, retained_until | 3~5년 정제 질문·통계 원본 |
 | knowledge_sets | id, catalog_version FK, status, embedding_model, embedding_dimensions, manifest_json, published_at | BUILDING/PUBLISHED/WITHDRAWN, 지식 묶음 |
 | knowledge_documents | id, knowledge_set_id FK, source_key, version_label, kind, title, url, normalized_text, content_hash, scope_json, effective_date, reviewed_at, review_until, reviewer_key, status, withdrawn_at, withdrawal_reason | 원문 버전·승인·적용 조건 |
@@ -33,7 +34,7 @@ consultations는 회원 소유 ID와 익명 토큰 해시 중 정확히 하나�
 
 request_runs는 영속 작업 큐가 아니다. lease·attempt·자동 재처리 없이 같은 요청의 완료 응답만 재생한다. 상태는 PROCESSING/COMPLETED/FAILED/DELETED이며 실패·삭제된 요청은 재실행하지 않는다. DELETED는 본문 없는 재실행 차단 기록이며 세부 정책은 03을 따른다.
 
-목표 CHECK는 PROCESSING이면 finished_at·response_json 모두 null, COMPLETED이면 둘 다 NOT NULL, FAILED 또는 DELETED이면 finished_at NOT NULL·response_json null이다. M03 구현에는 아직 DELETED가 없으므로 M06에서 최초 migration을 수정하지 않고 새 migration으로 상태·응답 제약을 확장한다.
+목표 CHECK는 PROCESSING이면 finished_at·response_json 모두 null, COMPLETED이면 둘 다 NOT NULL, FAILED 또는 DELETED이면 finished_at NOT NULL·response_json null이다. M06의 새 migration 0003_m06에서 DELETED와 상태·응답 제약을 확장했다.
 
 검토 전 원문과 전체 문장 정리는 접근 제한된 파일·검토표로 관리한다. COMPLETE_VERIFIED를 확인한 정리본만 DB의 BUILDING 지식 묶음에 청킹·임베딩한다. manifest_json에 범위·검토자·완전성·실제 별표·모델을 기록하고 모두 확인한 뒤 게시한다.
 
@@ -122,7 +123,7 @@ pgvector는 정확 검색을 기본으로 제공한다. 근사 인덱스 도입�
 
 백업은 한 DB의 pg_dump와 검토 파일을 대상으로 한다. 정적 이미지·볼륨 자체를 백업으로 오인하지 않는다. 복원 시 최신 삭제 로그를 확보해 retained_until·단기 만료·명시적 삭제를 적용한 뒤 서비스를 연결한다. 삭제 로그 최신본은 DB 백업과 별도로 작은 암호화 파일로 보관하며 전용 복제 서비스는 두지 않는다. 상세 절차는 06을 따른다.
 
-빈 DB와 기존 스키마에서 Alembic을 검증한다. 확장 설치·DB 준비 뒤 migration을 한 번 실행하고 API의 각 시작마다 경쟁 실행하지 않는다. M03에서 12개 테이블과 최초 migration을 구현하고 실제 PostgreSQL + pgvector의 빈 개발/시험 DB에서 검증했다. M08A 카탈로그와 M09 지식 49개 청크를 로컬 개발 DB에 게시했다. 현재 migration head는 0004_m09이며 게시 지식 묶음·원문·청크의 변경/삭제를 차단하고 명시적 철회만 허용한다. [M09 명령과 검증](12-knowledge-publication.md)을 따른다. pg_dump 백업·복원과 보존 정리 명령은 M11에서 구현한다.
+빈 DB와 기존 스키마에서 Alembic을 검증한다. 확장 설치·DB 준비 뒤 migration을 한 번 실행하고 API의 각 시작마다 경쟁 실행하지 않는다. M03에서 12개 테이블과 최초 migration을 구현하고 실제 PostgreSQL + pgvector의 빈 개발/시험 DB에서 검증했다. M08A 카탈로그와 M09 지식 49개 청크를 로컬 개발 DB에 게시했다. 현재 migration head는 0005_m10이며 게시 지식 묶음·원문·청크의 변경/삭제를 차단하고 명시적 철회만 허용한다. M10은 질문 내용 없이 회원 ID·예약 시각만 저장하는 chat_usage를 추가해 상담 삭제/재시작으로 사용량 한도가 초기화되지 않게 한다. [M09 명령과 검증](12-knowledge-publication.md) 및 [M10 사용량·저장](13-member-chat.md)을 따른다. pg_dump 백업·복원과 보존 정리 명령은 M11에서 구현한다.
 
 ## 8. 인수 조건
 

@@ -4,7 +4,7 @@
 
 ## 설정과 준비
 
-실제 서버 설정은 Git/Docker 빌드에서 제외된 `.env`에 둔다. 키를 명령 인자·브라우저·기록 파일·로그로 출력하지 않는다. 생성 모델은 사용자 지정 `gpt-5.4-mini`, 임베딩은 `text-embedding-3-large`·1536차원이다. 생성 모델 호출은 M10에서 연결한다. 예시 환경은 OPENAI_ENABLED=false를 유지하며 현재 검증한 로컬 `.env`는 true다.
+실제 서버 설정은 Git/Docker 빌드에서 제외된 `.env`에 둔다. 키를 명령 인자·브라우저·기록 파일·로그로 출력하지 않는다. 생성 모델은 사용자 지정 `gpt-5.4-mini`, 임베딩은 `text-embedding-3-large`·1536차원이다. 생성 모델 호출은 [M10](13-member-chat.md)에서 연결했다. 예시 환경은 OPENAI_ENABLED=false를 유지하며 현재 검증한 로컬 `.env`는 true다.
 
 large의 기본 3072차원을 그대로 쓰지 않고 요청에 dimensions=1536을 명시한다. 문서·질문 모델과 차원이 같아야 한다. 변경된 본문은 새 임베딩, 변경된 검토/연결은 새 릴리스로 처리한다. 동일 본문 해시·본문·모델·차원의 벡터는 재사용한다. 사용자의 요청에 따라 총비용 상한은 없으며 한 요청 최대 32개 입력, 입력별 UTF-8 8191바이트의 보수적 한도, 문서 30초·질문 5초 timeout, HTTP 자동 재시도 없음은 유지한다. 큰 조문은 자르지 않고 별도 분할 검토를 요구한다.
 
@@ -12,7 +12,7 @@ large의 기본 3072차원을 그대로 쓰지 않고 요청에 dimensions=1536�
 
 ## 관리 명령
 
-MIGRATION_HEAD `0004_m09`를 먼저 적용한다. 기존 데이터가 있는 DB에 downgrade를 하지 않는다. 앱 이미지에 원문/키/벡터를 넣지 않으며 필요할 때만 원문을 읽기 전용 마운트한다. 아래 경로는 현재 Windows 체크아웃 기준으로 다른 환경에서는 변경한다.
+현재 MIGRATION_HEAD `0005_m10`을 먼저 적용한다. 지식 불변성은 `0004_m09`에서 추가했다. 기존 데이터가 있는 DB에 downgrade를 하지 않는다. 앱 이미지에 원문/키/벡터를 넣지 않으며 필요할 때만 원문을 읽기 전용 마운트한다. 아래 경로는 현재 Windows 체크아웃 기준으로 다른 환경에서는 변경한다.
 
 ```sh
 docker compose --env-file .env -f compose.yaml -f compose.admin.yaml run --rm --no-deps api python -m alembic upgrade head

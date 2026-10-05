@@ -121,7 +121,7 @@ async def seed_knowledge(session, *, published=True):
     return knowledge, document, chunk
 
 
-async def test_real_schema_has_twelve_tables_vector_and_limited_app_role(pg_database):
+async def test_real_schema_has_thirteen_tables_vector_and_limited_app_role(pg_database):
     async with pg_database.engine.connect() as connection:
         tables = await connection.run_sync(lambda sync: inspect(sync).get_table_names())
         assert set(tables) == set(Base.metadata.tables) | {"alembic_version"}

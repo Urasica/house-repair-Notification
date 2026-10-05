@@ -13,7 +13,6 @@ from app.db.models import Consultation, QuestionRecord, Result
 from app.db.requests import RequestRepository, request_fingerprint
 from app.domain.constants import ErrorCode, RequestKind, RequestStatus
 from app.schemas.contracts import (
-    ChatResponse,
     Context,
     ContextUpdate,
     ErrorResponse,
@@ -26,6 +25,7 @@ from app.schemas.contracts import (
     SessionCreated,
 )
 from app.services.catalog import require_latest_catalog
+from app.services.chat import replay_chat
 from app.services.consultations import check_revision, latest_knowledge, pinned_catalog, session_dto
 from app.services.deletion import delete_questions, delete_result, log_deletion
 from app.services.guidance import add_years, result_dto, unavailable_result
@@ -271,7 +271,7 @@ async def get_request(consultation_id: UUID, request_id: UUID, request: Request)
             payload = (
                 await replay_result(session, row.response_json)
                 if row.kind == RequestKind.SURVEY
-                else ChatResponse.model_validate(row.response_json)
+                else await replay_chat(session, row, request.app.state.settings)
             )
         return RequestState(
             request_id=request_id,

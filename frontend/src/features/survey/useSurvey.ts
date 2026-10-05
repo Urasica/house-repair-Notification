@@ -17,7 +17,7 @@ export function useSurvey() {
     if (!reference) return
     const expire = () => {
       clearSession(reference)
-      client.removeQueries({ predicate: q => ['session', 'result', 'questions'].includes(String(q.queryKey[0])) && q.queryKey[1] === reference.id })
+      client.removeQueries({ predicate: q => ['session', 'result', 'questions', 'chat'].includes(String(q.queryKey[0])) && q.queryKey[1] === reference.id })
     }
     if (query.error instanceof ApiError && ['UNAUTHORIZED', 'SESSION_EXPIRED', 'NOT_FOUND'].includes(query.error.code)) { expire(); return }
     const unavailable = (event: Event) => { if ((event as CustomEvent<{ id: string }>).detail.id === reference.id) expire() }

@@ -194,8 +194,8 @@ async def test_embedding_off_and_oversize_never_call_network():
         await Embeddings(settings, transport=httpx.MockTransport(forbidden)).embed(["한" * 3000])
 
 
-async def seed_release(session, kind="LAW_CRITERIA", operation=False):
-    catalog = await seed_catalog(session, published=True)
+async def seed_release(session, kind="LAW_CRITERIA", operation=False, catalog=None):
+    catalog = catalog or await seed_catalog(session, published=True)
     now = datetime.now(UTC)
     release = KnowledgeSet(
         catalog_version=catalog.version,

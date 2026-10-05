@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 from uuid import uuid4
@@ -9,6 +10,7 @@ from fastapi.openapi.utils import get_openapi
 from starlette.exceptions import HTTPException
 
 from app.api.v1.auth import router as auth_router
+from app.api.v1.chat import router as chat_router
 from app.api.v1.history import router as history_router
 from app.api.v1.sessions import router as sessions_router
 from app.auth.access import guard_member_path
@@ -26,6 +28,7 @@ from app.db.session import Database
 from app.schemas.catalog import Catalog, Question
 from app.schemas.contracts import CONTRACT_MODELS, ErrorResponse, Readiness
 from app.services.catalog import get_catalog
+from app.services.chat import chat_response
 from app.services.guidance import evaluate_survey
 from app.services.locks import ConsultationLocks
 from app.services.readiness import get_readiness
@@ -59,6 +62,7 @@ def create_app(settings: Settings | None = None, database: Database | None = Non
     app.state.auth_rate_limiter = AuthRateLimiter()
     app.state.consultation_locks = ConsultationLocks()
     app.state.question_deletion_locks = ConsultationLocks()
+    app.state.chat_budget_lock = asyncio.Lock()
 
     async def survey_evaluator(snapshot, catalog, runtime_settings):
         return await evaluate_survey(
@@ -66,6 +70,11 @@ def create_app(settings: Settings | None = None, database: Database | None = Non
         )
 
     app.state.evaluate_survey = survey_evaluator
+
+    async def chat_evaluator(*args, **kwargs):
+        return await chat_response(*args, **kwargs, database=app.state.database)
+
+    app.state.chat_response = chat_evaluator
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.web_origins,
@@ -140,6 +149,7 @@ def create_app(settings: Settings | None = None, database: Database | None = Non
     app.include_router(auth_router)
     app.include_router(sessions_router)
     app.include_router(history_router)
+    app.include_router(chat_router)
     app.openapi = openapi_contract
     return app
 

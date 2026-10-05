@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     deletion_log_retention_days: int = Field(default=15, ge=15)
     survey_timeout_seconds: int = Field(default=10, ge=1, le=10)
     chat_timeout_seconds: int = Field(default=25, ge=1, le=25)
+    chat_user_window_limit: int = Field(default=20, ge=1, le=100)
+    chat_daily_limit: int = Field(default=100, ge=1, le=10000)
+    chat_max_output_tokens: int = Field(default=4096, ge=512, le=8192)
 
     @property
     def auth_cookie_name(self) -> str:

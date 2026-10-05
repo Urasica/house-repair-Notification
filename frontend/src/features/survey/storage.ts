@@ -41,6 +41,7 @@ export function storeSession(session: Session, token: string | null) {
 export function clearSession(reference: SessionRef) {
   sessionStorage.removeItem(reference.mode === 'MEMBER' ? MEMBER_KEY : GUEST_KEY)
   clearPending(reference.id)
+  sessionStorage.removeItem('chat-pending-' + reference.id)
   changed()
 }
 
@@ -50,7 +51,7 @@ export function resetSurveyIdentity() {
   sessionStorage.removeItem(GUEST_KEY)
   for (let index = sessionStorage.length - 1; index >= 0; index--) {
     const key = sessionStorage.key(index)
-    if (key?.startsWith('survey-pending-')) sessionStorage.removeItem(key)
+    if (key?.startsWith('survey-pending-') || key?.startsWith('chat-pending-')) sessionStorage.removeItem(key)
   }
   changed()
 }

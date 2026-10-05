@@ -1,0 +1,220 @@
+"""Member chat policy, minimal external projection, and historical validity."""
+
+import asyncio
+import re
+from datetime import UTC, datetime
+from types import SimpleNamespace
+from uuid import uuid4
+
+from app.db.models import Consultation
+from app.domain.constants import DISCLAIMER, INSUFFICIENT_INFORMATION_MESSAGE, GuidanceStatus
+from app.schemas.contracts import ChatMessage, ChatResponse
+from app.services.embeddings import Embeddings, EmbeddingUnavailable
+from app.services.generation import PROMPT_VERSION, GenerationUnavailable, Responses, annex_texts
+from app.services.guidance import evaluate_survey
+from app.services.retrieval import question_purpose, retrieve, revalidate_citations
+
+
+def project_question(content):
+    """Allowlist only purpose and explicit legal locators; no regex-only PII promise."""
+    locators = re.findall(r"제\s*\d{1,3}\s*조(?:의\s*\d{1,2})?|별표\s*\d{1,2}", content)
+    return question_purpose(content) + " " + " ".join(dict.fromkeys(locators))
+
+
+def fallback(response):
+    return response.model_copy(
+        update={
+            "answer_mode": "TEMPLATE",
+            "status": GuidanceStatus.NEED_CONFIRMATION,
+            "follow_up_questions": [],
+            "assistant_message": response.assistant_message.model_copy(
+                update={"content": INSUFFICIENT_INFORMATION_MESSAGE, "citations": []}
+            ),
+        }
+    )
+
+
+def citation_check(response, snapshot):
+    return SimpleNamespace(
+        citations=response.assistant_message.citations,
+        knowledge_release_id=snapshot.knowledge_release_id,
+        catalog_version=snapshot.catalog_version,
+    )
+
+
+async def chat_response(
+    snapshot,
+    catalog,
+    settings,
+    content,
+    request_id,
+    recent,
+    *,
+    database,
+    embeddings=None,
+    generator=None,
+    deadline=None,
+):
+    base = await evaluate_survey(snapshot, catalog, settings)
+    now = datetime.now(UTC)
+    response = ChatResponse(
+        request_id=request_id,
+        context_revision=snapshot.revision,
+        answer_mode="CLARIFY" if base.status == "NEED_MORE_INFO" else "TEMPLATE",
+        status=base.status,
+        user_message=ChatMessage(
+            id=uuid4(),
+            request_id=request_id,
+            role="USER",
+            content=content,
+            citations=[],
+            created_at=now,
+            is_current=True,
+        ),
+        assistant_message=ChatMessage(
+            id=uuid4(),
+            request_id=request_id,
+            role="ASSISTANT",
+            content="\n".join(base.guidance),
+            citations=[],
+            created_at=now,
+            is_current=True,
+        ),
+        follow_up_questions=base.follow_up_questions,
+        disclaimer=DISCLAIMER,
+        is_current=True,
+    )
+    # A conservative interruption, never a diagnosis or an inferred repair rule.
+    if re.search(r"가스\s*(?:냄새|누출)|불꽃|불이\s*났|감전|붕괴|떨어지고", content):
+        return response.model_copy(
+            update={
+                "status": GuidanceStatus.SAFETY_PRIORITY,
+                "answer_mode": "TEMPLATE",
+                "follow_up_questions": [],
+                "assistant_message": response.assistant_message.model_copy(
+                    update={
+                        "content": "일반 보수 안내보다 안전 확인이 우선이에요. "
+                        "관리사무소 또는 담당 기관에 직접 문의해 주세요."
+                    }
+                ),
+            }
+        )
+    if (
+        base.status != "NEED_CONFIRMATION"
+        or not snapshot.knowledge_release_id
+        or not settings.openai_enabled
+    ):
+        return response
+    purpose = question_purpose(content)
+    # Free text and raw conversation never leave the server. Selected labels are reviewed.
+    query = " · ".join(
+        [
+            project_question(content),
+            base.summary.housing_label,
+            base.summary.room_label,
+            base.summary.facility_label,
+            base.summary.symptom_label,
+            *base.summary.answer_labels,
+        ]
+    )
+    loop = asyncio.get_running_loop()
+    deadline = deadline or loop.time() + settings.chat_timeout_seconds - 2
+    try:
+        async with asyncio.timeout_at(deadline):
+            vector = (
+                await (embeddings or Embeddings(settings)).embed(
+                    [query], timeout=min(5, max(0.01, deadline - loop.time()))
+                )
+            ).vectors[0]
+            async with database.session() as session:
+                found = await retrieve(
+                    session,
+                    snapshot.knowledge_release_id,
+                    vector,
+                    settings,
+                    snapshot.context,
+                    purpose=purpose,
+                    question=content,
+                    catalog_version=snapshot.catalog_version,
+                )
+            response = response.model_copy(
+                update={
+                    "status": GuidanceStatus(found.status),
+                    "assistant_message": response.assistant_message.model_copy(
+                        update={
+                            "content": "\n".join(
+                                found.guidance + [INSUFFICIENT_INFORMATION_MESSAGE]
+                            ),
+                            "citations": found.citations(),
+                        }
+                    ),
+                }
+            )
+            if found.status != "GUIDANCE_AVAILABLE":
+                return response
+            statements = await (generator or Responses(settings)).generate(
+                query, recent, found, purpose, timeout=min(20, max(0.01, deadline - loop.time()))
+            )
+            prefix = (
+                "질문과 관련된 법령 원문이에요. 조문의 조건과 단서를 함께 확인해 주세요. "
+                "연결된 별표와 총칙·부칙도 함께 적용되며, "
+                "LH 보수·비용·교체 판단을 뜻하지 않아요.\n\n"
+                if purpose == "LAW_EXPLANATION"
+                else "검토된 운영 안내예요.\n\n"
+            )
+            return response.model_copy(
+                update={
+                    "answer_mode": "GROUNDED",
+                    "assistant_message": response.assistant_message.model_copy(
+                        update={"content": prefix + "\n\n".join(statements + annex_texts(found))}
+                    ),
+                }
+            )
+    except (EmbeddingUnavailable, GenerationUnavailable, TimeoutError):
+        return fallback(response)
+
+
+def stored_response(response, snapshot, settings):
+    return {
+        **response.model_dump(mode="json", by_alias=True),
+        "_meta": {
+            "engine": PROMPT_VERSION,
+            "model": settings.openai_chat_model,
+            "catalog": snapshot.catalog_version,
+            "release": str(snapshot.knowledge_release_id)
+            if snapshot.knowledge_release_id
+            else None,
+        },
+    }
+
+
+async def replay_chat(session, run, settings):
+    payload = run.response_json
+    response = ChatResponse.model_validate({k: v for k, v in payload.items() if k != "_meta"})
+    meta = payload.get("_meta", {})
+    row = await session.get(Consultation, run.consultation_id)
+    current = bool(
+        row
+        and row.expires_at > datetime.now(UTC)
+        and row.revision == response.context_revision
+        and meta.get("engine") == PROMPT_VERSION
+        and meta.get("catalog") == row.catalog_version
+        and meta.get("release") == (str(row.knowledge_set_id) if row.knowledge_set_id else None)
+        and (response.answer_mode != "GROUNDED" or meta.get("model") == settings.openai_chat_model)
+    )
+    if current and response.assistant_message.citations:
+        snapshot = SimpleNamespace(
+            knowledge_release_id=row.knowledge_set_id, catalog_version=row.catalog_version
+        )
+        current = await revalidate_citations(
+            session, citation_check(response, snapshot), settings, lock=False
+        )
+    return response.model_copy(
+        update={
+            "is_current": current,
+            "user_message": response.user_message.model_copy(update={"is_current": current}),
+            "assistant_message": response.assistant_message.model_copy(
+                update={"is_current": current}
+            ),
+        }
+    )

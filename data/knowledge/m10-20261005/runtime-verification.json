@@ -1,0 +1,25 @@
+{
+  "verifiedAt": "2026-10-05T07:24:36.122109+00:00",
+  "readiness": {
+    "status": "ok",
+    "catalogReady": true,
+    "ragReady": true
+  },
+  "answerMode": "GROUNDED",
+  "status": "GUIDANCE_AVAILABLE",
+  "locators": [
+    "제10조",
+    "별표 2"
+  ],
+  "annexFootnotePresent": true,
+  "sameRequestReplay": true,
+  "historyRestored": true,
+  "requestStateRestored": true,
+  "staleAfterContextChange": true,
+  "syntheticConversationRemoved": true,
+  "cleanup": {
+    "syntheticAccountsPreserved": 3,
+    "leftoverConsultationsRemoved": 1,
+    "authSessionsCleared": true
+  }
+}
