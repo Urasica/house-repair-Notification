@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+from time import perf_counter
 from uuid import uuid4
 
 from fastapi import FastAPI, Query, Request
@@ -24,6 +25,7 @@ from app.core.errors import (
     unexpected_error_handler,
     validation_error_handler,
 )
+from app.core.observability import log_http
 from app.db.session import Database
 from app.schemas.catalog import Catalog, Question
 from app.schemas.contracts import CONTRACT_MODELS, ErrorResponse, Readiness
@@ -89,6 +91,7 @@ def create_app(settings: Settings | None = None, database: Database | None = Non
 
     @app.middleware("http")
     async def request_metadata(request: Request, call_next):
+        started = perf_counter()
         request.state.trace_id = uuid4()
         try:
             await guard_member_path(request)
@@ -105,6 +108,7 @@ def create_app(settings: Settings | None = None, database: Database | None = Non
         response.headers["X-Trace-Id"] = str(request.state.trace_id)
         if request.url.path.startswith(("/api/", "/health/")):
             response.headers["Cache-Control"] = "no-store"
+        log_http(request, response.status_code, perf_counter() - started)
         return response
 
     @app.get("/health/live", operation_id="getLive")

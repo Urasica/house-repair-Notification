@@ -2,6 +2,8 @@
 
 개발 실행: [로컬 실행과 검증](docs/10-local-development.md) · 설계: [전체 안내](docs/README.md) · 진행: [MVP 작업](progress/README.md)
 
+Windows 테스트 배포: `test-deploy.bat` → `https://localhost:18880`(로컬 인증서), 종료: `stop-test-deploy.bat`. 외부 터널은 `-Tunnel`을 명시한 경우만 시작합니다. [M12 실행·운영 배포 안내](docs/15-deployment.md).
+
 LH 공공주택 입주민이 집 안의 불편이나 하자를 쉽게 설명하고, 보수 관련 기준과 문의할 내용을 확인할 수 있도록 돕는 웹 서비스입니다. 이 문서는 상세 설계가 아닌 서비스 방향과 UI 시안 구성을 정리한 초안입니다.
 
 ## 배경

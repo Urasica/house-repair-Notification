@@ -1,0 +1,9 @@
+# Combine base + prod + deletions + preview. Credentials/volumes use repair-guide-preview.
+services:
+  web:
+    command: [caddy, run, --config, "/etc/caddy/${PREVIEW_CADDYFILE:-Caddyfile.tunnel}", --adapter, caddyfile]
+    ports: !override
+      - "127.0.0.1:${PREVIEW_PORT:-18880}:${PREVIEW_TARGET_PORT:-80}"
+  api:
+    environment:
+      WEB_ORIGINS: ${WEB_ORIGINS:?Set the exact tunnel HTTPS origin}

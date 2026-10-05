@@ -1,0 +1,29 @@
+# Only the local cloudflared connector reaches this loopback-published HTTP origin.
+:80 {
+    encode zstd gzip
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy no-referrer
+        X-Frame-Options DENY
+        X-Robots-Tag "noindex, nofollow"
+    }
+    request_body {
+        max_size 64KB
+    }
+    @api path /api/* /health/*
+    handle @api {
+        reverse_proxy api:8000 {
+            header_up X-Forwarded-Proto https
+            # Caddy ignores untrusted incoming X-Forwarded-For. Keep that default:
+            # a shared tunnel-IP auth bucket is safer than trusting caller headers.
+            transport http {
+                response_header_timeout 40s
+            }
+        }
+    }
+    handle {
+        root * /srv
+        try_files {path} /index.html
+        file_server
+    }
+}

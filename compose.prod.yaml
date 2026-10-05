@@ -1,9 +1,31 @@
 services:
+  db:
+    image: repair-guide-db:${RELEASE_TAG:?Set an immutable RELEASE_TAG}
+    build: ./docker/db
+    volumes: !override
+      - database:/var/lib/postgresql
+    logging: &logging
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
+  api:
+    image: repair-guide-api:${RELEASE_TAG:?Set an immutable RELEASE_TAG}
+    build:
+      context: ./backend
+      target: production
+    environment:
+      APP_ENV: production
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    logging: *logging
   web:
+    image: repair-guide-web:${RELEASE_TAG:?Set an immutable RELEASE_TAG}
+    command: [caddy, run, --config, /etc/caddy/Caddyfile.prod, --adapter, caddyfile]
     ports: !override
       - "80:80"
       - "443:443"
     environment:
       PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:?Set PUBLIC_DOMAIN}
-    volumes:
-      - ./frontend/Caddyfile.prod:/etc/caddy/Caddyfile:ro
+    logging: *logging

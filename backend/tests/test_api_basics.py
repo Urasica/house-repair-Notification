@@ -1,4 +1,6 @@
+import json
 from contextlib import asynccontextmanager
+from unittest.mock import patch
 
 import httpx
 import pytest
@@ -64,6 +66,26 @@ async def test_unknown_api_route_does_not_return_frontend_html(client):
     response = await client.get("/api/v1/missing")
     assert response.status_code == 404
     assert response.json()["error"]["code"] == "NOT_FOUND"
+
+
+async def test_request_logs_exclude_raw_urls_headers_and_identifiers(client):
+    with patch("app.core.observability.logger.info") as log:
+        response = await client.get(
+            "/api/v1/private-email@example.com?token=secret-query",
+            headers={"Authorization": "Bearer secret-token", "Cookie": "secret-cookie"},
+        )
+    event = json.loads(log.call_args.args[0])
+    assert event["route"] == "unmatched"
+    assert event["status"] == 404
+    assert event["traceId"] == response.headers["x-trace-id"]
+    assert event["durationMs"] >= 0
+    assert "secret" not in str(event)
+    assert "example.com" not in str(event)
+    with patch("app.core.observability.logger.info") as log:
+        await client.get("/api/v1/catalog?version=private-version")
+    event = json.loads(log.call_args.args[0])
+    assert event["route"] == "/api/v1/catalog"
+    assert "private-version" not in str(event)
 
 
 async def test_missing_catalog_version_is_not_found(client):

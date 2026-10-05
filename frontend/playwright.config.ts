@@ -1,5 +1,11 @@
 import { defineConfig, devices } from '@playwright/test'
 
+const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:18080'
+const allowLocalCertificate = process.env.E2E_ALLOW_SELF_SIGNED === 'true'
+if (allowLocalCertificate && new URL(baseURL).hostname !== 'localhost') {
+  throw new Error('Self-signed certificate bypass is restricted to localhost')
+}
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
@@ -8,6 +14,6 @@ export default defineConfig({
   timeout: 45000,
   outputDir: '../artifacts/playwright',
   reporter: [['list']],
-  use: { baseURL: 'http://localhost:18080', trace: 'retain-on-failure' },
+  use: { baseURL, ignoreHTTPSErrors: allowLocalCertificate, trace: 'retain-on-failure' },
   projects: [{ name: 'chromium-mobile', use: { ...devices['Desktop Chrome'], viewport: { width: 360, height: 800 } } }],
 })

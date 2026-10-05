@@ -97,7 +97,7 @@ M05의 카탈로그 명령·검토·게시본 불변성·질문 정책은 [카�
 
 ## 5. 운영 설정
 
-compose.prod.yaml은 도메인·80/443·Caddy HTTPS를 적용한다. 운영 비밀·도메인·백업 준비와 실제 배포는 M12에서 확인한다. .env에는 APP_ENV=production, 고유 앱/관리자 DB 비밀번호, HTTPS WEB_ORIGINS, PUBLIC_DOMAIN을 지정한다.
+compose.prod.yaml은 도메인·80/443·Caddy HTTPS와 이미지 버전 고정을 적용한다. 실제 운영 설정은 개발 .env와 분리된 .env.production에 APP_ENV=production, 고유 앱/관리자 DB 비밀번호, HTTPS WEB_ORIGINS, PUBLIC_DOMAIN, RELEASE_TAG를 지정한다. M12의 Windows BAT·로컬 HTTPS·선택 터널과 운영 인수 절차는 [배포 안내](15-deployment.md)를 따른다.
 
 ```sh
 docker compose --env-file .env -f compose.yaml -f compose.prod.yaml config --quiet

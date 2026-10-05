@@ -1,12 +1,14 @@
 # Explicit one-shot profile. Remote directory must be an already-mounted remote filesystem.
 services:
   ops:
+    image: repair-guide-ops:${RELEASE_TAG:-local}
     profiles: [ops]
     build:
       context: ./backend
       dockerfile: Dockerfile.ops
     environment:
       APP_ENV: ${APP_ENV:-development}
+      WEB_ORIGINS: ${WEB_ORIGINS:-["http://localhost:8080"]}
       DATABASE_URL: ${MIGRATION_DATABASE_URL:?Set MIGRATION_DATABASE_URL}
       BACKUP_KEY: ${BACKUP_KEY:?Set a separate Fernet BACKUP_KEY}
       BACKUP_SCOPE: ${BACKUP_SCOPE:-repair-guide}

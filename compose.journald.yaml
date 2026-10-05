@@ -1,0 +1,13 @@
+# Linux production host only. Apply the host journal policy before using this overlay.
+services:
+  db:
+    logging: &journal
+      driver: journald
+      options: !override
+        tag: repair-guide
+  api:
+    logging: *journal
+  web:
+    logging: *journal
+  ops:
+    logging: *journal

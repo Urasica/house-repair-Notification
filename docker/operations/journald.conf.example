@@ -1,0 +1,8 @@
+# Dedicated Linux host: /etc/systemd/journald.conf.d/repair-guide.conf
+# Applies to the entire host journal. Review existing host policies before installing.
+[Journal]
+Storage=persistent
+MaxRetentionSec=14day
+MaxFileSec=1day
+SystemMaxUse=1G
+SystemKeepFree=2G

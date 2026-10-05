@@ -1,5 +1,5 @@
 # One-shot maintenance image; not an additional running service.
-FROM pgvector/pgvector:0.8.7-pg18-trixie
+FROM pgvector/pgvector:0.8.7-pg18-trixie@sha256:9d9c930220cb9bf2f956d10a8f909cf9973d9672ca0278aef2c1e6facccad2e0
 RUN apt-get update && apt-get install -y --no-install-recommends python3-venv \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
