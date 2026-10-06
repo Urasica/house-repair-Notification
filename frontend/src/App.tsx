@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, Route, Routes, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Route, Routes, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { ApiError } from './api/client'
 import { logout } from './features/auth/api'
@@ -41,8 +41,8 @@ export default function App() {
     <header className="topbar">
       <Link className="brand" to="/"><span className="brand-mark" aria-hidden="true">⌂</span> 우리집 보수 길잡이</Link>
       <nav aria-label="이용 메뉴">
-        <Link to="/chat">챗봇</Link><Link to="/history">이전 결과</Link>
-        {auth.data?.user && !auth.isError ? <button className="nav-button" disabled={leaving} onClick={() => void leave()}>로그아웃</button> : <Link to="/login">로그인</Link>}
+        <NavLink to="/chat">챗봇</NavLink><NavLink to="/history">이전 결과</NavLink>
+        {auth.data?.user && !auth.isError ? <button className="nav-button" disabled={leaving} onClick={() => void leave()}>로그아웃</button> : <NavLink to="/login">로그인</NavLink>}
       </nav>
     </header>
     {message && <p role="alert">{message}</p>}

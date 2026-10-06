@@ -28,7 +28,8 @@ async function survey(page: Page) {
   }
   await accessible(page)
   await page.getByRole('button', { name: '안내 결과 확인', exact: true }).click()
-  await expect(page).toHaveURL(/\/result\//)
+  // The live search path can exceed the default 5s assertion; the API client allows 15s.
+  await expect(page).toHaveURL(/\/result\//, { timeout: 15000 })
   await accessible(page)
 }
 
