@@ -12,7 +12,7 @@ export function safeReturnPath(path: unknown): string {
 export async function replaceAuth(client: QueryClient, state: AuthState) {
   resetSurveyIdentity()
   await client.cancelQueries()
-  client.clear()
+  client.removeQueries({ predicate: query => query.queryKey[0] !== AUTH_KEY[0] })
   client.setQueryData(AUTH_KEY, state)
 }
 

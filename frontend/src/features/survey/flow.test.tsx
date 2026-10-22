@@ -291,6 +291,14 @@ it('starts a new member consultation without transferring a guest consultation w
   expect((call[1] as RequestInit).body).not.toContain(testToken)
   expect(current.context.answers).toEqual({})
 })
+it('opens member history after signing in at its guest gate without reloading', async () => {
+  await render('/history')
+  await until(() => expect(host.textContent).toContain('로그인 후 이용해 주세요'))
+  isMember = true
+  await act(async () => replaceAuth(client, member))
+  await until(() => expect(host.querySelectorAll('.history-list li')).toHaveLength(1))
+  expect(host.textContent).not.toContain('정보를 확인하고 있어요')
+})
 it('loads member history pages and deletes only question records with CSRF', async () => {
   isMember = true; current = filledSession(true); result = resultFixture(current)
   await render('/history')
