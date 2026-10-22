@@ -125,6 +125,7 @@ textarea { resize: vertical; }
 .chat-panel form { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); }
 .chat-panel form > label { font-weight: 700; }
 .chat-panel textarea { display: block; margin-top: 8px; }
+.chat-panel select { display: block; width: 100%; min-height: 44px; margin-block: 12px; font: inherit; }
 @media (max-width: 850px) {
   .topbar { gap: 16px; }
   .topbar nav { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }

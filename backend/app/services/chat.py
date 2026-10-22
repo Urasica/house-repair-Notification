@@ -13,6 +13,7 @@ from app.services.chat_context import chat_policy
 from app.services.embeddings import Embeddings, EmbeddingUnavailable
 from app.services.generation import PROMPT_VERSION, GenerationUnavailable, Responses, annex_texts
 from app.services.retrieval import question_purpose, retrieve, revalidate_citations
+from app.services.survey_policy import survey_policy
 
 
 def project_question(content):
@@ -85,7 +86,12 @@ async def chat_response(
         is_current=True,
     )
     # A conservative interruption, never a diagnosis or an inferred repair rule.
-    if re.search(
+    survey = (
+        survey_policy(catalog, snapshot.context)
+        if snapshot.context.room_id and snapshot.context.facility_id and snapshot.context.symptom_id
+        else None
+    )
+    if (survey and survey.status == GuidanceStatus.SAFETY_PRIORITY) or re.search(
         r"가스\s*(?:냄새|누출)|타는\s*냄새|연기|스파크|불꽃|불이\s*났|감전|붕괴|떨어지고", content
     ):
         return response.model_copy(
@@ -117,6 +123,12 @@ async def chat_response(
         ("symptom_id", catalog.symptoms),
     ]:
         labels.extend(item.label for item in items if item.id == getattr(snapshot.context, field))
+    for question in survey.questions if survey else []:
+        labels.extend(
+            f"{question.label}: {option.label}"
+            for option in question.options
+            if option.value == survey.context.answers.get(question.question_id)
+        )
     query = " · ".join([project_question(content), *labels])
     loop = asyncio.get_running_loop()
     deadline = deadline or loop.time() + settings.chat_timeout_seconds - 2

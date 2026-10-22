@@ -127,7 +127,7 @@ async def own_result(
 
 async def guard_member_path(request: Request):
     path = request.url.path
-    chat = re.fullmatch(r"/api/v1/sessions/([^/]+)/chat/messages", path)
+    chat = re.fullmatch(r"/api/v1/sessions/([^/]+)/chat/(?:messages|survey-context)", path)
     history = re.fullmatch(r"/api/v1/me/(?:results(?:/[^/]+)?|question-records)", path)
     if not chat and not history:
         return

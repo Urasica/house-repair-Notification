@@ -62,6 +62,11 @@ class ChatRequest(EvaluationRequest):
         return value
 
 
+class ChatSurveyImport(APIModel):
+    result_id: UUID
+    expected_revision: int = Field(ge=0)
+
+
 class Session(APIModel):
     id: UUID
     purpose: SessionPurpose = SessionPurpose.SURVEY

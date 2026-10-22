@@ -17,7 +17,7 @@ from test_knowledge import seed_release
 from test_knowledge_runtime import FakeEmbedding
 from test_m08a_catalog import CATALOG
 
-from app.db.models import ChatUsage, Consultation, Message, QuestionRecord
+from app.db.models import ChatUsage, Consultation, Message, QuestionRecord, Result, User
 from app.schemas.contracts import Context, Session
 from app.services.chat import chat_response
 from app.services.chat_context import chat_policy, confirmed_context
@@ -38,6 +38,138 @@ def test_chat_confirms_own_context_without_survey_answers():
     unknown = confirmed_context(Context(), "모르겠어요", CATALOG)
     status, questions, _ = chat_policy(unknown, "모르겠어요")
     assert unknown.housing_type == "UNKNOWN" and status == "NEED_CONFIRMATION" and not questions
+
+
+def test_everyday_leakage_is_confirmed_without_catalog_phrasing_or_negative_guessing():
+    context = confirmed_context(
+        Context(), "LH 건설임대주택이에요. 주방 싱크대 아래 배관에서 물이 새요.", CATALOG
+    )
+    assert (context.room_id, context.facility_id, context.symptom_id) == ("kitchen", "pipe", "leak")
+    assert chat_policy(context, "어떻게 하나요?")[0] == "NEED_CONFIRMATION"
+    negative = confirmed_context(Context(), "주방 배관에서 물이 새지 않아요", CATALOG)
+    assert negative.symptom_id is None
+    partial = confirmed_context(Context(), "물이 새요", CATALOG)
+    assert partial.symptom_id == "leak"
+    follow_up = confirmed_context(partial, "주방 배관이에요", CATALOG)
+    assert follow_up.symptom_id == "leak" and follow_up.facility_id == "pipe"
+
+
+@pytest.mark.integration
+async def test_opt_in_survey_import_checks_consent_scope_revision_and_keeps_answers(survey_client):
+    client, _ = survey_client
+    survey, headers, _ = await start(client, member=True)
+    survey = await fill(client, survey, headers, description="private free text")
+    result, _ = await evaluation(client, survey, headers)
+    chat = (
+        await client.post(
+            "/api/v1/sessions",
+            headers=headers,
+            json={"catalogVersion": survey["catalogVersion"], "purpose": "CHAT"},
+        )
+    ).json()["session"]
+    base = f"/api/v1/sessions/{chat['id']}"
+    assert chat["context"]["answers"] == {}
+    body = {"resultId": result.json()["id"], "expectedRevision": 0}
+    assert (
+        await client.post(
+            base + "/chat/survey-context",
+            json=body,
+            headers={"Origin": ORIGIN, "Content-Type": "application/json"},
+        )
+    ).status_code == 403
+    loaded = await client.post(base + "/chat/survey-context", json=body, headers=headers)
+    assert loaded.status_code == 200
+    saved = loaded.json()
+    assert saved["revision"] == 1 and saved["context"]["description"] == ""
+    assert saved["context"]["answers"] == survey["context"]["answers"]
+    assert (
+        await client.post(base + "/chat/survey-context", json=body, headers=headers)
+    ).status_code == 409
+    reply = await client.post(
+        base + "/chat/messages",
+        headers=headers,
+        json={"requestId": str(uuid4()), "expectedRevision": 1, "content": "어떻게 확인하나요?"},
+    )
+    assert reply.status_code == 200 and reply.json()["answerMode"] != "CLARIFY"
+    assert (await client.get(base, headers=headers)).json()["context"]["answers"] == survey[
+        "context"
+    ]["answers"]
+    assert (await client.get(f"/api/v1/sessions/{survey['id']}", headers=headers)).json()[
+        "context"
+    ] == survey["context"]
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("unavailable", ["other_owner", "guest", "expired", "catalog"])
+async def test_survey_import_rejects_inaccessible_or_incompatible_sources(
+    survey_client, pg_session, unavailable
+):
+    client, _ = survey_client
+    survey, headers, _ = await start(client, member=True)
+    survey = await fill(client, survey, headers)
+    result, _ = await evaluation(client, survey, headers)
+    row = await pg_session.get(Result, result.json()["id"])
+    if unavailable == "other_owner":
+        user = User(normalized_email="other-import@example.com", password_hash="test-only")
+        pg_session.add(user)
+        await pg_session.flush()
+        row.owner_user_id = user.id
+    elif unavailable == "guest":
+        row.owner_user_id = None
+    elif unavailable == "expired":
+        row.retained_until = datetime.now(UTC) - timedelta(seconds=1)
+    else:
+        row.payload_json = {**row.payload_json, "catalogVersion": "another-version"}
+    await pg_session.flush()
+    chat = (
+        await client.post(
+            "/api/v1/sessions",
+            headers=headers,
+            json={"catalogVersion": survey["catalogVersion"], "purpose": "CHAT"},
+        )
+    ).json()["session"]
+    response = await client.post(
+        f"/api/v1/sessions/{chat['id']}/chat/survey-context",
+        headers=headers,
+        json={"resultId": result.json()["id"], "expectedRevision": 0},
+    )
+    assert response.status_code == (409 if unavailable == "catalog" else 404)
+    assert (await client.get(f"/api/v1/sessions/{chat['id']}", headers=headers)).json()["context"][
+        "answers"
+    ] == {}
+
+
+@pytest.mark.integration
+async def test_imported_safety_answer_remains_a_priority_for_chat(survey_client):
+    client, _ = survey_client
+    survey, headers, _ = await start(client, member=True)
+    survey = await fill(client, survey, headers, answers={"test-question": "RISK"})
+    result, _ = await evaluation(client, survey, headers)
+    chat = (
+        await client.post(
+            "/api/v1/sessions",
+            headers=headers,
+            json={"catalogVersion": survey["catalogVersion"], "purpose": "CHAT"},
+        )
+    ).json()["session"]
+    base = f"/api/v1/sessions/{chat['id']}"
+    assert (
+        await client.post(
+            base + "/chat/survey-context",
+            headers=headers,
+            json={"resultId": result.json()["id"], "expectedRevision": 0},
+        )
+    ).status_code == 200
+    reply = await client.post(
+        base + "/chat/messages",
+        headers=headers,
+        json={
+            "requestId": str(uuid4()),
+            "expectedRevision": 1,
+            "content": "제10조 내용 알려 주세요",
+        },
+    )
+    assert reply.status_code == 200 and reply.json()["status"] == "SAFETY_PRIORITY"
 
 
 @pytest.mark.integration

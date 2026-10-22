@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.services.retrieval import safe_text
 
-PROMPT_VERSION = "chat-v2-independent-extractive"
+PROMPT_VERSION = "chat-v3-survey-opt-in-extractive"
 MAX_INPUT_BYTES = 60000
 
 

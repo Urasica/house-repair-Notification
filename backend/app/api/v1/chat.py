@@ -8,12 +8,19 @@ from sqlalchemy import and_, delete, func, or_, select
 
 from app.api.v1.history import cursor_for, parse_cursor
 from app.api.v1.sessions import check_question_deletion, ready_database, repository
-from app.auth.access import own_consultation
+from app.auth.access import own_consultation, own_result
 from app.core.errors import AppError
 from app.db.models import ChatUsage, Message, QuestionRecord, RequestRun
 from app.db.requests import request_fingerprint
 from app.domain.constants import ErrorCode, RequestKind, SessionPurpose
-from app.schemas.contracts import ChatHistory, ChatRequest, ChatResponse, Context
+from app.schemas.contracts import (
+    ChatHistory,
+    ChatRequest,
+    ChatResponse,
+    ChatSurveyImport,
+    Context,
+    Session,
+)
 from app.services.chat import (
     citation_check,
     fallback,
@@ -25,8 +32,45 @@ from app.services.chat_context import confirmed_context
 from app.services.consultations import check_revision, pinned_catalog, require_purpose, session_dto
 from app.services.guidance import add_years
 from app.services.retrieval import revalidate_citations
+from app.services.survey_policy import survey_policy
 
 router = APIRouter(prefix="/api/v1/sessions", tags=["chat"], dependencies=[Depends(ready_database)])
+
+
+@router.post(
+    "/{consultation_id}/chat/survey-context",
+    response_model=Session,
+    operation_id="importChatSurvey",
+)
+async def import_survey(consultation_id: UUID, body: ChatSurveyImport, request: Request):
+    db = request.app.state.database
+    async with db.session() as session:
+        await own_consultation(request, session, consultation_id, member_only=True, mutation=True)
+    async with db.change(), request.app.state.consultation_locks.hold(consultation_id):
+        async with db.transaction() as session:
+            row = await own_consultation(
+                request, session, consultation_id, member_only=True, mutation=True
+            )
+            require_purpose(row, SessionPurpose.CHAT)
+            check_revision(row, body.expected_revision)
+            source = await own_result(request, session, body.result_id)
+            if source.payload_json["catalogVersion"] != row.catalog_version:
+                raise AppError(
+                    ErrorCode.CATALOG_UPDATED,
+                    "이 설문은 다른 목록으로 작성됐어요. 새 대화에서 직접 상황을 알려 주세요.",
+                    409,
+                )
+            catalog = await pinned_catalog(session, row)
+            context = Context.model_validate(source.input_snapshot_json)
+            context.description = ""
+            canonical = survey_policy(catalog, context).context.model_dump(
+                mode="json", by_alias=True
+            )
+            if canonical != row.context_json:
+                row.context_json = canonical
+                row.revision += 1
+            await session.flush()
+            return await session_dto(session, row)
 
 
 async def check_budget(session, owner, settings):

@@ -8,7 +8,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import App from '../../App'
 import { AUTH_KEY, anonymous } from '../auth/state'
 import { resetSurveyIdentity, storeSession } from '../survey/storage'
-import { catalog, filledSession, member, sessionFixture } from '../survey/test-fixtures'
+import { catalog, filledSession, member, resultFixture, sessionFixture } from '../survey/test-fixtures'
 import { pendingChat, saveChatPending } from './api'
 import type { ChatResponse } from './api'
 
@@ -33,6 +33,7 @@ function answer(requestId: string, content = '제10조 내용') : ChatResponse {
 }
 beforeEach(() => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
   sessionStorage.clear(); resetSurveyIdentity(); current = { ...filledSession(true), purpose: 'CHAT' }
   signedIn = true; replies = []; sent = []; calls = []; lost = false; held = false; state = 'COMPLETED'; release = () => {}
   exists = true; deleteFailure = false; deleteLost = false; createFailure = false; createdBodies = []
@@ -41,6 +42,14 @@ beforeEach(() => {
     if (path === '/auth/logout') { signedIn = false; return new Response(null, { status: 204 }) }
     if (path === '/auth/me') return json(signedIn ? member : anonymous)
     if (path.startsWith('/catalog')) return json(catalog)
+    if (path.startsWith('/me/results')) return json({ items: [resultFixture(filledSession(true))], nextCursor: null })
+    if (path.endsWith('/chat/survey-context')) {
+      const body = JSON.parse(options.body as string) as { resultId: string; expectedRevision: number }
+      expect(body).toEqual({ resultId: resultFixture(current).id, expectedRevision: current.revision })
+      current = { ...current, revision: current.revision + 1, context: filledSession(true).context }
+      expect(options.headers).toMatchObject({ 'X-CSRF-Token': member.csrfToken })
+      return json(current)
+    }
     if (path === '/sessions' && options.method === 'POST') {
       createdBodies.push(JSON.parse(options.body as string) as Record<string, unknown>)
       if (createFailure) return failure(503, 'SERVICE_UNAVAILABLE')
@@ -93,6 +102,25 @@ it('sends once, restores complete display metadata and escapes user content', as
   expect(host.textContent).toContain('추가 확인')
   expect(pendingChat(current.id)).toBeNull()
   expect(JSON.stringify(sessionStorage)).not.toContain('private@example.com')
+})
+
+it('imports only after choosing a saved survey and explicitly requesting it', async () => {
+  current.context = { description: '', answers: {} }
+  await render(); await until(() => expect(host.querySelector('#chat-input')).not.toBeNull())
+  expect(calls.some(path => path.includes('/me/results') || path.includes('/survey-context'))).toBe(false)
+  await act(async () => button('이전 설문 불러오기').click())
+  await until(() => expect(host.querySelectorAll('#import-survey option')).toHaveLength(2))
+  expect(calls.some(path => path.includes('/survey-context'))).toBe(false)
+  const select = host.querySelector<HTMLSelectElement>('#import-survey')!
+  await act(async () => { select.value = resultFixture(current).id; select.dispatchEvent(new Event('change', { bubbles: true })) })
+  await act(async () => button('선택한 설문 불러오기').click())
+  await until(() => expect(host.textContent).toContain('선택한 설문을 불러왔어요'))
+  expect(current.context.answers).toEqual({ 'test-question': 'UNKNOWN' })
+  expect(host.textContent).toContain('설문 답변 1개')
+  expect(sent).toHaveLength(0)
+  await enter('이 경우 무엇을 확인하나요?'); await submit()
+  await until(() => expect(sent).toHaveLength(1))
+  expect(sent[0].expectedRevision).toBe(current.revision)
 })
 
 it('recovers a lost response with its original request and no duplicate POST', async () => {

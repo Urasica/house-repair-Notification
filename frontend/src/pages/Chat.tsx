@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ApiError } from '../api/client'
 import { Feedback, Waiting } from '../components/Feedback'
+import SurveyImport from '../components/SurveyImport'
 import { useAuth } from '../features/auth/useAuth'
-import { chatHistory, pendingChat, saveChatPending, sendChat } from '../features/chat/api'
+import { chatHistory, importSurvey, pendingChat, saveChatPending, sendChat } from '../features/chat/api'
 import type { ChatResponse } from '../features/chat/api'
 import { createSession, endSession, getCatalog, getSession, requestState } from '../features/survey/api'
 import { clearSession, identityEpoch, storedReference, storeSession } from '../features/survey/storage'
@@ -48,6 +49,7 @@ export default function Chat() {
 function Conversation({ session, reference, restart }: { session: Session; reference: SessionRef; restart: () => Promise<void> }) {
   const auth = useAuth()
   const client = useQueryClient()
+  const catalog = useQuery({ queryKey: ['catalog', session.catalogVersion], queryFn: ({ signal }) => getCatalog(session.catalogVersion, signal), retry: false })
   const history = useInfiniteQuery({ queryKey: ['chat', session.id, auth.data?.user?.id, 'CHAT'], initialPageParam: null as string | null,
     queryFn: ({ pageParam, signal }) => chatHistory(reference, pageParam, signal),
     getNextPageParam: page => page.nextCursor, retry: false, refetchOnWindowFocus: false })
@@ -63,6 +65,22 @@ function Conversation({ session, reference, restart }: { session: Session; refer
   const [resetting, setResetting] = useState(false)
   const [latest, setLatest] = useState<ChatResponse[]>([])
   const delay = useRetryDelay()
+  async function loadSurvey(resultId: string) {
+    if (guard.current || pending || resetting || confirmReset || delay.waiting) return
+    const epoch = identityEpoch()
+    guard.current = true; setBusy(true); setError(null); setNotice('설문을 불러오고 있어요.')
+    try {
+      const saved = await importSurvey(reference, { resultId, expectedRevision: session.revision }, auth.data?.csrfToken)
+      if (!referenceIsActive(reference, epoch)) return
+      client.setQueryData(['chat-session', session.id, auth.data?.user?.id, 'CHAT'], saved)
+      void client.invalidateQueries({ queryKey: ['chat', session.id] })
+      setNotice('선택한 설문을 불러왔어요. 확인한 내용을 참고해 다음 질문에 답할게요.')
+      input.current?.focus()
+    } catch (cause) {
+      if (referenceIsActive(reference, epoch)) { setError(cause); setNotice(''); if (cause instanceof ApiError && cause.code === 'CONTEXT_CONFLICT') void client.invalidateQueries({ queryKey: ['chat-session', session.id] }) }
+      throw cause
+    } finally { guard.current = false; if (referenceIsActive(reference, epoch)) setBusy(false) }
+  }
   const items = [...new Map([...latest, ...(history.data?.pages.flatMap(page => page.items) ?? [])].map(item => [item.requestId, item])).values()]
     .sort((a, b) => a.userMessage.createdAt.localeCompare(b.userMessage.createdAt))
   function clear() { saveChatPending(session.id, null); setPending(null); setPendingContent(null) }
@@ -145,14 +163,16 @@ function Conversation({ session, reference, restart }: { session: Session; refer
   return <section className="notice chat-panel">
     <p className="eyebrow">회원 상담</p><h1>검토된 자료로 질문하기</h1>
     <p>관련 조문 원문과 확인할 내용을 안내해요. 보수·비용·교체 여부는 담당 기관 확인이 필요해요.</p>
-    <p>설문과 별도로 답변해요. 필요한 내용은 이 대화에서 확인할게요.</p>
+    <p>필요한 내용은 이 대화에서 확인할게요. 원하시면 이전 설문을 골라 불러올 수도 있어요.</p>
+    {catalog.data && <p className="context-path">확인한 내용: {[catalog.data.housingTypes.find(item => item.id === session.context.housingType)?.label, catalog.data.rooms.find(item => item.id === session.context.roomId)?.label, catalog.data.facilities.find(item => item.id === session.context.facilityId)?.label, catalog.data.symptoms.find(item => item.id === session.context.symptomId)?.label].filter(Boolean).join(' · ') || '아직 없어요. 불편한 증상부터 알려 주세요.'}{!!Object.keys(session.context.answers ?? {}).length && ` · 설문 답변 ${Object.keys(session.context.answers ?? {}).length}개`}</p>}
+    <SurveyImport disabled={busy || !!pending || resetting || confirmReset || delay.waiting} load={loadSurvey} />
     <button className="secondary" disabled={busy || !!pending || resetting} onClick={() => setConfirmReset(true)}>대화 초기화</button>
     {confirmReset && <section className="notice confirm-panel" role="group" aria-label="대화 초기화 확인">
       <p>현재 대화와 챗봇에서 확인한 내용이 지워지고 새 대화를 시작합니다. 설문·결과 이력과 별도 보존되는 질문 분석 기록은 유지됩니다.</p>
       <div className="actions"><button className="danger" disabled={resetting} onClick={() => void reset()}>초기화 확인</button>
       <button className="secondary" disabled={resetting} onClick={() => { setConfirmReset(false); input.current?.focus() }}>취소</button></div>
     </section>}
-    <p className="muted">질문 원문과 대화는 상담 만료 후 7일 이내 정리해요. 식별정보를 제외한 질문 분류·선택 정보는 기본 5년 보관해요. OpenAI에는 선택 라벨·조문 번호와 검토 자료만 보내요. 이름·주소·연락처는 입력하지 마세요.</p>
+    <p className="muted">질문 원문과 대화는 상담 만료 후 7일 이내 정리해요. 식별정보를 제외한 질문 분류·선택 정보는 기본 5년 보관해요. OpenAI에는 선택·설문 답변 라벨, 조문 번호와 검토 자료만 보내요. 이름·주소·연락처는 입력하지 마세요.</p>
     {history.isPending && <Waiting />}
     {history.isError && <Feedback error={history.error} retry={() => void history.refetch()} />}
     {history.data && !items.length && <p role="status">새 대화가 준비됐어요. 궁금한 조문이나 증상을 바로 질문해 주세요.</p>}
@@ -172,7 +192,7 @@ function Conversation({ session, reference, restart }: { session: Session; refer
     </li>)}</ol>
     {history.hasNextPage && <button className="secondary" disabled={history.isFetchingNextPage} onClick={() => void history.fetchNextPage()}>다음 대화 보기</button>}
     {error != null && <Feedback error={error} />}
-    <p role="status">{busy ? '답변을 확인하고 저장하고 있어요.' : notice}</p>
+    <p role="status">{busy ? notice || '답변을 확인하고 저장하고 있어요.' : notice}</p>
     {pending && <div className="notice"><p>이전 전송의 완료 여부를 먼저 확인해 주세요. 새로고침 후에도 중복 전송하지 않아요.</p>
       <button disabled={busy || delay.waiting} onClick={() => void recover()}>전송 결과 확인</button>
       {pendingContent !== null && <button className="secondary" disabled={busy || delay.waiting} onClick={() => { if (!guard.current && pendingContent !== null) void execute(pending, pendingContent) }}>같은 요청 다시 보내기</button>}
@@ -180,7 +200,7 @@ function Conversation({ session, reference, restart }: { session: Session; refer
     <form onSubmit={event => { event.preventDefault(); submit() }}>
       <label htmlFor="chat-input">궁금한 내용</label>
       <textarea id="chat-input" ref={input} value={draft} onChange={event => setDraft(event.target.value)} maxLength={2000} required disabled={busy || !!pending || confirmReset || resetting} rows={4} aria-describedby="chat-help" />
-      <p id="chat-help">최대 2,000자 · 예: 제10조 내용을 알려 주세요.</p>
+      <p id="chat-help">최대 2,000자 · 예: 주방 싱크대 아래에서 물이 새요.</p>
       <button type="submit" disabled={busy || !!pending || confirmReset || resetting || delay.waiting || !draft.trim()}>질문 보내기</button>
     </form>
   </section>

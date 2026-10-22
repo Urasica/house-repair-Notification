@@ -49,7 +49,7 @@ frontend/src/
 | 홈 | 서비스 설명, 설문, 로그인, 회원 챗봇·이력 | GET /catalog, POST /sessions |
 | 선택 | 게시된 주택·공간·시설물·증상, 요약 | PUT .../context |
 | 설문 | 서버 singleChoice 질문, 진행·모름·오류 | GET .../questions, PUT .../context, POST .../evaluations |
-| 챗봇 | 독립된 회원 대화·입력·채팅 내 확인·근거 펼침·대화 초기화 | POST /sessions(purpose=CHAT), GET/POST .../chat/messages, DELETE /sessions/{id} |
+| 챗봇 | 독립된 회원 대화·확인 맥락·선택적 설문 불러오기·근거 펼침·대화 초기화 | POST /sessions(purpose=CHAT), GET/POST .../chat/messages, POST .../chat/survey-context, DELETE /sessions/{id} |
 | 현재 결과 | 상태·안내·출처·문의 문구·저장 여부 | GET .../results/{resultId} |
 | 로그인·가입 | 이메일·비밀번호, 복귀 경로 | POST /auth/register, /auth/login |
 | 이력 | 날짜·요약·상태, 상세·삭제 | GET /me/results, GET/DELETE /me/results/{resultId} |
@@ -73,7 +73,7 @@ frontend/src/
 
 맥락은 context 전체와 expectedRevision으로 저장하고 응답의 정규화된 값으로 갱신한다. 부모 선택이 바뀌면 무효 하위 항목·숨겨진 답을 제거한다. 409 CONTEXT_CONFLICT는 최신 맥락을 조회해 변경을 확인하며 자동 덮어쓰지 않는다.
 
-설문 맥락 변경은 SURVEY 세션에만 적용한다. 챗봇에서 확인한 값은 CHAT 세션에만 저장하고 answers는 비워 둔다. 챗봇의 확인 질문은 채팅 입력으로 답하며 설문 폼·결과를 자동 참조하지 않는다.
+설문 맥락 변경은 SURVEY 세션에만 적용한다. 챗봇 확인 값은 CHAT 세션에 저장한다. ‘이전 설문 불러오기’를 펼치면 본인 이력을 페이지 단위로 조회하며 결과 선택 후 ‘선택한 설문 불러오기’로만 복사한다. 대상·제외 항목·다음 질문의 외부 라벨 전송을 설명한다. 전송/복구/초기화 중에는 불러오기를 막고 revision 충돌은 새 맥락 확인으로 복구한다. 복사 성공 시 맥락과 답변 개수를 보여 주고 기존 대화는 과거 revision으로 표시한다. 확인 질문에는 채팅으로 답하며 설문 폼·결과를 자동 참조하지 않는다.
 
 설문 평가·채팅마다 UUID requestId를 발급한다. 시간 초과·응답 유실이면 GET .../requests/{requestId} 또는 같은 ID 재전송으로 상태·완료 응답을 확인한다. PROCESSING이면 기다리고 COMPLETED이면 저장된 응답을 표시한다. FAILED는 실패를 설명한 뒤 사용자가 재시도할 때만 새 ID로 실행한다. 새 ID 자동 재전송은 없다. 요청 대기 중 맥락 저장·새 전송을 막는다. 서버 SESSION_BUSY·REQUEST_IN_PROGRESS의 대기 시간을 따른다.
 

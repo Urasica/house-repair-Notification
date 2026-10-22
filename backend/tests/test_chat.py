@@ -193,6 +193,7 @@ async def test_runtime_purpose_privacy_failure_and_deadline(pg_session):
         async def generate(self, *args, **kwargs):
             self.calls += 1
             assert "private" not in args[0] and "@" not in args[0]
+            assert any(question.label in args[0] for question in CATALOG.questions)
             if self.failure:
                 raise GenerationUnavailable("test")
             return [chunk.body]

@@ -18,7 +18,7 @@
 | M12 | 운영 이미지·격리 로컬 HTTPS 준비 완료; 실제 운영 출시 인수 대기 | [R007](records/07-m12-deployment-review.md), [남은 작업](#m12-docker-운영-배포와-mvp-출시-확인) |
 | M13 | 독립 챗봇·대화 초기화·사이트 내 답변 구현/격리 검증 및 기존 로컬 서비스 재배포 완료 | [R009](records/09-m13-chat-review.md), [R010](records/10-local-redeploy-image-cleanup.md) |
 | M14 | PC·모바일 시인성·화면 밀도·홈 말투 개선과 소스/모의 API 검증 및 개발 서비스 재배포 완료 | [R016](records/16-responsive-ui-visibility.md), [R017](records/17-mobile-density-plain-language.md), [R018](records/18-friendly-home-copy.md), [R019](records/19-local-deploy-persona-ux-review.md) |
-| M15 | UX01~UX05 수정·회귀 완료. UX06~UX08 구현 진행, 실제 서비스 재배포는 미수행 | [R020](records/20-ux01-auth-transition.md), [R021](records/21-ux02-step-navigation.md), [R022](records/22-ux03-missing-answer-recovery.md), [R023](records/23-ux04-sink-leak-navigation.md), [R024](records/24-ux05-actionable-results.md) |
+| M15 | UX01~UX06 수정·회귀 완료. UX07~UX08 구현 진행, 실제 서비스 재배포는 미수행 | [R020](records/20-ux01-auth-transition.md), [R021](records/21-ux02-step-navigation.md), [R022](records/22-ux03-missing-answer-recovery.md), [R023](records/23-ux04-sink-leak-navigation.md), [R024](records/24-ux05-actionable-results.md), [R025](records/25-ux06-opt-in-survey-chat.md) |
 
 ## 환경별 적용과 검증
 
@@ -84,4 +84,3 @@ PC·모바일 UI의 시인성과 화면 밀도를 개선하고 홈 안내를 부
 | --- | --- | --- | --- | --- |
 | T-M15-06 | 대기 | P2 UX07: 비회원 저장 위치/재접근 조건과 회원 전환 시 기록 처리 안내 정리. 가입 후 재입력과 재로그인 후 대화 접근도 인증 정책 안에서 검토 | 기획, 프론트, 백엔드, QA | R019 |
 | T-M15-07 | 대기 | P2 UX08: 결과 삭제 확인의 초점 이동과 취소 시 복귀 보완. 키보드만으로 확인/취소 영역을 찾고 원래 조작점으로 복귀 | 프론트, QA | R019 |
-| T-M15-08 | 대기 | P1 UX06: 일상 표현과 부족한 항목 확인 보완, 사용자가 선택한 본인 설문을 챗봇에 불러오기. 자동 공유 없이 소유권·현재 카탈로그·revision을 검증하고 계약/화면/회귀 갱신 | 프론트, 백엔드, QA | R019 |

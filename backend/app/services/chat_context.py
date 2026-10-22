@@ -1,15 +1,19 @@
-"""Chat-only confirmations from reviewed vocabulary; never consume survey answers."""
+"""Chat confirmations and explicitly imported, catalog-validated survey context."""
 
 import re
 
 from app.domain.constants import SUPPORTED_HOUSING_TYPES, GuidanceStatus, HousingType
-from app.schemas.contracts import Context
 from app.services.retrieval import question_purpose
+from app.services.survey_policy import survey_policy
 
 
 def confirmed_context(previous, content, catalog):
     context = previous.model_copy(deep=True)
-    context.answers, context.description = {}, ""
+    context.description = ""
+    allowed = {q.question_id: {option.value for option in q.options} for q in catalog.questions}
+    context.answers = {
+        key: value for key, value in context.answers.items() if value in allowed.get(key, set())
+    }
     if context.housing_type is None and content.strip().rstrip(".!? ") in {
         "모름",
         "몰라요",
@@ -32,6 +36,11 @@ def confirmed_context(previous, content, catalog):
         matches = []
         for item in items:
             terms = [item.label, *item.aliases]
+            if catalog.version == "m08a-20261004-v2":
+                if item.id == "pipe":
+                    terms.append("배관")
+                if item.id == "leak" and not re.search(r"새지|안\s*새|새는.*아니", content):
+                    terms.extend(["물이 새", "물이 샙", "물샘"])
             lengths = [len(term) for term in terms if len(term) > 1 and term in content]
             if lengths and item.id != "unknown":
                 matches.append((max(lengths), item.id))
@@ -43,7 +52,9 @@ def confirmed_context(previous, content, catalog):
 
     room = match(catalog.rooms)
     if room and room != context.room_id:
-        context.room_id, context.facility_id, context.symptom_id = room, None, None
+        if context.room_id is not None:
+            context.facility_id, context.symptom_id = None, None
+        context.room_id = room
     facilities = [
         item
         for item in catalog.facilities
@@ -51,7 +62,12 @@ def confirmed_context(previous, content, catalog):
     ]
     facility = match(facilities)
     if facility and facility != context.facility_id:
-        context.facility_id, context.symptom_id = facility, None
+        if context.facility_id is not None or not any(
+            item.id == context.symptom_id and facility in item.facility_ids
+            for item in catalog.symptoms
+        ):
+            context.symptom_id = None
+        context.facility_id = facility
     symptoms = [
         item
         for item in catalog.symptoms
@@ -60,7 +76,15 @@ def confirmed_context(previous, content, catalog):
     symptom = match(symptoms)
     if symptom:
         context.symptom_id = symptom
-    return Context.model_validate(context.model_dump())
+    if any(
+        getattr(context, field) != getattr(previous, field)
+        for field in ("housing_type", "room_id", "facility_id", "symptom_id")
+    ):
+        context.answers = {}
+    if context.room_id and context.facility_id and context.symptom_id:
+        return survey_policy(catalog, context, previous).context
+    context.answers = {}
+    return context
 
 
 def chat_policy(context, content):
@@ -86,8 +110,14 @@ def chat_policy(context, content):
             "주택 유형을 채팅으로 알려 주세요. LH 건설임대 또는 분양전환 전 임대주택인가요? "
             "모르면 모른다고 답해 주세요."
         )
-    if not context.symptom_id and not re.search(r"제\s*\d+\s*조|별표\s*\d+", content):
-        questions.append("어떤 시설물에 어떤 증상이 있는지 채팅으로 알려 주세요.")
+    if (not context.facility_id or not context.symptom_id) and not re.search(
+        r"제\s*\d+\s*조|별표\s*\d+", content
+    ):
+        questions.append(
+            "불편한 시설물을 채팅으로 알려 주세요. 예: 배관, 문, 창문."
+            if not context.facility_id
+            else "어떤 증상인지 채팅으로 알려 주세요. 예: 물이 새요, 문이 잠기지 않아요."
+        )
     if questions:
         return (
             GuidanceStatus.NEED_MORE_INFO,

@@ -1,7 +1,7 @@
 import { expect, test, type Page, type TestInfo } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { readFileSync } from 'node:fs'
-import { catalog, member, questionsFixture, resultFixture, sessionFixture, testToken } from '../src/features/survey/test-fixtures'
+import { catalog, filledSession, member, questionsFixture, resultFixture, sessionFixture, testToken } from '../src/features/survey/test-fixtures'
 import type { Catalog, Context } from '../src/features/survey/storage'
 import type { ChatResponse } from '../src/features/chat/api'
 
@@ -21,6 +21,10 @@ async function mockUI(page: Page, signedIn = false, choices: Catalog = catalog) 
       return route.fulfill({ json: session })
     }
     if (path.endsWith('/questions')) return route.fulfill({ json: questionsFixture(session) })
+    if (path.endsWith('/chat/survey-context')) {
+      session = { ...session, context: filledSession(true).context, revision: session.revision + 1 }
+      return route.fulfill({ json: session })
+    }
     if (path.endsWith('/evaluations')) {
       session.currentResultId = resultFixture(session).id
       return route.fulfill({ json: resultFixture(session) })
@@ -147,6 +151,11 @@ test('member chat reset and history deletion keep distinct actions', async ({ pa
   await page.getByLabel('궁금한 내용', { exact: true }).fill('시험용 질문')
   await expect(page.getByRole('button', { name: '질문 보내기', exact: true })).toBeEnabled()
   await visibleControls(page, 'chat', info)
+  await page.getByRole('button', { name: '이전 설문 불러오기', exact: true }).click()
+  await page.getByLabel('불러올 설문 결과', { exact: true }).selectOption({ index: 1 })
+  await page.getByRole('button', { name: '선택한 설문 불러오기', exact: true }).click()
+  await expect(page.getByText(/선택한 설문을 불러왔어요/)).toBeVisible()
+  await expect(page.getByText(/확인한 내용:.*설문 답변 1개/)).toBeVisible()
   await page.getByRole('button', { name: '대화 초기화', exact: true }).click()
   await visibleControls(page, 'chat-confirm', info)
   await page.getByRole('button', { name: '취소', exact: true }).click()

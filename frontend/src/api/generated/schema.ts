@@ -190,6 +190,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sessions/{consultation_id}/chat/survey-context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import Survey */
+        post: operations["importChatSurvey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sessions/{consultation_id}/context": {
         parameters: {
             query?: never;
@@ -422,6 +439,16 @@ export interface components {
             requestId: string;
             status: components["schemas"]["GuidanceStatus"];
             userMessage: components["schemas"]["ChatMessage"];
+        };
+        /** ChatSurveyImport */
+        ChatSurveyImport: {
+            /** Expectedrevision */
+            expectedRevision: number;
+            /**
+             * Resultid
+             * Format: uuid
+             */
+            resultId: string;
         };
         /** Citation */
         Citation: {
@@ -1765,6 +1792,50 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChatResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    importChatSurvey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                consultation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatSurveyImport"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Session"];
                 };
             };
             /** @description Unprocessable Entity */

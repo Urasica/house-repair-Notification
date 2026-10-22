@@ -298,6 +298,27 @@
         "title": "ChatResponse",
         "type": "object"
       },
+      "ChatSurveyImport": {
+        "additionalProperties": false,
+        "properties": {
+          "expectedRevision": {
+            "minimum": 0.0,
+            "title": "Expectedrevision",
+            "type": "integer"
+          },
+          "resultId": {
+            "format": "uuid",
+            "title": "Resultid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "resultId",
+          "expectedRevision"
+        ],
+        "title": "ChatSurveyImport",
+        "type": "object"
+      },
       "Citation": {
         "additionalProperties": false,
         "properties": {
@@ -2517,6 +2538,69 @@
           }
         },
         "summary": "Send",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/v1/sessions/{consultation_id}/chat/survey-context": {
+      "post": {
+        "operationId": "importChatSurvey",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consultation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Consultation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatSurveyImport"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Import Survey",
         "tags": [
           "chat"
         ]

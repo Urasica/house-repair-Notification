@@ -34,7 +34,7 @@ UUID·TIMESTAMPTZ·JSONB를 사용하고 시행일은 DATE, 불명확하면 null
 
 consultations는 회원 소유 ID와 익명 토큰 해시 중 정확히 하나만 존재하도록 CHECK한다. auth_sessions는 계정 삭제 시 CASCADE한다. 장기 기록·회원 결과 삭제는 보존·명시적 삭제 정책대로 처리한다.
 
-consultations.purpose를 NOT NULL·기본값 SURVEY·허용값 SURVEY/CHAT CHECK로 제한하고 CHAT에는 회원 소유권을 요구한다. 기존 상담은 SURVEY로 분류하며 그 상담의 완료 CHAT 이력은 과거 기록 조회만 유지한다. 새 채팅에는 별도 CHAT 상담을 만들고 기존 설문 입력·결과·대화를 옮기지 않는다. CHAT의 context_json.answers는 비워 두며 해당 대화에서 확인한 값만 저장한다. 용도별 요청 허용은 API에서도 검증한다.
+consultations.purpose를 NOT NULL·기본값 SURVEY·허용값 SURVEY/CHAT CHECK로 제한하고 CHAT에는 회원 소유권을 요구한다. 기존 상담은 SURVEY로 분류하며 그 상담의 완료 CHAT 이력은 과거 기록 조회만 유지한다. 새 채팅은 별도 CHAT 상담으로 시작한다. 명시적 불러오기에서만 본인 결과의 검증된 선택·답변을 기존 context_json에 복사하며 자유 설명·과거 답변 결론은 가져오지 않는다. 이후 독립된 복사본이며 용도별 요청 허용은 API에서도 검증한다.
 
 request_runs는 영속 작업 큐가 아니다. lease·attempt·자동 재처리 없이 같은 요청의 완료 응답만 재생한다. 상태는 PROCESSING/COMPLETED/FAILED/DELETED이며 실패·삭제된 요청은 재실행하지 않는다. DELETED는 본문 없는 재실행 차단 기록이며 세부 정책은 [API 설계](../backend/api.md)를 따른다.
 

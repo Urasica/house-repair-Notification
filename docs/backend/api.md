@@ -69,6 +69,7 @@ backend/alembic/              # 단일 DB migration 이력
 | GET /sessions/{id}/results/{resultId} | 세션 소유권 | 200 GuidanceResult |
 | GET /sessions/{id}/chat/messages?cursor=...&limit=... | 회원 소유권 | 200 ChatHistory; 질문·답변 쌍과 표시 정보 |
 | POST /sessions/{id}/chat/messages | 회원 소유 CHAT 세션; requestId·expectedRevision·content | 200 ChatResponse |
+| POST /sessions/{id}/chat/survey-context | 회원 소유 CHAT·CSRF; resultId·expectedRevision | 200 Session; 본인 설문 입력만 복사 |
 | GET /sessions/{id}/requests/{requestId} | 평가: 세션 소유권; 채팅: 회원 | 200 RequestState |
 | DELETE /sessions/{id} | 세션 소유권 | 204 상담 종료; 장기 기록 일괄 삭제와 구분 |
 | GET /me/results?cursor=...&limit=... | 계정 | 200 {items, nextCursor} |
@@ -82,6 +83,8 @@ backend/alembic/              # 단일 DB migration 이력
 세션 생성은 최신 완성 카탈로그만 허용한다. 이전 버전 요청은 409 CATALOG_UPDATED다. 기존 세션 복구를 위해 게시된 과거 카탈로그 조회는 허용한다. 목록이 없으면 예시 카탈로그를 seed해 공개하지 않는다.
 
 SURVEY와 CHAT은 별도 세션이다. CHAT 생성에 설문 세션·선택·답변·결과를 요구하거나 복사하지 않는다. 소유권 확인 후 용도가 다른 질문·평가·채팅 전송 요청은 409 SESSION_PURPOSE_MISMATCH로 거부한다. 이전 공유 상담의 완료 CHAT 이력은 기존 소유권으로 과거 기록 조회만 허용하고 새 전송은 독립 CHAT 세션에서 처리한다.
+
+명시적 설문 불러오기는 `POST /sessions/{id}/chat/survey-context`만 사용한다. CHAT 세션·결과 소유권, CSRF/Origin, 상담 잠금, expectedRevision, 결과 보관 기한과 동일 카탈로그 버전을 검사한다. 본인 결과의 입력 snapshot을 기존 설문 정책으로 검증·정규화하고 자유 입력 description을 제외해 CHAT context로 복사한다. 변경 시 revision을 올린다. 원래 결과와 설문은 수정하지 않으며 이 API는 외부 생성/검색을 호출하지 않는다. 오래된 목록의 결과는 409 CATALOG_UPDATED로 거부한다. 상담 만료 후에도 유효한 회원 결과는 불러올 수 있다.
 
 사용자 초기화는 기존 CHAT 세션 DELETE 성공 후 새 purpose=CHAT 세션 생성으로 처리한다. 삭제와 생성의 실패는 각각 처리하며 삭제 전에는 새 세션으로 전환하지 않는다. 상담 잠금·삭제 로그·단기 대화/요청 정리 규칙을 재사용하고 설문 세션·회원 결과·장기 질문·chat_usage는 삭제하지 않는다. 종료된 세션에 늦은 완료가 저장되지 않도록 최종 존재·인증·요청 상태 검사를 유지한다.
 
@@ -251,7 +254,7 @@ ready는 DB·필수 설정·중단 요청 정리 여부를 확인한다. catalog
 
 - 비회원 채팅과 계정 이력 접근을 서버에서 차단한다.
 - 용도별 세션 분리·채팅 내 추가 확인·챗봇 초기화와 늦은 완료 차단을 검증한다.
-- 새 채팅은 사이트 내 답변·근거 excerpt를 제공하고 설문 입력·결과를 참조하지 않는다.
+- 새 채팅은 사이트 내 답변·근거 excerpt를 제공하며 설문 입력은 사용자 선택에 따른 불러오기로만 참고한다. 과거 결과 결론은 근거로 쓰지 않는다.
 - 양쪽 설문 결과 저장·회원 과거 조회·로그인 후 새 상담이 검증된다.
 - 단기 세션 삭제가 회원 이력·정제 질문을 CASCADE로 지우지 않는다.
 - 근거가 없으면 외부 검색·모델 추측 없이 연락처 없는 직접 문의를 반환한다.

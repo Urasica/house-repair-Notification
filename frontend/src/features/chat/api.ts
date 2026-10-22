@@ -1,12 +1,13 @@
 import type { components } from '../../api/generated/schema'
 import { api } from '../../api/client'
-import type { Pending, SessionRef } from '../survey/storage'
+import type { Pending, Session, SessionRef } from '../survey/storage'
 import { headers } from '../survey/api'
 
 export type ChatResponse = components['schemas']['ChatResponse']
 export type ChatHistory = components['schemas']['ChatHistory']
 export const chatHistory = (ref: SessionRef, cursor: string | null, signal?: AbortSignal) => api<ChatHistory>(`/sessions/${ref.id}/chat/messages` + (cursor ? '?cursor=' + encodeURIComponent(cursor) : ''), { signal })
 export const sendChat = (ref: SessionRef, pending: Pending, content: string, csrf?: string | null) => api<ChatResponse>(`/sessions/${ref.id}/chat/messages`, { method: 'POST', headers: headers(ref, csrf), body: JSON.stringify({ ...pending, content }), signal: AbortSignal.timeout(30000) })
+export const importSurvey = (ref: SessionRef, body: components['schemas']['ChatSurveyImport'], csrf?: string | null) => api<Session>(`/sessions/${ref.id}/chat/survey-context`, { method: 'POST', headers: headers(ref, csrf), body: JSON.stringify(body) })
 
 export function pendingChat(id: string): Pending | null {
   try {
