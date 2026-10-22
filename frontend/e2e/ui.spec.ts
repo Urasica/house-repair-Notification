@@ -1,18 +1,19 @@
 import { expect, test, type Page, type TestInfo } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
+import { readFileSync } from 'node:fs'
 import { catalog, member, questionsFixture, resultFixture, sessionFixture, testToken } from '../src/features/survey/test-fixtures'
-import type { Context } from '../src/features/survey/storage'
+import type { Catalog, Context } from '../src/features/survey/storage'
 import type { ChatResponse } from '../src/features/chat/api'
 
-async function mockUI(page: Page, signedIn = false) {
-  let session = sessionFixture(signedIn)
+async function mockUI(page: Page, signedIn = false, choices: Catalog = catalog) {
+  let session = { ...sessionFixture(signedIn), catalogVersion: choices.version }
   await page.route('**/api/v1/**', async route => {
     const request = route.request()
     const path = new URL(request.url()).pathname.replace('/api/v1', '')
     if (path === '/auth/me') return route.fulfill({ json: signedIn ? member : { user: null, csrfToken: null } })
-    if (path === '/catalog') return route.fulfill({ json: catalog })
+    if (path === '/catalog') return route.fulfill({ json: choices })
     if (path === '/sessions' && request.method() === 'POST') {
-      session = { ...sessionFixture(signedIn), purpose: (request.postDataJSON() as { purpose: 'SURVEY' | 'CHAT' }).purpose }
+      session = { ...sessionFixture(signedIn), catalogVersion: choices.version, purpose: (request.postDataJSON() as { purpose: 'SURVEY' | 'CHAT' }).purpose }
       return route.fulfill({ json: { session, sessionToken: signedIn ? null : testToken } })
     }
     if (path.endsWith('/context')) {
@@ -122,6 +123,18 @@ test('selection, answers, result and end confirmation remain readable', async ({
   await expect(page).toHaveURL(/\/result\//)
   await page.getByRole('button', { name: '상담 종료', exact: true }).click()
   await visibleControls(page, 'result-confirm', info)
+})
+
+test('kitchen sink finishing links everyday leakage to the existing pipe symptom', async ({ page }) => {
+  const reviewed = JSON.parse(readFileSync(new URL('../../data/catalog/m08a-20261004/catalog.json', import.meta.url), 'utf8')) as Catalog
+  await mockUI(page, false, reviewed)
+  await page.goto('/')
+  await page.getByRole('button', { name: '새 설문 시작', exact: true }).click()
+  await page.getByLabel('공간', { exact: true }).selectOption('kitchen')
+  await page.getByLabel('시설물', { exact: true }).selectOption('sink')
+  await page.getByRole('button', { name: '싱크대 아래에서 물이 새요' }).click()
+  await expect(page.getByLabel('시설물', { exact: true })).toHaveValue('pipe')
+  await expect(page.getByLabel('증상', { exact: true })).toHaveValue('leak')
 })
 
 test('member chat reset and history deletion keep distinct actions', async ({ page }, info) => {

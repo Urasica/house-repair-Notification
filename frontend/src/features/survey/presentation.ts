@@ -25,6 +25,8 @@ export function facilitiesForRoom(catalog: Catalog, roomId: string | null | unde
 export function facilityLabel(catalog: Catalog, roomId: string | null | undefined, facilityId: string | null | undefined) {
   const original = catalog.facilities.find(item => item.id === facilityId)?.label
   if (catalog.version !== 'm08a-20261004-v2') return original
+  if (facilityId === 'sink') return '싱크대 아래·뒤쪽 마감'
+  if (facilityId === 'pipe' && roomId === 'kitchen') return '배관 (싱크대 아래·수도관 등)'
   if (facilityId === 'furniture' && roomId === 'entrance') return '신발장·수납 가구'
   if (facilityId === 'furniture' && (roomId === 'living' || roomId === 'bedroom')) return '수납 가구'
   if (facilityId === 'door' && roomId === 'entrance') return '현관문·문틀'

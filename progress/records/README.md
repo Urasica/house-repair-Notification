@@ -30,3 +30,4 @@
 | R020 | 2026-10-22 | [UX01 로그인 전환 후 회원 화면 조회 복구](20-ux01-auth-transition.md) | 로컬 소스·Node 22.23.1·Vitest/jsdom·mock API | R019의 UX01 진행 장애를 수정한다. 기준 커밋 c46ea96 이후의 첫 UX 수정이며 서비스 재배포 관측은 R019를 유지한다. |
 | R021 | 2026-10-22 | [UX02 단계 이동의 화면 위치와 제목 초점](21-ux02-step-navigation.md) | 로컬 소스·Vite·Chromium PC/모바일·mock API | R019의 UX02를 수정한다. R020의 인증 수정 이후이며 실제 서비스 배포 관측은 R019를 유지한다. |
 | R022 | 2026-10-22 | [UX03 누락 답변과 모르는 주택의 복구 안내](22-ux03-missing-answer-recovery.md) | 로컬 소스·Vitest/jsdom·Chromium PC/모바일·mock API | R019의 UX03을 수정한다. R020~R021의 인증/이동 보완을 유지하며 서비스 배포 관측은 R019를 유지한다. |
+| R023 | 2026-10-22 | [UX04 싱크대 마감과 누수 선택 경로 구분](23-ux04-sink-leak-navigation.md) | 로컬 소스·실제 게시 카탈로그·Vitest·Chromium PC/모바일·mock API | R019의 UX04를 수정한다. R022의 필수 답변 복구와 기존 게시 자료/ID를 유지한다. |

@@ -19,6 +19,8 @@ describe('room-specific navigation with the real published catalog', () => {
     expect(facilityLabel(catalog, 'entrance', 'furniture')).toBe('신발장·수납 가구')
     expect(facilityLabel(catalog, 'kitchen', 'sanitary')).toBe('수전')
     expect(facilityLabel(catalog, 'bathroom', 'air')).toBe('욕실 환풍기')
+    expect(facilityLabel(catalog, 'kitchen', 'sink')).toContain('마감')
+    expect(facilityLabel(catalog, 'kitchen', 'pipe')).toContain('싱크대 아래')
   })
   it('keeps all navigation entries inside the catalog relationship and offers an unknown choice', () => {
     for (const [room, facilities] of Object.entries(roomFacilities)) {
