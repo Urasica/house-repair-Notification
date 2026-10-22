@@ -30,6 +30,7 @@ const failure = (code: string, status = 409) => json({ error: { code, message: '
 
 beforeEach(() => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
   sessionStorage.clear(); resetSurveyIdentity()
   current = sessionFixture(); result = resultFixture(current)
   isMember = false; missingCatalog = false; evaluationMode = 'OK'; recoveryState = 'COMPLETED'; saveConflict = false; sent = []
@@ -129,6 +130,33 @@ it.each([false, true])('completes selection, branch, evaluation and result with 
   expect(JSON.stringify(sessionStorage)).not.toContain('시험용')
   const evaluationCall = fetcher.mock.calls.find(([url]) => String(url).endsWith('/evaluations'))!
   expect((evaluationCall[1] as RequestInit).headers).toMatchObject(memberMode ? { 'X-CSRF-Token': member.csrfToken } : { Authorization: 'Bearer ' + testToken })
+})
+it('keeps an unanswered required question on the survey and accepts UNKNOWN as an answer', async () => {
+  current = filledSession(); current.context.answers = {}
+  await render('/survey', true)
+  await until(() => expect(button('안내 결과 확인').disabled).toBe(false))
+  await click(button('안내 결과 확인'))
+  expect(sent).toHaveLength(0)
+  expect(host.textContent).toContain('답을 골라 주세요')
+  expect(document.activeElement?.getAttribute('name')).toBe('test-question')
+  await radio('UNKNOWN')
+  await until(() => expect(button('안내 결과 확인').disabled).toBe(false))
+  await click(button('안내 결과 확인'))
+  await until(() => expect(sent).toHaveLength(1))
+})
+it('returns a missing-input result directly to its unanswered survey question', async () => {
+  current = filledSession(); current.context.answers = {}
+  result = { ...resultFixture(current), status: 'NEED_MORE_INFO', reasonCodes: ['MISSING_INPUT'] }
+  await render('/result/' + resultId, true)
+  await until(() => expect(host.querySelector('a[href="/survey"]')).not.toBeNull())
+  await click(host.querySelector<HTMLAnchorElement>('a[href="/survey"]')!)
+  await until(() => expect(host.textContent).toContain('답을 골라 주세요'))
+  expect(document.activeElement?.getAttribute('name')).toBe('test-question')
+})
+it('explains how to check an unknown housing type before continuing', async () => {
+  current = filledSession(); current.context.housingType = 'UNKNOWN'
+  await render('/select', true)
+  await until(() => expect(host.textContent).toContain('임대차계약서나 입주 안내문'))
 })
 it('invalidates descendants when a parent selection changes and preserves draft on a revision conflict', async () => {
   current = filledSession()

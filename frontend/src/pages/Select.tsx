@@ -5,6 +5,7 @@ import Consultation from '../components/Consultation'
 import EndConsultation from '../components/EndConsultation'
 import SelectionSummary from '../components/SelectionSummary'
 import SurveyProgress from '../components/SurveyProgress'
+import HousingHelp from '../components/HousingHelp'
 import { facilitiesForRoom, facilityLabel, updateSelection } from '../features/survey/presentation'
 import { Feedback } from '../components/Feedback'
 import { useAuth } from '../features/auth/useAuth'
@@ -56,6 +57,7 @@ function SelectForm({ session, reference, catalog }: { session: Session; referen
       {!!readPending(reference.id) && <p role="status">처리 중인 평가가 있어요. <Link to="/survey">설문 화면에서 완료 여부 확인</Link></p>}
       <form onSubmit={event => { event.preventDefault(); void save() }}>
         <fieldset className="housing-options" disabled={locked}><legend>주택 유형</legend>{catalog.housingTypes.map(item => <label className="choice" key={item.id}><input type="radio" name="housingType" value={item.id} checked={context.housingType === item.id} onChange={() => select('housingType', item.id)} />{item.label}</label>)}</fieldset>
+        {context.housingType === 'UNKNOWN' && <HousingHelp />}
         <div className="selection-group"><span className="field-step" aria-hidden="true">1</span><div><label htmlFor="room">공간</label><p className="field-hint">불편한 곳이 어디인가요?</p><select id="room" value={context.roomId ?? ''} disabled={locked} onChange={event => select('roomId', event.target.value)}><option value="">선택하지 않음</option>{catalog.rooms.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}</select></div></div>
         <div className="selection-group"><span className="field-step" aria-hidden="true">2</span><div><label htmlFor="facility">시설물</label><p className="field-hint" id="facility-hint">{room ? `${room.label}에 있는 어떤 부분인가요?` : '공간을 먼저 선택해 주세요.'}</p><select id="facility" aria-describedby="facility-hint" value={context.facilityId ?? ''} disabled={locked || !context.roomId} onChange={event => select('facilityId', event.target.value)}><option value="">선택하지 않음</option>{previousFacility && <option value={previousFacility.id}>{previousFacility.label} (이전 선택)</option>}{facilities.map(item => <option key={item.id} value={item.id}>{facilityLabel(catalog, context.roomId, item.id)}</option>)}</select></div></div>
         <div className="selection-group"><span className="field-step" aria-hidden="true">3</span><div><label htmlFor="symptom">증상</label><p className="field-hint">{context.facilityId ? '어떤 불편함이 있나요?' : '시설물을 선택하면 관련 증상이 나와요.'}</p><select id="symptom" value={context.symptomId ?? ''} disabled={locked || !context.facilityId} onChange={event => select('symptomId', event.target.value)}><option value="">선택하지 않음</option>{catalog.symptoms.filter(item => item.facilityIds.includes(context.facilityId ?? '')).map(item => <option key={item.id} value={item.id}>{item.label}</option>)}</select></div></div>

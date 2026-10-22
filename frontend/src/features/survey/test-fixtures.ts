@@ -23,7 +23,7 @@ export function sessionFixture(isMember = false): Session {
   return { id: sessionId, purpose: 'SURVEY', accessMode: isMember ? 'MEMBER' : 'GUEST', catalogVersion: catalog.version, context: { description: '', answers: {} }, revision: 0, currentResultId: null, knowledgeReleaseId: null, createdAt: new Date().toISOString(), expiresAt: new Date(Date.now() + 86400000).toISOString() }
 }
 export function filledSession(isMember = false): Session {
-  return { ...sessionFixture(isMember), revision: 1, context: { housingType: 'LH_CONSTRUCTION_RENTAL', roomId: 'test-room', facilityId: 'test-facility', symptomId: 'test-symptom', description: '', answers: {} } }
+  return { ...sessionFixture(isMember), revision: 1, context: { housingType: 'LH_CONSTRUCTION_RENTAL', roomId: 'test-room', facilityId: 'test-facility', symptomId: 'test-symptom', description: '', answers: { 'test-question': 'UNKNOWN' } } }
 }
 export function questionsFixture(session: Session): Questions {
   const questions: Questions['questions'] = session.context.symptomId ? [{ questionId: 'test-question', label: '시험용 확인 질문', required: true, type: 'singleChoice', options: [{ value: 'TEST', label: '시험용 일반 선택' }, { value: 'RISK', label: '시험용 위험 선택' }, { value: 'UNKNOWN', label: '모름' }], interruptValues: ['RISK'] }] : []
