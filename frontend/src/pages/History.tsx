@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Feedback, Waiting } from '../components/Feedback'
@@ -18,6 +18,15 @@ function DeleteRecord({ resultId }: { resultId?: string }) {
   const [message, setMessage] = useState('')
   const [error, setError] = useState<unknown>(null)
   const guard = useRef(false)
+  const trigger = useRef<HTMLButtonElement>(null)
+  const cancel = useRef<HTMLButtonElement>(null)
+  const wasConfirming = useRef(false)
+  const descriptionId = useId()
+  useEffect(() => {
+    if (confirming) cancel.current?.focus()
+    else if (wasConfirming.current) trigger.current?.focus()
+    wasConfirming.current = confirming
+  }, [confirming])
   async function erase() {
     if (!auth.data?.csrfToken || guard.current) return
     const epoch = identityEpoch()
@@ -41,9 +50,9 @@ function DeleteRecord({ resultId }: { resultId?: string }) {
     finally { guard.current = false; if (epoch === identityEpoch()) setBusy(false) }
   }
   return <section className="delete-panel">
-    {!confirming ? <button className="secondary danger" onClick={() => setConfirming(true)}>{resultId ? '이 결과 삭제' : '내 질문 기록 전체 삭제'}</button> : <>
-      <p>{resultId ? '이 결과와 연결된 질문 기록을 삭제해요. 삭제 후에는 복원할 수 없어요.' : '서비스 개선을 위해 보관한 내 정제 질문 기록을 모두 삭제해요. 안내 결과와 계정은 그대로 남아요.'}</p>
-      <div className="actions"><button className="danger" disabled={busy} onClick={() => void erase()}>삭제 확인</button><button className="secondary" disabled={busy} onClick={() => setConfirming(false)}>취소</button></div>
+    {!confirming ? <button ref={trigger} className="secondary danger" onClick={() => setConfirming(true)}>{resultId ? '이 결과 삭제' : '내 질문 기록 전체 삭제'}</button> : <>
+      <p id={descriptionId}>{resultId ? '이 결과와 연결된 질문 기록을 삭제해요. 삭제 후에는 복원할 수 없어요.' : '서비스 개선을 위해 보관한 내 정제 질문 기록을 모두 삭제해요. 안내 결과와 계정은 그대로 남아요.'}</p>
+      <div className="actions"><button className="danger" disabled={busy} onClick={() => void erase()}>삭제 확인</button><button ref={cancel} className="secondary" aria-describedby={descriptionId} disabled={busy} onClick={() => setConfirming(false)}>취소</button></div>
     </>}
     {message && <p role="status">{message}</p>}{!!error && <Feedback error={error} />}
   </section>

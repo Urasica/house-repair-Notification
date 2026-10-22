@@ -34,3 +34,4 @@
 | R024 | 2026-10-22 | [UX05 다음 행동과 상황을 담은 결과 문의 문장](24-ux05-actionable-results.md) | 로컬 소스·Vitest/jsdom·Chromium PC/모바일·mock API | R019의 UX05를 수정한다. R020~R023의 진행 장애 수정을 유지하며 서버 결과와 법적 판단 범위는 바꾸지 않는다. |
 | R025 | 2026-10-22 | [UX06 사용자가 선택한 설문을 챗봇에 불러오기](25-ux06-opt-in-survey-chat.md) | 로컬 소스·격리 PostgreSQL/pgvector·OpenAI OFF/mock 제공자·Vitest·Chromium PC/모바일 mock API | 사용자 지시로 R019 UX06의 ‘독립 대화만’ 후보를 선택적 설문 복사로 개정한다. R020~R024의 수정을 유지하며 서비스 배포 관측은 R019를 유지한다. |
 | R026 | 2026-10-22 | [UX07 기록 재접근 안내와 가입 후 로그인 연결](26-ux07-storage-and-signup.md) | 로컬 소스·Chromium PC/모바일·mock API | R019의 UX07을 수정한다. R025의 선택적 설문 불러오기를 유지하며 비회원 기록 자동 계정 이관은 추가하지 않는다. |
+| R027 | 2026-10-22 | [UX08 삭제 확인 초점과 UX01~UX08 최종 통합 검증](27-ux08-focus-and-integration.md) | 로컬 소스·격리 repair-guide-test localhost:18081·실제 PostgreSQL/카탈로그·OpenAI OFF·Vitest·Chromium PC/모바일 | R019의 UX08을 수정하고 R020~R026의 UX01~UX07과 함께 최종 검증한다. 개발 서비스 localhost:8080의 배포 관측은 R019를 유지한다. |

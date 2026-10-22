@@ -358,6 +358,18 @@ it('loads member history pages and deletes only question records with CSRF', asy
   expect((call[1] as RequestInit).headers).toMatchObject({ 'X-CSRF-Token': member.csrfToken })
   expect(count('/me/results/' + resultId, 'DELETE')).toBe(0)
 })
+it.each(['/history', '/history/' + resultId])('keeps keyboard focus through deletion confirmation and cancellation at %s', async path => {
+  isMember = true; current = filledSession(true); result = resultFixture(current)
+  await render(path)
+  const label = path === '/history' ? '내 질문 기록 전체 삭제' : '이 결과 삭제'
+  await until(() => expect(host.textContent).toContain(label))
+  await click(button(label))
+  expect(document.activeElement).toBe(button('취소'))
+  expect(button('취소').getAttribute('aria-describedby')).toBeTruthy()
+  await click(button('취소'))
+  expect(document.activeElement).toBe(button(label))
+  expect(count('/me/', 'DELETE')).toBe(0)
+})
 it('deletes a member result and evicts its detail and current-result caches', async () => {
   isMember = true; current = filledSession(true); result = { ...resultFixture(current), isCurrent: false }
   client.setQueryData(['result', sessionId, resultId, member.user!.id, 'SURVEY'], result)

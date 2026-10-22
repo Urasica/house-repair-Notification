@@ -18,13 +18,13 @@
 | M12 | 운영 이미지·격리 로컬 HTTPS 준비 완료; 실제 운영 출시 인수 대기 | [R007](records/07-m12-deployment-review.md), [남은 작업](#m12-docker-운영-배포와-mvp-출시-확인) |
 | M13 | 독립 챗봇·대화 초기화·사이트 내 답변 구현/격리 검증 및 기존 로컬 서비스 재배포 완료 | [R009](records/09-m13-chat-review.md), [R010](records/10-local-redeploy-image-cleanup.md) |
 | M14 | PC·모바일 시인성·화면 밀도·홈 말투 개선과 소스/모의 API 검증 및 개발 서비스 재배포 완료 | [R016](records/16-responsive-ui-visibility.md), [R017](records/17-mobile-density-plain-language.md), [R018](records/18-friendly-home-copy.md), [R019](records/19-local-deploy-persona-ux-review.md) |
-| M15 | UX01~UX07 수정·회귀 완료. UX08 구현 진행, 실제 서비스 재배포는 미수행 | [R020](records/20-ux01-auth-transition.md), [R021](records/21-ux02-step-navigation.md), [R022](records/22-ux03-missing-answer-recovery.md), [R023](records/23-ux04-sink-leak-navigation.md), [R024](records/24-ux05-actionable-results.md), [R025](records/25-ux06-opt-in-survey-chat.md), [R026](records/26-ux07-storage-and-signup.md) |
+| M15 | UX01~UX08 최소 수정·선택적 설문 불러오기·개별 커밋과 소스/격리 실제 API 통합 검증 완료. 개발 8080 재배포는 미수행 | [R027](records/27-ux08-focus-and-integration.md), [UX06 경계](records/25-ux06-opt-in-survey-chat.md) |
 
 ## 환경별 적용과 검증
 
 | 환경 | 마지막 근거·일자 | 확인 범위와 남은 제한 |
 | --- | --- | --- |
-| 격리 시험 `repair-guide-test` | [R009](records/09-m13-chat-review.md) · 2026-10-18 | M13 전체 회귀·최종 챗봇 부분 재검사·프론트·계약·migration·브라우저·접근성. 실제 OpenAI 재호출 없이 고정 벡터/mock·OFF 사용 |
+| 격리 시험 `repair-guide-test` / `http://localhost:18081` | [R027](records/27-ux08-focus-and-integration.md) · 2026-10-22 | 최종 UX 소스/이미지·schema 0006_m13·실제 카탈로그/DB 브라우저 통합·접근성, 백엔드/프론트 회귀·계약 일치 확인. 별도 시험 볼륨, OpenAI OFF/mock. 이전 시험 볼륨 보존 |
 | 개발 `repair-guide` / `http://localhost:8080` | [R019](records/19-local-deploy-persona-ux-review.md) · 2026-10-19 | M14 UI 반영, schema `0006_m13`·기존 배포 전후 건수 유지. 실제 설문/회원 이력/독립 챗봇 점검과 승인된 가상 누수·조문 응답 확인. 발견한 UX 장애는 미수정; 두 백업 사본은 같은 PC |
 | 격리 HTTPS preview / `https://localhost:18880` | [R007](records/07-m12-deployment-review.md) · 2026-10-06 | 당시 schema `0005_m10`, OpenAI OFF의 배포/보안 검증. M13 반영·현재 실행 여부를 확인한 기록은 없음 |
 | 실제 운영 서버·도메인 | [M12 작업](#m12-docker-운영-배포와-mvp-출시-확인) | 대상·담당/일정과 운영 설정·검증 증거 미확정. 운영 출시 완료로 판정하지 않음 |
@@ -47,7 +47,7 @@
 
 책임별 설계 정리와 D01/D02 해결 완료(2026-10-18). 설문 캐시 식별은 코드를 보완하고 백엔드 디렉터리 구조는 문서를 실제 배치에 맞췄다. 당시 코드·문서·프론트 회귀 검증은 [R015](records/15-design-implementation-alignment.md), 이후 개발 서비스 재배포는 [R019](records/19-local-deploy-persona-ux-review.md)를 따른다.
 
-PC·모바일 UI의 시인성과 화면 밀도를 개선하고 홈 안내를 부드러운 문장으로 보완했다. 소스·모의 API 확인은 [R017](records/17-mobile-density-plain-language.md)·[R018](records/18-friendly-home-copy.md), 실제 개발 서비스의 재배포와 1440·360px 흐름 점검은 [R019](records/19-local-deploy-persona-ux-review.md)를 따른다. 로그인 후 이력 대기, 단계 전환 위치, 필수 답변/모르는 주택의 복구, 일상 증상 분류와 챗봇 재질문 등이 남았다. 실제 기기·스크린리더·실제 이용자 조사는 미수행이다.
+PC·모바일 UI와 부드러운 홈 안내의 개발 배포 관측은 [R019](records/19-local-deploy-persona-ux-review.md)를 따른다. 이후 발견한 UX01~UX08은 [최종 구현/검증](records/27-ux08-focus-and-integration.md)에 따라 수정했다. UX06에는 사용자가 선택한 본인 설문 결과의 입력만 챗봇으로 복사하도록 요구를 개정했다. 개발 8080에는 아직 이 수정들을 재배포하지 않았다. 실제 기기·스크린리더·실제 이용자 조사도 미수행이다.
 
 ## 남은 작업
 
@@ -78,8 +78,4 @@ PC·모바일 UI의 시인성과 화면 밀도를 개선하고 홈 안내를 부
 
 ## M15. 서비스 흐름의 진행 장애와 이해 개선
 
-사용자가 UX01~UX08의 최소 수정과 각 UX별 커밋을 요청했다. 기존 작업은 c46ea96에 저장했다. UX06은 사용자 선택에 따른 설문 불러오기를 추가하도록 요구가 개정됐다. 법적 판단 범위, 검토된 자료와 ID, 회원 사이 데이터 격리는 유지한다. 실제 운영 인수는 M12와 별도다.
-
-| 작업 ID | 상태 | 작업과 완료 증거 | 담당 역할 | 선행 조건 |
-| --- | --- | --- | --- | --- |
-| T-M15-07 | 대기 | P2 UX08: 결과 삭제 확인의 초점 이동과 취소 시 복귀 보완. 키보드만으로 확인/취소 영역을 찾고 원래 조작점으로 복귀 | 프론트, QA | R019 |
+사용자가 요청한 최소 수정·선택적 설문 불러오기·UX별 커밋을 완료했다. 기존 작업의 기준 커밋은 c46ea96이다. 완료 ID·커밋·검증과 한계는 [R027](records/27-ux08-focus-and-integration.md)에 보존한다. 이 단계의 구현 대기 행은 없으며 개발 8080 배포와 실제 운영 인수는 완료로 표시하지 않는다. 법적 판단 범위, 검토된 자료와 ID, 계정 격리는 유지한다.
