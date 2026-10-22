@@ -164,6 +164,7 @@ function Conversation({ session, reference, restart }: { session: Session; refer
     <p className="eyebrow">회원 상담</p><h1>검토된 자료로 질문하기</h1>
     <p>관련 조문 원문과 확인할 내용을 안내해요. 보수·비용·교체 여부는 담당 기관 확인이 필요해요.</p>
     <p>필요한 내용은 이 대화에서 확인할게요. 원하시면 이전 설문을 골라 불러올 수도 있어요.</p>
+    <p>이 대화는 현재 창에서 이어볼 수 있어요. 로그아웃하거나 창을 닫으면 새 대화로 시작해요.</p>
     {catalog.data && <p className="context-path">확인한 내용: {[catalog.data.housingTypes.find(item => item.id === session.context.housingType)?.label, catalog.data.rooms.find(item => item.id === session.context.roomId)?.label, catalog.data.facilities.find(item => item.id === session.context.facilityId)?.label, catalog.data.symptoms.find(item => item.id === session.context.symptomId)?.label].filter(Boolean).join(' · ') || '아직 없어요. 불편한 증상부터 알려 주세요.'}{!!Object.keys(session.context.answers ?? {}).length && ` · 설문 답변 ${Object.keys(session.context.answers ?? {}).length}개`}</p>}
     <SurveyImport disabled={busy || !!pending || resetting || confirmReset || delay.waiting} load={loadSurvey} />
     <button className="secondary" disabled={busy || !!pending || resetting} onClick={() => setConfirmReset(true)}>대화 초기화</button>

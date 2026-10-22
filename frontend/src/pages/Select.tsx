@@ -55,6 +55,7 @@ function SelectForm({ session, reference, catalog }: { session: Session; referen
     <SurveyProgress step={1} />
     <div className="consultation-layout">
     <section className="notice form-panel"><p className="eyebrow">01 · 주택과 증상</p><h1>어디가 불편한가요?</h1><p>공간을 먼저 고르면, 그곳에 맞는 시설물과 증상을 차례로 선택할 수 있어요.</p>
+      {reference.mode === 'GUEST' && <p>비회원 설문은 현재 창에서 이어볼 수 있어요. 결과를 계정에 모아 두고 싶으시면 로그인한 뒤 새 설문을 시작해 주세요.</p>}
       {!!readPending(reference.id) && <p role="status">처리 중인 평가가 있어요. <Link to="/survey">설문 화면에서 완료 여부 확인</Link></p>}
       <form onSubmit={event => { event.preventDefault(); void save() }}>
         <fieldset className="housing-options" disabled={locked}><legend>주택 유형</legend>{catalog.housingTypes.map(item => <label className="choice" key={item.id}><input type="radio" name="housingType" value={item.id} checked={context.housingType === item.id} onChange={() => select('housingType', item.id)} />{item.label}</label>)}</fieldset>

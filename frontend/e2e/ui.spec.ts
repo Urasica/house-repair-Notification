@@ -11,6 +11,8 @@ async function mockUI(page: Page, signedIn = false, choices: Catalog = catalog) 
     const request = route.request()
     const path = new URL(request.url()).pathname.replace('/api/v1', '')
     if (path === '/auth/me') return route.fulfill({ json: signedIn ? member : { user: null, csrfToken: null } })
+    if (path === '/auth/register') return route.fulfill({ status: 201, json: member.user })
+    if (path === '/auth/login') { signedIn = true; return route.fulfill({ json: member }) }
     if (path === '/catalog') return route.fulfill({ json: choices })
     if (path === '/sessions' && request.method() === 'POST') {
       session = { ...sessionFixture(signedIn), catalogVersion: choices.version, purpose: (request.postDataJSON() as { purpose: 'SURVEY' | 'CHAT' }).purpose }
@@ -127,6 +129,28 @@ test('selection, answers, result and end confirmation remain readable', async ({
   await expect(page).toHaveURL(/\/result\//)
   await page.getByRole('button', { name: '상담 종료', exact: true }).click()
   await visibleControls(page, 'result-confirm', info)
+})
+
+for (const succeeds of [true, false]) test(`signup continues to login without password re-entry (success=${succeeds})`, async ({ page }) => {
+  await mockUI(page)
+  if (!succeeds) await page.route('**/api/v1/auth/login', route => route.fulfill({ status: 503, json: { error: { code: 'SERVICE_UNAVAILABLE', message: '연결을 확인해 주세요.' } } }))
+  await page.goto('/')
+  await page.getByRole('button', { name: '새 설문 시작', exact: true }).click()
+  await expect(page).toHaveURL('/select')
+  await page.getByRole('link', { name: '이전 결과', exact: true }).click()
+  await page.getByRole('link', { name: '로그인하기', exact: true }).click()
+  await expect(page.getByText(/로그인하면 진행 중인 비회원 상담은/)).toBeVisible()
+  await page.getByRole('button', { name: '회원가입', exact: true }).click()
+  await page.getByLabel('이메일', { exact: true }).fill('signup-only@example.com')
+  await page.getByLabel('비밀번호', { exact: true }).fill('test-only-strong-passphrase')
+  await page.getByRole('button', { name: '가입하기', exact: true }).click()
+  if (succeeds) { await expect(page).toHaveURL('/history'); await expect(page.locator('.history-list a')).toBeVisible() }
+  else {
+    await expect(page.getByText(/가입은 완료됐어요/)).toBeVisible()
+    await expect(page.getByRole('heading', { name: '로그인', exact: true })).toBeVisible()
+    await expect(page.getByLabel('비밀번호', { exact: true })).toHaveValue('')
+    await expect(page.getByLabel('이메일', { exact: true })).toHaveValue('signup-only@example.com')
+  }
 })
 
 test('kitchen sink finishing links everyday leakage to the existing pipe symptom', async ({ page }) => {
