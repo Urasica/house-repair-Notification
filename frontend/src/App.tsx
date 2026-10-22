@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, NavLink, Route, Routes, useNavigate } from 'react-router-dom'
+import { useLayoutEffect, useRef, useState } from 'react'
+import { Link, NavLink, Route, Routes, useLocation, useNavigate, useNavigationType } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { ApiError } from './api/client'
 import { logout } from './features/auth/api'
@@ -18,6 +18,25 @@ export default function App() {
   const auth = useAuth()
   const client = useQueryClient()
   const navigate = useNavigate()
+  const location = useLocation()
+  const navigationType = useNavigationType()
+  const page = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    if (navigationType === 'POP') return
+    window.scrollTo(0, 0)
+    const focusTitle = () => {
+      const title = page.current?.querySelector<HTMLElement>('h1, h2')
+      if (!title) return false
+      title.tabIndex = -1
+      title.focus({ preventScroll: true })
+      return true
+    }
+    if (focusTitle()) return
+    // Destination data may arrive after the route's loading screen.
+    const observer = new MutationObserver(() => { if (focusTitle()) observer.disconnect() })
+    observer.observe(page.current!, { childList: true, subtree: true })
+    return () => observer.disconnect()
+  }, [location.pathname, navigationType])
   const [message, setMessage] = useState('')
   const [leaving, setLeaving] = useState(false)
   async function leave() {
@@ -46,7 +65,7 @@ export default function App() {
       </nav>
     </header>
     {message && <p role="alert">{message}</p>}
-    <Routes>
+    <div ref={page}><Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/select" element={<Select />} />
@@ -56,7 +75,7 @@ export default function App() {
       <Route path="/history" element={<MemberOnly><History /></MemberOnly>} />
       <Route path="/history/:resultId" element={<MemberOnly><HistoryDetail /></MemberOnly>} />
       <Route path="*" element={<section className="notice"><h1>페이지를 찾을 수 없어요</h1><Link to="/">홈으로 돌아가기</Link></section>} />
-    </Routes>
+    </Routes></div>
     <footer>수리가 가능한지는 담당 기관에 확인해 주세요.</footer>
   </main>
 }

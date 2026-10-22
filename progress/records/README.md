@@ -28,3 +28,4 @@
 | R018 | 2026-10-19 | [홈 안내 문구의 말투와 설명 보완](18-friendly-home-copy.md) | 로컬 소스·Node 22.23.1·Vite·Chromium PC/모바일 에뮬레이션·mock HTTP | R017의 간결한 홈 문구를 부드러운 말투와 충분한 설명으로 보완한다. R017의 화면 밀도와 기존 서비스 배포 관측은 유지한다. |
 | R019 | 2026-10-19 | [로컬 재배포와 페르소나별 서비스 흐름 점검](19-local-deploy-persona-ux-review.md) | repair-guide·localhost:8080·실제 API/DB·Chromium PC/모바일 에뮬레이션·OpenAI ON | R016~R018의 UI와 홈 문구를 개발 서비스에 배포하고 실제 흐름을 점검했다. R010의 로컬 배포 관측을 갱신하며 격리 시험·HTTPS preview·실제 운영 인수 결과는 대체하지 않는다. |
 | R020 | 2026-10-22 | [UX01 로그인 전환 후 회원 화면 조회 복구](20-ux01-auth-transition.md) | 로컬 소스·Node 22.23.1·Vitest/jsdom·mock API | R019의 UX01 진행 장애를 수정한다. 기준 커밋 c46ea96 이후의 첫 UX 수정이며 서비스 재배포 관측은 R019를 유지한다. |
+| R021 | 2026-10-22 | [UX02 단계 이동의 화면 위치와 제목 초점](21-ux02-step-navigation.md) | 로컬 소스·Vite·Chromium PC/모바일·mock API | R019의 UX02를 수정한다. R020의 인증 수정 이후이며 실제 서비스 배포 관측은 R019를 유지한다. |
