@@ -11,7 +11,7 @@ from app.auth.security import new_token, token_hash
 from app.core.errors import AppError
 from app.db.models import Consultation, QuestionRecord, Result
 from app.db.requests import RequestRepository, request_fingerprint
-from app.domain.constants import ErrorCode, RequestKind, RequestStatus
+from app.domain.constants import ErrorCode, RequestKind, RequestStatus, SessionPurpose
 from app.schemas.contracts import (
     Context,
     ContextUpdate,
@@ -26,7 +26,13 @@ from app.schemas.contracts import (
 )
 from app.services.catalog import require_latest_catalog
 from app.services.chat import replay_chat
-from app.services.consultations import check_revision, latest_knowledge, pinned_catalog, session_dto
+from app.services.consultations import (
+    check_revision,
+    latest_knowledge,
+    pinned_catalog,
+    require_purpose,
+    session_dto,
+)
 from app.services.deletion import delete_questions, delete_result, log_deletion
 from app.services.deletion_export import export_after_delete
 from app.services.guidance import add_years, result_dto, unavailable_result
@@ -65,13 +71,14 @@ async def create_session(body: SessionCreate, request: Request):
     db, settings = request.app.state.database, request.app.state.settings
     require_json_origin(request)
     async with db.transaction() as session:
-        principal = await account(request, session, required=False)
+        principal = await account(request, session, required=body.purpose == SessionPurpose.CHAT)
         if principal:
             require_csrf(request, principal)
             check_question_deletion(request, principal.user.id)
         await require_latest_catalog(session, body.catalog_version)
         token = None if principal else new_token()
         row = Consultation(
+            purpose=body.purpose,
             owner_user_id=principal.user.id if principal else None,
             guest_token_hash=token_hash(token) if token else None,
             catalog_version=body.catalog_version,
@@ -102,6 +109,10 @@ async def update_context(consultation_id: UUID, body: ContextUpdate, request: Re
             check_revision(row, body.expected_revision)
             catalog = await pinned_catalog(session, row)
             previous = Context.model_validate(row.context_json)
+            if row.purpose == SessionPurpose.CHAT and body.context.answers:
+                raise AppError(
+                    ErrorCode.INVALID_ANSWER, "챗봇에서는 설문 답변을 사용하지 않아요.", 422
+                )
             canonical = survey_policy(catalog, body.context, previous).context.model_dump(
                 mode="json", by_alias=True
             )
@@ -119,6 +130,7 @@ async def update_context(consultation_id: UUID, body: ContextUpdate, request: Re
 async def get_questions(consultation_id: UUID, request: Request):
     async with request.app.state.database.session() as session:
         row = await own_consultation(request, session, consultation_id)
+        require_purpose(row, SessionPurpose.SURVEY)
         catalog = await pinned_catalog(session, row)
         return survey_policy(catalog, Context.model_validate(row.context_json)).questions_response(
             row.catalog_version, row.revision
@@ -148,7 +160,8 @@ async def evaluate(
         RequestKind.SURVEY, body.model_dump(mode="json", by_alias=True)
     )
     async with db.session() as session:
-        await own_consultation(request, session, consultation_id, mutation=True)
+        row = await own_consultation(request, session, consultation_id, mutation=True)
+        require_purpose(row, SessionPurpose.SURVEY)
         existing = await repository.lookup(session, consultation_id, body.request_id)
         if existing:
             reservation = repository.existing(existing, RequestKind.SURVEY, fingerprint)

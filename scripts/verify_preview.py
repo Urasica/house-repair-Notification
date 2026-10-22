@@ -80,7 +80,7 @@ def main():
         "-Atc",
         "SELECT version_num FROM alembic_version",
     ).strip()
-    assert schema == "0005_m10"
+    assert schema == "0006_m13"
     role = docker(
         "exec",
         services["db"]["Id"],
@@ -90,7 +90,8 @@ def main():
         "-d",
         "repair_guide_preview",
         "-Atc",
-        "SELECT rolsuper OR rolcreatedb OR rolcreaterole FROM pg_roles WHERE rolname='repair_guide'",
+        "SELECT rolsuper OR rolcreatedb OR rolcreaterole FROM pg_roles "
+        "WHERE rolname='repair_guide'",
     ).strip()
     assert role == "f"
     cert = ROOT / "data/private/preview/local-ca.crt"

@@ -93,10 +93,13 @@ class Consultation(Identity, Created, Base):
     __table_args__ = (
         CheckConstraint("(owner_user_id IS NULL) <> (guest_token_hash IS NULL)", name="one_owner"),
         CheckConstraint("revision >= 0", name="revision"),
+        CheckConstraint("purpose IN ('SURVEY', 'CHAT')", name="purpose"),
+        CheckConstraint("purpose <> 'CHAT' OR owner_user_id IS NOT NULL", name="chat_member"),
         CheckConstraint("expires_at > created_at", name="expiry"),
     )
     owner_user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
     guest_token_hash: Mapped[str | None] = mapped_column(String(64))
+    purpose: Mapped[str] = mapped_column(String(16), server_default="SURVEY")
     catalog_version: Mapped[str] = mapped_column(ForeignKey("catalogs.version"))
     knowledge_set_id: Mapped[UUID | None] = mapped_column(ForeignKey("knowledge_sets.id"))
     revision: Mapped[int] = mapped_column(Integer, server_default="0")

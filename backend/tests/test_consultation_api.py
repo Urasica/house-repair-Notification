@@ -30,13 +30,15 @@ async def survey_client(pg_session):
         yield client, app
 
 
-async def start(client, *, member=False):
+async def start(client, *, member=False, purpose="SURVEY"):
     headers = {"Origin": ORIGIN, "Content-Type": "application/json"}
     if member:
         state = (await signed_in(client)).json()
         headers["X-CSRF-Token"] = state["csrfToken"]
     response = await client.post(
-        "/api/v1/sessions", json={"catalogVersion": "test-only-v1"}, headers=headers
+        "/api/v1/sessions",
+        json={"catalogVersion": "test-only-v1", "purpose": purpose},
+        headers=headers,
     )
     assert response.status_code == 201, response.text
     data = response.json()
@@ -51,7 +53,7 @@ async def fill(client, session, headers, **changes):
         "roomId": "test-room",
         "facilityId": "test-facility",
         "symptomId": "test-symptom",
-        "answers": {"test-question": "UNKNOWN"},
+        "answers": {} if session.get("purpose") == "CHAT" else {"test-question": "UNKNOWN"},
         **changes,
     }
     response = await client.put(

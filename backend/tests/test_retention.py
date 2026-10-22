@@ -123,7 +123,7 @@ async def test_restore_preserves_question_only_marker_for_next_export(pg_session
 @pytest.mark.integration
 async def test_statistics_classifies_chat_context_without_survey_wrapper(survey_client, pg_session):
     client, _ = survey_client
-    snapshot, headers, _ = await start(client, member=True)
+    snapshot, headers, _ = await start(client, member=True, purpose="CHAT")
     snapshot = await fill(client, snapshot, headers)
     response = await client.post(
         f"/api/v1/sessions/{snapshot['id']}/chat/messages",

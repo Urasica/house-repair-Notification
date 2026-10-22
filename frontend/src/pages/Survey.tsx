@@ -27,8 +27,8 @@ function AnswerFields({ questions, session, locked, answer, error }: { questions
 function SurveyActive({ session, reference, catalog }: { session: Session; reference: SessionRef; catalog: Catalog }) {
   const auth = useAuth()
   const client = useQueryClient()
-  const evaluation = useEvaluation(reference, session, auth.data?.csrfToken)
-  const questions = useQuery({ queryKey: ['questions', session.id, session.revision], queryFn: ({ signal }) => getQuestions(reference, signal), retry: false, refetchOnWindowFocus: false })
+  const evaluation = useEvaluation(reference, session, auth.data?.user?.id ?? null, auth.data?.csrfToken)
+  const questions = useQuery({ queryKey: ['questions', session.id, session.revision, auth.data?.user?.id ?? null, 'SURVEY'], queryFn: ({ signal }) => getQuestions(reference, signal), retry: false, refetchOnWindowFocus: false })
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<unknown>(null)
   const guard = useRef(false)
@@ -56,7 +56,7 @@ function SurveyActive({ session, reference, catalog }: { session: Session; refer
       const saved = await saveContext(reference, session, { ...session.context, answers: { ...session.context.answers, [id]: value } }, auth.data?.csrfToken)
       if (!referenceIsActive(reference, epoch)) return
       if (answerFocus.current) answerFocus.current.revision = saved.revision
-      client.setQueryData(['session', reference.id], saved)
+      client.setQueryData(['session', reference.id, auth.data?.user?.id ?? null, 'SURVEY'], saved)
       if (questions.data!.questions.find(question => question.questionId === id)?.interruptValues?.includes(value)) evaluation.start(saved)
     } catch (cause) { if (referenceIsActive(reference, epoch)) { if (answerFocus.current) answerFocus.current.revision = session.revision; setSaveError(cause); delay.pause(cause) } }
     finally { guard.current = false; if (referenceIsActive(reference, epoch)) setSaving(false) }
@@ -66,7 +66,7 @@ function SurveyActive({ session, reference, catalog }: { session: Session; refer
     try {
       const latest = await getSession(reference)
       if (!referenceIsActive(reference, epoch)) return
-      client.setQueryData(['session', reference.id], latest)
+      client.setQueryData(['session', reference.id, auth.data?.user?.id ?? null, 'SURVEY'], latest)
       client.removeQueries({ queryKey: ['questions', reference.id] })
       setSaveError(null)
     } catch (cause) { if (referenceIsActive(reference, epoch)) setSaveError(cause) }
@@ -86,7 +86,7 @@ function SurveyActive({ session, reference, catalog }: { session: Session; refer
       {evaluation.error instanceof ApiError && evaluation.error.code === 'CONTEXT_CONFLICT' && <button className="secondary" onClick={() => void reload()}>최신 입력 불러오기</button>}
       {evaluation.message && <p role="status">{evaluation.message}</p>}
       {evaluation.pending ? <div className="recovery-panel"><p>평가 요청이 남아 있어요. 저장된 결과를 먼저 확인해 주세요.</p><div className="actions"><button disabled={evaluation.busy || evaluation.waiting} onClick={() => void evaluation.recover()}>완료 여부 확인</button><button className="secondary" disabled={evaluation.busy || evaluation.waiting} onClick={evaluation.resend}>같은 요청 다시 보내기</button></div></div> : <button disabled={saving || evaluation.busy || evaluation.waiting || !!saveError || !matching} onClick={() => evaluation.start()}>{evaluation.busy ? '평가하고 있어요' : evaluation.message ? '새 평가로 다시 시도' : '안내 결과 확인'}</button>}
-      {!locked && <p className="continue-link"><Link to="/select">주택·증상 수정</Link></p>}
+      {!locked && <p className="continue-link"><Link className="button-link secondary" to="/select">주택·증상 수정</Link></p>}
     </section>
     <SelectionSummary catalog={catalog} context={session.context} />
     </div>

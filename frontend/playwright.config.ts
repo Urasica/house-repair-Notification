@@ -15,5 +15,8 @@ export default defineConfig({
   outputDir: '../artifacts/playwright',
   reporter: [['list']],
   use: { baseURL, ignoreHTTPSErrors: allowLocalCertificate, trace: 'retain-on-failure' },
-  projects: [{ name: 'chromium-mobile', use: { ...devices['Desktop Chrome'], viewport: { width: 360, height: 800 } } }],
+  projects: [
+    { name: 'chromium-desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 1000 } } },
+    { name: 'chromium-mobile', use: { ...devices['Pixel 7'], viewport: { width: 360, height: 800 } } },
+  ],
 })

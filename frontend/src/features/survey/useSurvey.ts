@@ -5,19 +5,19 @@ import { getSession } from './api'
 import { clearSession, referenceFrom, storedReference, subscribe } from './storage'
 import { ApiError } from '../../api/client'
 
-export function useSurvey() {
+export function useSurvey(purpose: 'SURVEY' | 'CHAT' = 'SURVEY') {
   const auth = useAuth()
   const client = useQueryClient()
   const member = !!auth.data?.user && !auth.isError
-  const raw = useSyncExternalStore(subscribe, () => storedReference(member), () => null)
-  const reference = useMemo(() => referenceFrom(raw, member), [raw, member])
-  const query = useQuery({ queryKey: ['session', reference?.id], enabled: !!reference && !auth.isPending && !auth.isError,
+  const raw = useSyncExternalStore(subscribe, () => storedReference(member, purpose), () => null)
+  const reference = useMemo(() => referenceFrom(raw, member, purpose), [raw, member, purpose])
+  const query = useQuery({ queryKey: purpose === 'CHAT' ? ['chat-session', reference?.id, auth.data?.user?.id, 'CHAT'] : ['session', reference?.id, auth.data?.user?.id ?? null, 'SURVEY'], enabled: !!reference && !auth.isPending && !auth.isError,
     queryFn: ({ signal }) => getSession(reference!, signal), retry: false, refetchOnWindowFocus: false })
   useEffect(() => {
     if (!reference) return
     const expire = () => {
       clearSession(reference)
-      client.removeQueries({ predicate: q => ['session', 'result', 'questions', 'chat'].includes(String(q.queryKey[0])) && q.queryKey[1] === reference.id })
+      client.removeQueries({ predicate: q => ['session', 'chat-session', 'result', 'questions', 'chat'].includes(String(q.queryKey[0])) && q.queryKey[1] === reference.id })
     }
     if (query.error instanceof ApiError && ['UNAUTHORIZED', 'SESSION_EXPIRED', 'NOT_FOUND'].includes(query.error.code)) { expire(); return }
     const unavailable = (event: Event) => { if ((event as CustomEvent<{ id: string }>).detail.id === reference.id) expire() }

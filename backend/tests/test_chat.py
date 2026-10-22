@@ -27,7 +27,7 @@ from app.services.generation import (
     validate_draft,
 )
 from app.services.knowledge import withdraw_source
-from app.services.retrieval import Evidence, Retrieval
+from app.services.retrieval import Evidence, Retrieval, source_excerpt
 
 
 def enabled():
@@ -153,6 +153,7 @@ def test_annex_display_preserves_all_columns_rows_and_exceptions():
     chunk = SimpleNamespace(id=uuid4(), body=json.dumps(table), metadata_json={"role": "ANNEX"})
     found = Retrieval(evidence=[Evidence(chunk, SimpleNamespace(), use="APPLICABLE")])
     output = annex_texts(found)[0]
+    assert source_excerpt(chunk) == output
     assert all(
         value in output
         for value in [
@@ -235,7 +236,7 @@ async def test_runtime_purpose_privacy_failure_and_deadline(pg_session):
 @pytest.mark.integration
 async def test_chat_atomic_history_replay_revision_and_question_deletion(chat_client, pg_session):
     client, app = chat_client
-    snapshot, headers, _ = await start(client, member=True)
+    snapshot, headers, _ = await start(client, member=True, purpose="CHAT")
     snapshot = await fill(client, snapshot, headers)
     url = f"/api/v1/sessions/{snapshot['id']}/chat/messages"
     body = {
@@ -288,7 +289,7 @@ async def test_chat_permissions_pagination_and_failed_run(chat_client, pg_sessio
     guest, guest_headers, _ = await start(client)
     guest_url = f"/api/v1/sessions/{guest['id']}/chat/messages"
     assert (await client.get(guest_url, headers=guest_headers)).status_code == 401
-    snapshot, headers, _ = await start(client, member=True)
+    snapshot, headers, _ = await start(client, member=True, purpose="CHAT")
     assert (await client.get(guest_url, headers=headers)).status_code == 404
     url = f"/api/v1/sessions/{snapshot['id']}/chat/messages"
     for _ in range(3):
@@ -323,7 +324,7 @@ async def test_chat_permissions_pagination_and_failed_run(chat_client, pg_sessio
 @pytest.mark.integration
 async def test_final_withdrawal_cannot_commit_grounded_answer(chat_client, pg_session):
     client, app = chat_client
-    snapshot, headers, _ = await start(client, member=True)
+    snapshot, headers, _ = await start(client, member=True, purpose="CHAT")
     snapshot = await fill(client, snapshot, headers)
     release, doc, chunk = await seed_release(
         pg_session, catalog=await pg_session.get(Catalog, snapshot["catalogVersion"])
@@ -378,7 +379,7 @@ async def test_final_withdrawal_cannot_commit_grounded_answer(chat_client, pg_se
 @pytest.mark.integration
 async def test_inflight_chat_lock_and_cancel_do_not_store_late_messages(chat_client, pg_session):
     client, app = chat_client
-    snapshot, headers, _ = await start(client, member=True)
+    snapshot, headers, _ = await start(client, member=True, purpose="CHAT")
     snapshot = await fill(client, snapshot, headers)
     url = f"/api/v1/sessions/{snapshot['id']}/chat/messages"
     body = {"requestId": str(uuid4()), "expectedRevision": snapshot["revision"], "content": "문의"}

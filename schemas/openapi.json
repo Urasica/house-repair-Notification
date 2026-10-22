@@ -322,6 +322,17 @@
             ],
             "title": "Effectivedate"
           },
+          "excerpt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Excerpt"
+          },
           "kind": {
             "enum": [
               "LAW_CRITERIA",
@@ -494,6 +505,7 @@
           "CATALOG_UPDATED",
           "CONTEXT_CONFLICT",
           "SESSION_BUSY",
+          "SESSION_PURPOSE_MISMATCH",
           "REQUEST_IN_PROGRESS",
           "REQUEST_FAILED",
           "REQUEST_DELETED",
@@ -1157,6 +1169,10 @@
             ],
             "title": "Knowledgereleaseid"
           },
+          "purpose": {
+            "$ref": "#/components/schemas/SessionPurpose",
+            "default": "SURVEY"
+          },
           "revision": {
             "minimum": 0.0,
             "title": "Revision",
@@ -1184,6 +1200,10 @@
             "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$",
             "title": "Catalogversion",
             "type": "string"
+          },
+          "purpose": {
+            "$ref": "#/components/schemas/SessionPurpose",
+            "default": "SURVEY"
           }
         },
         "required": [
@@ -1216,6 +1236,14 @@
         ],
         "title": "SessionCreated",
         "type": "object"
+      },
+      "SessionPurpose": {
+        "enum": [
+          "SURVEY",
+          "CHAT"
+        ],
+        "title": "SessionPurpose",
+        "type": "string"
       },
       "SymptomItem": {
         "additionalProperties": false,

@@ -35,7 +35,7 @@ def main():
         try:
             catalog = client.get("/api/v1/catalog").json()
             created = client.post(
-                "/api/v1/sessions", json={"catalogVersion": catalog["version"]}
+                "/api/v1/sessions", json={"catalogVersion": catalog["version"], "purpose": "CHAT"}
             )
             assert created.status_code == 201
             snapshot = created.json()["session"]
@@ -55,14 +55,7 @@ def main():
                 )
                 assert changed.status_code == 200
                 snapshot = changed.json()
-                questions = client.get(path + "/questions").json()["questions"]
-                missing = [
-                    q for q in questions if q["questionId"] not in context["answers"]
-                ]
-                if not missing:
-                    break
-                for question in missing:
-                    context["answers"][question["questionId"]] = "UNKNOWN"
+                break  # Chat confirms its own context and never loads survey questions.
             body = {
                 "requestId": str(uuid4()),
                 "expectedRevision": snapshot["revision"],
@@ -71,18 +64,12 @@ def main():
             result = client.post(path + "/chat/messages", json=body)
             assert result.status_code == 200
             answer = result.json()
-            assert (
-                answer["answerMode"] == "GROUNDED"
-                and answer["status"] == "GUIDANCE_AVAILABLE"
-            )
+            assert answer["answerMode"] == "GROUNDED" and answer["status"] == "GUIDANCE_AVAILABLE"
             assert "비고:" in answer["assistantMessage"]["content"]
             assert "유지관리 부실" in answer["assistantMessage"]["content"]
             assert client.post(path + "/chat/messages", json=body).json() == answer
             assert client.get(path + "/chat/messages").json()["items"] == [answer]
-            assert (
-                client.get(path + "/requests/" + body["requestId"]).json()["response"]
-                == answer
-            )
+            assert client.get(path + "/requests/" + body["requestId"]).json()["response"] == answer
             context["description"] = "합성 확인 입력"
             changed = client.put(
                 path + "/context",
@@ -96,9 +83,7 @@ def main():
                     "readiness": client.get("/health/ready").json(),
                     "answerMode": answer["answerMode"],
                     "status": answer["status"],
-                    "locators": [
-                        c["locator"] for c in answer["assistantMessage"]["citations"]
-                    ],
+                    "locators": [c["locator"] for c in answer["assistantMessage"]["citations"]],
                     "annexFootnotePresent": True,
                     "sameRequestReplay": True,
                     "historyRestored": True,
@@ -109,17 +94,13 @@ def main():
         finally:
             if session_id:
                 assert client.delete("/api/v1/me/question-records").status_code == 204
-                assert (
-                    client.delete(f"/api/v1/sessions/{session_id}").status_code == 204
-                )
+                assert client.delete(f"/api/v1/sessions/{session_id}").status_code == 204
             assert client.post("/api/v1/auth/logout").status_code == 204
         report["syntheticConversationRemoved"] = True
         args.output.write_text(
             json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
-    print(
-        "M10 live smoke passed: generation, annex, history, replay, stale display, cleanup"
-    )
+    print("M10 live smoke passed: generation, annex, history, replay, stale display, cleanup")
 
 
 if __name__ == "__main__":

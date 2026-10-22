@@ -7,10 +7,10 @@ import { clearPending, identityEpoch, readPending, storePending, storedReference
 import type { Guidance, Pending, Session, SessionRef } from './storage'
 
 export function referenceIsActive(ref: SessionRef, epoch: number) {
-  return identityEpoch() === epoch && referenceFrom(storedReference(ref.mode === 'MEMBER'), ref.mode === 'MEMBER')?.id === ref.id
+  return identityEpoch() === epoch && referenceFrom(storedReference(ref.mode === 'MEMBER', ref.purpose), ref.mode === 'MEMBER', ref.purpose)?.id === ref.id
 }
 
-export function useEvaluation(ref: SessionRef, session: Session, csrf?: string | null) {
+export function useEvaluation(ref: SessionRef, session: Session, userId: string | null, csrf?: string | null) {
   const client = useQueryClient()
   const navigate = useNavigate()
   const [pending, setPending] = useState<Pending | null>(() => readPending(ref.id))
@@ -27,7 +27,7 @@ export function useEvaluation(ref: SessionRef, session: Session, csrf?: string |
 
   function finish(result: Guidance) {
     clearPending(ref.id); setPending(null)
-    client.setQueryData(['result', ref.id, result.id], result)
+    client.setQueryData(['result', ref.id, result.id, userId, 'SURVEY'], result)
     void client.invalidateQueries({ queryKey: ['session', ref.id] })
     void navigate('/result/' + result.id)
   }

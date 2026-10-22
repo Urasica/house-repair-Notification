@@ -9,4 +9,4 @@
 
 평가 통과 범위는 검토 원문 선택·인용과 서버의 적격성 정책이다. 자유 재서술이나 LH 운영 판단의 정확도를 입증하지 않는다. 실제 호출은 비용을 발생시킬 수 있고 데이터 공유 혜택의 계정 자격은 확인하지 않았다. 보고서 generationTokens는 해당 관리 평가의 생성 호출만 집계하며 질문 임베딩·별도 HTTP smoke 사용량은 제외한다.
 
-[완료 기록](../../../progress/05-m10-chat-review.md) · [재현 명령](../../../docs/13-member-chat.md)
+[완료 기록](../../../progress/records/05-m10-chat-review.md) · [재현 명령](../../../docs/ai/chat-generation.md)

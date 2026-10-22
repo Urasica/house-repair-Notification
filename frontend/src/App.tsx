@@ -41,7 +41,7 @@ export default function App() {
     <header className="topbar">
       <Link className="brand" to="/"><span className="brand-mark" aria-hidden="true">⌂</span> 우리집 보수 길잡이</Link>
       <nav aria-label="이용 메뉴">
-        <NavLink to="/chat">챗봇</NavLink><NavLink to="/history">이전 결과</NavLink>
+        <NavLink to="/" end>홈</NavLink><NavLink to="/chat">챗봇</NavLink><NavLink to="/history">이전 결과</NavLink>
         {auth.data?.user && !auth.isError ? <button className="nav-button" disabled={leaving} onClick={() => void leave()}>로그아웃</button> : <NavLink to="/login">로그인</NavLink>}
       </nav>
     </header>
@@ -57,6 +57,6 @@ export default function App() {
       <Route path="/history/:resultId" element={<MemberOnly><HistoryDetail /></MemberOnly>} />
       <Route path="*" element={<section className="notice"><h1>페이지를 찾을 수 없어요</h1><Link to="/">홈으로 돌아가기</Link></section>} />
     </Routes>
-    <footer>실제 보수 여부는 담당 기관 확인이 필요해요.</footer>
+    <footer>수리가 가능한지는 담당 기관에 확인해 주세요.</footer>
   </main>
 }

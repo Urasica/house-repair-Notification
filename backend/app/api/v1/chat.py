@@ -12,8 +12,8 @@ from app.auth.access import own_consultation
 from app.core.errors import AppError
 from app.db.models import ChatUsage, Message, QuestionRecord, RequestRun
 from app.db.requests import request_fingerprint
-from app.domain.constants import ErrorCode, RequestKind
-from app.schemas.contracts import ChatHistory, ChatRequest, ChatResponse
+from app.domain.constants import ErrorCode, RequestKind, SessionPurpose
+from app.schemas.contracts import ChatHistory, ChatRequest, ChatResponse, Context
 from app.services.chat import (
     citation_check,
     fallback,
@@ -21,7 +21,8 @@ from app.services.chat import (
     replay_chat,
     stored_response,
 )
-from app.services.consultations import check_revision, pinned_catalog, session_dto
+from app.services.chat_context import confirmed_context
+from app.services.consultations import check_revision, pinned_catalog, require_purpose, session_dto
 from app.services.guidance import add_years
 from app.services.retrieval import revalidate_citations
 
@@ -109,7 +110,10 @@ async def send(consultation_id: UUID, body: ChatRequest, request: Request):
     db, settings = request.app.state.database, request.app.state.settings
     fingerprint = request_fingerprint(RequestKind.CHAT, body.model_dump(mode="json", by_alias=True))
     async with db.session() as session:
-        await own_consultation(request, session, consultation_id, member_only=True, mutation=True)
+        row = await own_consultation(
+            request, session, consultation_id, member_only=True, mutation=True
+        )
+        require_purpose(row, SessionPurpose.CHAT)
         existing = await repository.lookup(session, consultation_id, body.request_id)
         if existing:
             repository.existing(existing, RequestKind.CHAT, fingerprint)
@@ -126,6 +130,7 @@ async def send(consultation_id: UUID, body: ChatRequest, request: Request):
                             request, session, consultation_id, member_only=True, mutation=True
                         )
                         check_question_deletion(request, row.owner_user_id)
+                        require_purpose(row, SessionPurpose.CHAT)
                         check_revision(row, body.expected_revision)
                         await check_budget(session, row.owner_user_id, settings)
                         reservation = await repository.reserve(
@@ -133,8 +138,18 @@ async def send(consultation_id: UUID, body: ChatRequest, request: Request):
                         )
                         run_id = reservation.run_id
                         session.add(ChatUsage(owner_user_id=row.owner_user_id))
-                        snapshot = await session_dto(session, row)
                         catalog = await pinned_catalog(session, row)
+                        context = confirmed_context(
+                            Context.model_validate(row.context_json), body.content, catalog
+                        )
+                        canonical = context.model_dump(mode="json", by_alias=True)
+                        if canonical != Context.model_validate(row.context_json).model_dump(
+                            mode="json", by_alias=True
+                        ):
+                            row.context_json = canonical
+                            row.revision += 1
+                        await session.flush()
+                        snapshot = await session_dto(session, row)
                         messages = list(
                             (
                                 await session.scalars(

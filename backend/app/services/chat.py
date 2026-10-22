@@ -9,9 +9,9 @@ from uuid import uuid4
 from app.db.models import Consultation
 from app.domain.constants import DISCLAIMER, INSUFFICIENT_INFORMATION_MESSAGE, GuidanceStatus
 from app.schemas.contracts import ChatMessage, ChatResponse
+from app.services.chat_context import chat_policy
 from app.services.embeddings import Embeddings, EmbeddingUnavailable
 from app.services.generation import PROMPT_VERSION, GenerationUnavailable, Responses, annex_texts
-from app.services.guidance import evaluate_survey
 from app.services.retrieval import question_purpose, retrieve, revalidate_citations
 
 
@@ -55,13 +55,13 @@ async def chat_response(
     generator=None,
     deadline=None,
 ):
-    base = await evaluate_survey(snapshot, catalog, settings)
+    status, questions, guidance = chat_policy(snapshot.context, content)
     now = datetime.now(UTC)
     response = ChatResponse(
         request_id=request_id,
         context_revision=snapshot.revision,
-        answer_mode="CLARIFY" if base.status == "NEED_MORE_INFO" else "TEMPLATE",
-        status=base.status,
+        answer_mode="CLARIFY" if status == "NEED_MORE_INFO" else "TEMPLATE",
+        status=status,
         user_message=ChatMessage(
             id=uuid4(),
             request_id=request_id,
@@ -75,17 +75,19 @@ async def chat_response(
             id=uuid4(),
             request_id=request_id,
             role="ASSISTANT",
-            content="\n".join(base.guidance),
+            content=guidance or INSUFFICIENT_INFORMATION_MESSAGE,
             citations=[],
             created_at=now,
             is_current=True,
         ),
-        follow_up_questions=base.follow_up_questions,
+        follow_up_questions=questions,
         disclaimer=DISCLAIMER,
         is_current=True,
     )
     # A conservative interruption, never a diagnosis or an inferred repair rule.
-    if re.search(r"가스\s*(?:냄새|누출)|불꽃|불이\s*났|감전|붕괴|떨어지고", content):
+    if re.search(
+        r"가스\s*(?:냄새|누출)|타는\s*냄새|연기|스파크|불꽃|불이\s*났|감전|붕괴|떨어지고", content
+    ):
         return response.model_copy(
             update={
                 "status": GuidanceStatus.SAFETY_PRIORITY,
@@ -100,23 +102,22 @@ async def chat_response(
             }
         )
     if (
-        base.status != "NEED_CONFIRMATION"
+        status != "NEED_CONFIRMATION"
         or not snapshot.knowledge_release_id
         or not settings.openai_enabled
     ):
         return response
     purpose = question_purpose(content)
     # Free text and raw conversation never leave the server. Selected labels are reviewed.
-    query = " · ".join(
-        [
-            project_question(content),
-            base.summary.housing_label,
-            base.summary.room_label,
-            base.summary.facility_label,
-            base.summary.symptom_label,
-            *base.summary.answer_labels,
-        ]
-    )
+    labels = []
+    for field, items in [
+        ("housing_type", catalog.housing_types),
+        ("room_id", catalog.rooms),
+        ("facility_id", catalog.facilities),
+        ("symptom_id", catalog.symptoms),
+    ]:
+        labels.extend(item.label for item in items if item.id == getattr(snapshot.context, field))
+    query = " · ".join([project_question(content), *labels])
     loop = asyncio.get_running_loop()
     deadline = deadline or loop.time() + settings.chat_timeout_seconds - 2
     try:
@@ -145,7 +146,7 @@ async def chat_response(
                             "content": "\n".join(
                                 found.guidance + [INSUFFICIENT_INFORMATION_MESSAGE]
                             ),
-                            "citations": found.citations(),
+                            "citations": found.citations(excerpts=True),
                         }
                     ),
                 }
@@ -195,6 +196,7 @@ async def replay_chat(session, run, settings):
     row = await session.get(Consultation, run.consultation_id)
     current = bool(
         row
+        and row.purpose == "CHAT"
         and row.expires_at > datetime.now(UTC)
         and row.revision == response.context_revision
         and meta.get("engine") == PROMPT_VERSION

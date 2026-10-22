@@ -18,6 +18,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Progress records and Markdown references
+        run: |
+          python scripts/check_progress.py
+          python -m unittest discover -s scripts/tests -p "test_check_progress.py"
       - name: Frontend checks
         working-directory: frontend
         run: |

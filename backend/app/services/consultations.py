@@ -22,6 +22,7 @@ async def session_dto(session, row) -> Session:
     )
     return Session(
         id=row.id,
+        purpose=row.purpose,
         access_mode=AccessMode.MEMBER if row.owner_user_id else AccessMode.GUEST,
         catalog_version=row.catalog_version,
         knowledge_release_id=row.knowledge_set_id,
@@ -63,4 +64,13 @@ def check_revision(row, expected: int):
             "입력이 바뀌었어요. 최신 내용을 확인해 주세요.",
             409,
             {"revision": row.revision},
+        )
+
+
+def require_purpose(row, purpose):
+    if row.purpose != purpose:
+        raise AppError(
+            ErrorCode.SESSION_PURPOSE_MISMATCH,
+            "설문과 챗봇은 별도로 이용해 주세요. 챗봇에서 새 대화를 시작할 수 있어요.",
+            409,
         )

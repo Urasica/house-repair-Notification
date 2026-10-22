@@ -15,16 +15,11 @@ BASE = "http://localhost:18080"
 
 async def main():
     headers = {"Origin": BASE, "Content-Type": "application/json"}
-    samples = {
-        key: []
-        for key in ("catalog", "session", "questions", "history", "survey", "chat")
-    }
+    samples = {key: [] for key in ("catalog", "session", "questions", "history", "survey", "chat")}
     async with httpx.AsyncClient(base_url=BASE, headers=headers, timeout=30) as client:
         email = f"load-{uuid4().hex}@example.com"
         credentials = {"email": email, "password": "load-only-long-password"}
-        (
-            await client.post("/api/v1/auth/register", json=credentials)
-        ).raise_for_status()
+        (await client.post("/api/v1/auth/register", json=credentials)).raise_for_status()
         login = await client.post("/api/v1/auth/login", json=credentials)
         login.raise_for_status()
         client.headers["X-CSRF-Token"] = login.json()["csrfToken"]
@@ -37,6 +32,11 @@ async def main():
             created.raise_for_status()
             session = created.json()["session"]
             base = f"/api/v1/sessions/{session['id']}"
+            chat_created = await client.post(
+                "/api/v1/sessions", json={"catalogVersion": catalog["version"], "purpose": "CHAT"}
+            )
+            chat_created.raise_for_status()
+            chat_base = f"/api/v1/sessions/{chat_created.json()['session']['id']}"
             try:
                 for _ in range(5):
                     for kind, path in (
@@ -59,13 +59,14 @@ async def main():
                 ):
                     started = perf_counter()
                     response = await client.post(
-                        base + path,
+                        (chat_base if kind == "chat" else base) + path,
                         json={"requestId": str(uuid4()), "expectedRevision": 0, **body},
                     )
                     response.raise_for_status()
                     samples[kind].append((perf_counter() - started) * 1000)
             finally:
                 (await client.delete(base)).raise_for_status()
+                (await client.delete(chat_base)).raise_for_status()
 
         await asyncio.gather(*(user() for _ in range(20)))
         history = (await client.get("/api/v1/me/results?limit=50")).json()

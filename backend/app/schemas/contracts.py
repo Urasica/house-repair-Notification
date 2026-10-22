@@ -10,6 +10,7 @@ from app.domain.constants import (
     HousingType,
     RequestKind,
     RequestStatus,
+    SessionPurpose,
 )
 from app.schemas.base import APIModel
 from app.schemas.catalog import Question, Version
@@ -37,6 +38,7 @@ class QuestionsResponse(APIModel):
 
 class SessionCreate(APIModel):
     catalog_version: Version
+    purpose: SessionPurpose = SessionPurpose.SURVEY
 
 
 class SessionCreated(APIModel):
@@ -62,6 +64,7 @@ class ChatRequest(EvaluationRequest):
 
 class Session(APIModel):
     id: UUID
+    purpose: SessionPurpose = SessionPurpose.SURVEY
     access_mode: AccessMode
     catalog_version: str
     knowledge_release_id: UUID | None
@@ -91,6 +94,7 @@ class Citation(APIModel):
     title: str
     locator: str
     url: str
+    excerpt: str | None = None
     effective_date: str | None
     reviewed_at: AwareDatetime
     review_until: AwareDatetime

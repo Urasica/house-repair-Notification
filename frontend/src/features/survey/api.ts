@@ -10,7 +10,7 @@ export function headers(reference: SessionRef, csrf: string | null | undefined):
   return reference.mode === 'GUEST' ? { Authorization: 'Bearer ' + reference.token } : csrf ? { 'X-CSRF-Token': csrf } : {}
 }
 export const getCatalog = (version?: string, signal?: AbortSignal) => api<Catalog>('/catalog' + (version ? '?version=' + encodeURIComponent(version) : ''), { signal })
-export const createSession = (version: string, csrf?: string | null) => api<components['schemas']['SessionCreated']>('/sessions', { method: 'POST', headers: csrf ? { 'X-CSRF-Token': csrf } : {}, body: JSON.stringify({ catalogVersion: version }) })
+export const createSession = (version: string, csrf?: string | null, purpose: 'SURVEY' | 'CHAT' = 'SURVEY') => api<components['schemas']['SessionCreated']>('/sessions', { method: 'POST', headers: csrf ? { 'X-CSRF-Token': csrf } : {}, body: JSON.stringify({ catalogVersion: version, purpose }) })
 export const getSession = (ref: SessionRef, signal?: AbortSignal) => api<Session>(`/sessions/${ref.id}`, { headers: headers(ref, null), signal })
 export const saveContext = (ref: SessionRef, session: Session, context: Context, csrf?: string | null) => api<Session>(`/sessions/${ref.id}/context`, { method: 'PUT', headers: headers(ref, csrf), body: JSON.stringify({ context, expectedRevision: session.revision }) })
 export const getQuestions = (ref: SessionRef, signal?: AbortSignal) => api<Questions>(`/sessions/${ref.id}/questions`, { headers: headers(ref, null), signal })

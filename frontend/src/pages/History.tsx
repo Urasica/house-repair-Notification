@@ -41,16 +41,17 @@ function DeleteRecord({ resultId }: { resultId?: string }) {
     finally { guard.current = false; if (epoch === identityEpoch()) setBusy(false) }
   }
   return <section className="delete-panel">
-    {!confirming ? <button className="secondary" onClick={() => setConfirming(true)}>{resultId ? '이 결과 삭제' : '내 질문 기록 전체 삭제'}</button> : <>
+    {!confirming ? <button className="secondary danger" onClick={() => setConfirming(true)}>{resultId ? '이 결과 삭제' : '내 질문 기록 전체 삭제'}</button> : <>
       <p>{resultId ? '이 결과와 연결된 질문 기록을 삭제해요. 삭제 후에는 복원할 수 없어요.' : '서비스 개선을 위해 보관한 내 정제 질문 기록을 모두 삭제해요. 안내 결과와 계정은 그대로 남아요.'}</p>
-      <div className="actions"><button disabled={busy} onClick={() => void erase()}>삭제 확인</button><button className="secondary" disabled={busy} onClick={() => setConfirming(false)}>취소</button></div>
+      <div className="actions"><button className="danger" disabled={busy} onClick={() => void erase()}>삭제 확인</button><button className="secondary" disabled={busy} onClick={() => setConfirming(false)}>취소</button></div>
     </>}
     {message && <p role="status">{message}</p>}{!!error && <Feedback error={error} />}
   </section>
 }
 
 export default function History() {
-  const history = useInfiniteQuery({ queryKey: ['history'], initialPageParam: null as string | null, queryFn: ({ pageParam, signal }) => getHistory(pageParam, signal), getNextPageParam: page => page.nextCursor ?? undefined, retry: false })
+  const auth = useAuth()
+  const history = useInfiniteQuery({ queryKey: ['history', auth.data?.user?.id ?? null, 'SURVEY'], initialPageParam: null as string | null, queryFn: ({ pageParam, signal }) => getHistory(pageParam, signal), getNextPageParam: page => page.nextCursor ?? undefined, retry: false })
   if (history.isPending) return <Waiting />
   if (history.isError && !history.data) return <Feedback error={history.error} retry={() => void history.refetch()} />
   const items = history.data?.pages.flatMap(page => page.items) ?? []
@@ -64,8 +65,9 @@ export default function History() {
 
 export function HistoryDetail() {
   const { resultId = '' } = useParams()
-  const result = useQuery({ queryKey: ['history-result', resultId], queryFn: ({ signal }) => getHistoryResult(resultId, signal), retry: false })
+  const auth = useAuth()
+  const result = useQuery({ queryKey: ['history-result', resultId, auth.data?.user?.id ?? null, 'SURVEY'], queryFn: ({ signal }) => getHistoryResult(resultId, signal), retry: false })
   if (result.isPending) return <Waiting />
   if (result.isError) return <Feedback error={result.error} retry={() => void result.refetch()} />
-  return <><ResultView result={result.data} /><div className="actions"><Link to="/history">이전 결과 목록</Link><Link to="/">새 상담 시작</Link></div><DeleteRecord resultId={resultId} /></>
+  return <><ResultView result={result.data} /><div className="actions"><Link className="button-link secondary" to="/history">이전 결과 목록</Link><Link className="button-link" to="/">새 상담 시작</Link></div><DeleteRecord resultId={resultId} /></>
 }

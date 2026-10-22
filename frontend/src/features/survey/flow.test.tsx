@@ -97,11 +97,14 @@ it('keeps the unpublished catalog empty and never starts a session', async () =>
   expect(host.textContent).not.toContain('시험용')
   expect(count('/sessions', 'POST')).toBe(0)
 })
-it('completes the guest selection, branch, evaluation and result flow with one request despite two clicks', async () => {
+it.each([false, true])('completes selection, branch, evaluation and result with scoped caches (member=%s)', async memberMode => {
+  isMember = memberMode
+  const userId = memberMode ? member.user!.id : null
   await render()
   await until(() => expect(button('새 설문 시작').disabled).toBe(false))
   await click(button('새 설문 시작'))
   await until(() => expect(host.querySelector('#room')).not.toBeNull())
+  expect(client.getQueryData(['session', sessionId, userId, 'SURVEY'])).toEqual(current)
   expect(host.querySelector('textarea')?.maxLength).toBe(1000)
   await radio('LH_CONSTRUCTION_RENTAL')
   await choose('room', 'test-room'); await choose('facility', 'test-facility'); await choose('symptom', 'test-symptom')
@@ -112,9 +115,12 @@ it('completes the guest selection, branch, evaluation and result flow with one r
   await until(() => expect(host.textContent).toContain('시험용 분기 질문'))
   await radio('YES')
   await until(() => expect(button('안내 결과 확인').disabled).toBe(false))
+  expect(client.getQueryData(['session', sessionId, userId, 'SURVEY'])).toEqual(current)
+  expect(client.getQueryData(['questions', sessionId, current.revision, userId, 'SURVEY'])).toEqual(questionsFixture(current))
   const evaluate = button('안내 결과 확인')
   await act(async () => { evaluate.click(); evaluate.click() })
-  await until(() => expect(host.textContent).toContain('현재 익명 상담에 저장됐어요'))
+  await until(() => expect(host.textContent).toContain(memberMode ? '계정의 이전 결과에 저장됐어요' : '현재 익명 상담에 저장됐어요'))
+  expect(client.getQueryData(['result', sessionId, resultId, userId, 'SURVEY'])).toEqual(result)
   expect(sent).toHaveLength(1)
   expect(sent[0].expectedRevision).toBe(3)
   expect(readPending(sessionId)).toBeNull()
@@ -122,7 +128,7 @@ it('completes the guest selection, branch, evaluation and result flow with one r
   expect(host.querySelector('a[href^="tel:"]')).toBeNull()
   expect(JSON.stringify(sessionStorage)).not.toContain('시험용')
   const evaluationCall = fetcher.mock.calls.find(([url]) => String(url).endsWith('/evaluations'))!
-  expect((evaluationCall[1] as RequestInit).headers).toMatchObject({ Authorization: 'Bearer ' + testToken })
+  expect((evaluationCall[1] as RequestInit).headers).toMatchObject(memberMode ? { 'X-CSRF-Token': member.csrfToken } : { Authorization: 'Bearer ' + testToken })
 })
 it('invalidates descendants when a parent selection changes and preserves draft on a revision conflict', async () => {
   current = filledSession()
@@ -223,14 +229,14 @@ it.each(['FAILED', 'DELETED'] as const)('does not recreate a %s request until th
   current = filledSession(); recoveryState = state
   const old = { requestId: crypto.randomUUID(), expectedRevision: current.revision }
   storePending(sessionId, old)
-  client.setQueryData(['result', sessionId, resultId], result)
+  client.setQueryData(['result', sessionId, resultId, null, 'SURVEY'], result)
   await render('/survey', true)
   await until(() => expect(button('완료 여부 확인').disabled).toBe(false))
   await click(button('완료 여부 확인'))
   await until(() => expect(host.textContent).toContain(state === 'DELETED' ? '이 기록은 삭제됐어요' : '평가가 완료되지 않았어요'))
   expect(sent).toHaveLength(0)
   expect(readPending(sessionId)).toBeNull()
-  if (state === 'DELETED') expect(client.getQueryData(['result', sessionId, resultId])).toBeUndefined()
+  if (state === 'DELETED') expect(client.getQueriesData({ queryKey: ['result', sessionId, resultId] })).toHaveLength(0)
   await click(button('새 평가로 다시 시도'))
   await until(() => expect(sent).toHaveLength(1))
   expect(sent[0].requestId).not.toBe(old.requestId)
@@ -267,7 +273,7 @@ it('discards a late evaluation after logout and removes all private caches and c
   await until(() => expect(sessionStorage.length).toBe(0))
   await act(async () => release(json(result)))
   await until(() => expect(host.textContent).not.toContain('계정의 이전 결과에 저장됐어요'))
-  expect(client.getQueryData(['result', sessionId, resultId])).toBeUndefined()
+  expect(client.getQueriesData({ queryKey: ['result', sessionId, resultId] })).toHaveLength(0)
   expect(client.getQueryData(AUTH_KEY)).toEqual(anonymous)
 })
 it('starts a new member consultation without transferring a guest consultation when identity changes', async () => {
@@ -300,13 +306,13 @@ it('loads member history pages and deletes only question records with CSRF', asy
 })
 it('deletes a member result and evicts its detail and current-result caches', async () => {
   isMember = true; current = filledSession(true); result = { ...resultFixture(current), isCurrent: false }
-  client.setQueryData(['result', sessionId, resultId], result)
+  client.setQueryData(['result', sessionId, resultId, member.user!.id, 'SURVEY'], result)
   await render('/history/' + resultId)
   await until(() => expect(host.textContent).toContain('과거 결과예요'))
   await click(button('이 결과 삭제')); await click(button('삭제 확인'))
   await until(() => expect(count('/me/results/' + resultId, 'DELETE')).toBe(1))
-  await until(() => expect(client.getQueryData(['history-result', resultId])).toBeUndefined())
-  expect(client.getQueryData(['result', sessionId, resultId])).toBeUndefined()
+  await until(() => expect(client.getQueriesData({ queryKey: ['history-result', resultId] })).toHaveLength(0))
+  expect(client.getQueriesData({ queryKey: ['result', sessionId, resultId] })).toHaveLength(0)
 })
 it('ends an anonymous consultation with an explicit question erasure option', async () => {
   current = filledSession()
@@ -331,13 +337,26 @@ it('erases an old member consultation and private result cache when account reva
   isMember = true; current = filledSession(true); result = resultFixture(current)
   await render('/history', true)
   await until(() => expect(host.querySelectorAll('.history-list li')).toHaveLength(1))
-  client.setQueryData(['history-result', resultId], result)
+  client.setQueryData(['history-result', resultId, member.user!.id, 'SURVEY'], result)
   const original = fetcher.getMockImplementation()!
   const other = { ...member, user: { ...member.user!, id: crypto.randomUUID() } }
   fetcher.mockImplementation(async (url: string, opts: RequestInit = {}) => String(url).endsWith('/auth/me') ? json(other) : original(url, opts))
   await act(async () => { await client.invalidateQueries({ queryKey: AUTH_KEY }) })
   await until(() => expect(sessionStorage.getItem('member-session-id')).toBeNull())
-  expect(client.getQueryData(['history-result', resultId])).toBeUndefined()
+  expect(client.getQueryData(['history-result', resultId, member.user!.id, 'SURVEY'])).toBeUndefined()
+})
+it.each(['/result/', '/history/'])('does not display another identity or unscoped result cache at %s', async path => {
+  isMember = true; current = filledSession(true); result = resultFixture(current)
+  const prefix = path === '/result/' ? ['result', sessionId, resultId] : ['history-result', resultId]
+  const privateResult = { ...result, guidance: ['이전 계정의 비공개 안내'] }
+  client.setQueryDefaults([prefix[0]], { staleTime: Infinity })
+  client.setQueryData(prefix, privateResult)
+  client.setQueryData([...prefix, 'another-member', 'SURVEY'], privateResult)
+  await render(path + resultId, path === '/result/')
+  await until(() => expect(host.textContent).toContain(result.guidance[0]))
+  expect(host.textContent).not.toContain('이전 계정의 비공개 안내')
+  expect(count('/me/results/' + resultId)).toBe(1)
+  expect(client.getQueryData([...prefix, member.user!.id, 'SURVEY'])).toEqual(result)
 })
 it('treats history storage failure as an error instead of an empty history', async () => {
   isMember = true

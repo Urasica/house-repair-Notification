@@ -17,7 +17,9 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     const body = await response.json().catch(() => null) as components['schemas']['ErrorResponse'] | null
     const retry = response.headers.get('Retry-After')
     if (body?.error.code === 'AUTH_EXPIRED' && typeof window !== 'undefined') window.dispatchEvent(new Event('auth-expired'))
-    if (typeof window !== 'undefined' && ['SESSION_EXPIRED', 'UNAUTHORIZED'].includes(body?.error.code ?? '') && path.startsWith('/sessions/')) window.dispatchEvent(new CustomEvent('session-unavailable', { detail: { id: path.split('/')[2] } }))
+    const sessionPath = path.split('?')[0]
+    const sessionGone = body?.error.code === 'NOT_FOUND' && options.method !== 'DELETE' && /^\/sessions\/[^/]+(?:\/chat\/messages)?$/.test(sessionPath)
+    if (typeof window !== 'undefined' && (sessionGone || ['SESSION_EXPIRED', 'UNAUTHORIZED'].includes(body?.error.code ?? '')) && path.startsWith('/sessions/')) window.dispatchEvent(new CustomEvent('session-unavailable', { detail: { id: sessionPath.split('/')[2] } }))
     throw new ApiError(body?.error.code ?? 'SERVICE_UNAVAILABLE',
       body?.error.message ?? '서비스에 연결하지 못했어요. 잠시 후 다시 시도해 주세요.',
       response.status, retry ? Number(retry) : null, body?.error.details ?? {})

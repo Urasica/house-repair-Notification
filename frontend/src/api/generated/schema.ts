@@ -437,6 +437,8 @@ export interface components {
             documentVersionId: string;
             /** Effectivedate */
             effectiveDate: string | null;
+            /** Excerpt */
+            excerpt?: string | null;
             /**
              * Kind
              * @enum {string}
@@ -506,7 +508,7 @@ export interface components {
          * ErrorCode
          * @enum {string}
          */
-        ErrorCode: "AUTH_REQUIRED" | "AUTH_EXPIRED" | "UNAUTHORIZED" | "SESSION_EXPIRED" | "CATALOG_NOT_READY" | "CATALOG_UPDATED" | "CONTEXT_CONFLICT" | "SESSION_BUSY" | "REQUEST_IN_PROGRESS" | "REQUEST_FAILED" | "REQUEST_DELETED" | "IDEMPOTENCY_CONFLICT" | "INVALID_SELECTION" | "INVALID_ANSWER" | "VALIDATION_ERROR" | "NOT_FOUND" | "RATE_LIMITED" | "SERVICE_UNAVAILABLE";
+        ErrorCode: "AUTH_REQUIRED" | "AUTH_EXPIRED" | "UNAUTHORIZED" | "SESSION_EXPIRED" | "CATALOG_NOT_READY" | "CATALOG_UPDATED" | "CONTEXT_CONFLICT" | "SESSION_BUSY" | "SESSION_PURPOSE_MISMATCH" | "REQUEST_IN_PROGRESS" | "REQUEST_FAILED" | "REQUEST_DELETED" | "IDEMPOTENCY_CONFLICT" | "INVALID_SELECTION" | "INVALID_ANSWER" | "VALIDATION_ERROR" | "NOT_FOUND" | "RATE_LIMITED" | "SERVICE_UNAVAILABLE";
         /** ErrorDetail */
         ErrorDetail: {
             code: components["schemas"]["ErrorCode"];
@@ -751,6 +753,8 @@ export interface components {
             id: string;
             /** Knowledgereleaseid */
             knowledgeReleaseId: string | null;
+            /** @default SURVEY */
+            purpose: components["schemas"]["SessionPurpose"];
             /** Revision */
             revision: number;
         };
@@ -758,6 +762,8 @@ export interface components {
         SessionCreate: {
             /** Catalogversion */
             catalogVersion: string;
+            /** @default SURVEY */
+            purpose: components["schemas"]["SessionPurpose"];
         };
         /** SessionCreated */
         SessionCreated: {
@@ -765,6 +771,11 @@ export interface components {
             /** Sessiontoken */
             sessionToken: string | null;
         };
+        /**
+         * SessionPurpose
+         * @enum {string}
+         */
+        SessionPurpose: "SURVEY" | "CHAT";
         /** SymptomItem */
         SymptomItem: {
             /** Aliases */

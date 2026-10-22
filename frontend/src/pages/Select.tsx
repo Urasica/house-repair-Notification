@@ -37,7 +37,7 @@ function SelectForm({ session, reference, catalog }: { session: Session; referen
     try {
       const saved = await saveContext(reference, session, context, auth.data?.csrfToken)
       if (!referenceIsActive(reference, epoch)) return
-      client.setQueryData(['session', reference.id], saved)
+      client.setQueryData(['session', reference.id, auth.data?.user?.id ?? null, 'SURVEY'], saved)
       void navigate('/survey')
     } catch (cause) { if (referenceIsActive(reference, epoch)) { setError(cause); delay.pause(cause) } }
     finally { guard.current = false; if (referenceIsActive(reference, epoch)) setBusy(false) }
@@ -46,7 +46,7 @@ function SelectForm({ session, reference, catalog }: { session: Session; referen
     const epoch = identityEpoch()
     try {
       const latest = await getSession(reference)
-      if (referenceIsActive(reference, epoch)) { setContext(latest.context); setError(null); client.setQueryData(['session', reference.id], latest) }
+      if (referenceIsActive(reference, epoch)) { setContext(latest.context); setError(null); client.setQueryData(['session', reference.id, auth.data?.user?.id ?? null, 'SURVEY'], latest) }
     } catch (cause) { if (referenceIsActive(reference, epoch)) setError(cause) }
   }
   return <>

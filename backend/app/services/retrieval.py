@@ -1,5 +1,6 @@
 """Exact pgvector search in a pinned release, followed by conservative evidence gates."""
 
+import json
 import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -48,10 +49,14 @@ class Retrieval:
     guidance: list[str] = field(default_factory=list)
     candidate_count: int = 0
 
-    def citations(self):
+    def citations(self, *, excerpts=False):
         output = {}
         for bundle in self.evidence:
-            for chunk, document in [(bundle.chunk, bundle.document), *bundle.related]:
+            for chunk, document in [
+                (bundle.chunk, bundle.document),
+                *bundle.related,
+                *(bundle.context if excerpts else []),
+            ]:
                 output[chunk.id] = Citation(
                     chunk_id=chunk.id,
                     document_version_id=document.id,
@@ -60,6 +65,7 @@ class Retrieval:
                     title=document.title,
                     locator=chunk.locator,
                     url=document.url,
+                    excerpt=source_excerpt(chunk) if excerpts else None,
                     effective_date=document.effective_date.isoformat()
                     if document.effective_date
                     else None,
@@ -67,6 +73,20 @@ class Retrieval:
                     review_until=document.review_until,
                 )
         return list(output.values())
+
+
+def source_excerpt(chunk):
+    if chunk.metadata_json.get("role") != "ANNEX":
+        return chunk.body
+    data = json.loads(chunk.body)
+    lines = [f"별표 {data['number']} · {data['title']}"]
+    for row in data["rows"]:
+        lines.append(
+            "\n".join(
+                f"{label}: {value}" for label, value in zip(data["columns"], row, strict=True)
+            )
+        )
+    return "\n\n".join([*lines, *data["footnotes"]])
 
 
 def eligible(chunk, document, now):
@@ -124,10 +144,18 @@ async def retrieve(
         KnowledgeDocument.status == "APPROVED",
         KnowledgeDocument.reviewed_at <= now,
         KnowledgeDocument.review_until > now,
-        KnowledgeDocument.scope_json["housingTypes"].contains([context.housing_type]),
         KnowledgeChunk.embedding.is_not(None),
         KnowledgeChunk.content_hash == KnowledgeChunk.embedded_content_hash,
     ]
+    if context.housing_type and context.housing_type != "UNKNOWN":
+        filters.append(
+            KnowledgeDocument.scope_json["housingTypes"].contains([context.housing_type])
+        )
+    elif purpose == "LAW_EXPLANATION":
+        # A general article explanation does not require a survey housing selection.
+        filters.append(KnowledgeDocument.kind == "LAW_CRITERIA")
+    else:
+        return Retrieval()
     explicit = re.findall(r"제\s*(\d+)\s*조(?:의\s*(\d+))?|별표\s*(\d+)", question)
     locators = [
         f"별표 {annex}" if annex else f"제{n}조" + (f"의{sub}" if sub else "")

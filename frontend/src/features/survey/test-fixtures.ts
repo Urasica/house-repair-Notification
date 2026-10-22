@@ -20,7 +20,7 @@ export const catalog: Catalog = {
   symptoms: [{ id: 'test-symptom', label: '시험용 증상', facilityIds: ['test-facility'] }, { id: 'test-symptom2', label: '시험용 다른 증상', facilityIds: ['test-facility2'] }],
 }
 export function sessionFixture(isMember = false): Session {
-  return { id: sessionId, accessMode: isMember ? 'MEMBER' : 'GUEST', catalogVersion: catalog.version, context: { description: '', answers: {} }, revision: 0, currentResultId: null, knowledgeReleaseId: null, createdAt: new Date().toISOString(), expiresAt: new Date(Date.now() + 86400000).toISOString() }
+  return { id: sessionId, purpose: 'SURVEY', accessMode: isMember ? 'MEMBER' : 'GUEST', catalogVersion: catalog.version, context: { description: '', answers: {} }, revision: 0, currentResultId: null, knowledgeReleaseId: null, createdAt: new Date().toISOString(), expiresAt: new Date(Date.now() + 86400000).toISOString() }
 }
 export function filledSession(isMember = false): Session {
   return { ...sessionFixture(isMember), revision: 1, context: { housingType: 'LH_CONSTRUCTION_RENTAL', roomId: 'test-room', facilityId: 'test-facility', symptomId: 'test-symptom', description: '', answers: {} } }
