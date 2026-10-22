@@ -102,6 +102,9 @@ textarea { resize: vertical; }
 .contact-draft { padding: 20px; border-left: 3px solid #83a08e; background: #f5f7f4; }
 .notice, .notice li, .notice dd { overflow-wrap: anywhere; }
 .result-view h2 { margin-top: 28px; }
+.result-view details { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 8px; }
+.result-view summary { cursor: pointer; min-height: 44px; padding-block: 10px; font-weight: 650; }
+.copy-text { width: 100%; }
 .auth-panel, .member-panel, .chat-panel { margin-top: 32px; }
 .auth-panel { max-width: 540px; margin-inline: auto; }
 .auth-panel h1, .member-panel h1 { font-size: 32px; }

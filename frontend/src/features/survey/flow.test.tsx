@@ -158,6 +158,24 @@ it('explains how to check an unknown housing type before continuing', async () =
   await render('/select', true)
   await until(() => expect(host.textContent).toContain('임대차계약서나 입주 안내문'))
 })
+it.each([true, false])('copies a contextual inquiry or provides manual copy recovery (clipboard=%s)', async available => {
+  current = filledSession(); current.context.description = '비공개 추가 설명'
+  result = resultFixture(current)
+  const writeText = vi.fn().mockImplementation(() => available ? Promise.resolve() : Promise.reject(new Error('denied')))
+  vi.stubGlobal('navigator', { clipboard: { writeText } })
+  await render('/result/' + resultId, true)
+  await until(() => expect(host.textContent).toContain('지금 할 일'))
+  const article = host.querySelector('article')!
+  expect(article.querySelector('h2')?.textContent).toBe('지금 할 일')
+  expect(article.querySelector('details')?.open).toBe(false)
+  await click(button('문의 내용 복사'))
+  await until(() => expect(writeText).toHaveBeenCalledTimes(1))
+  expect(writeText.mock.calls[0][0]).toContain('위치: 시험용 공간 · 시험용 시설물')
+  expect(writeText.mock.calls[0][0]).toContain('증상: 시험용 증상')
+  expect(writeText.mock.calls[0][0]).not.toContain('비공개 추가 설명')
+  if (available) expect(host.textContent).toContain('문의 내용을 복사했어요')
+  else expect(host.querySelector<HTMLTextAreaElement>('[aria-label="복사할 문의 내용"]')?.readOnly).toBe(true)
+})
 it('invalidates descendants when a parent selection changes and preserves draft on a revision conflict', async () => {
   current = filledSession()
   await render('/select', true)

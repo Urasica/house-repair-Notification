@@ -160,7 +160,7 @@ function Conversation({ session, reference, restart }: { session: Session; refer
       <article><h2>내 질문</h2><p className="chat-content">{item.userMessage.content}</p>
         <h2>{statusLabels[item.status]}</h2><p className="eyebrow">{item.answerMode === 'GROUNDED' ? '근거 확인 답변' : item.answerMode === 'CLARIFY' ? '추가 확인' : '기본 안내'} · {localTime(item.assistantMessage.createdAt)}</p>
         {(!item.isCurrent || item.contextRevision !== session.revision) && <p className="past-note">이전 입력이나 기준의 답변이에요. 현재 상황과 다를 수 있어요.</p>}
-        <p className="chat-content">{item.assistantMessage.content}</p>
+        <div aria-label="답변 내용">{item.assistantMessage.content.split(/\n{2,}/).map((text, index) => <p key={index} className="chat-content">{text}</p>)}</div>
         {!!item.followUpQuestions.length && <ul>{item.followUpQuestions.map((question, index) => <li key={index}>{question}</li>)}</ul>}
         {!!item.assistantMessage.citations.length && <ul aria-label="정보 출처">{item.assistantMessage.citations.map(citation => <li key={citation.chunkId}>
           <details><summary>{citation.use === 'RELATED' ? '참고 자료' : '설명 근거'} · {citation.title} · {citation.locator}</summary>

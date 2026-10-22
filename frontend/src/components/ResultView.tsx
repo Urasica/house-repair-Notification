@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Guidance } from '../features/survey/storage'
 import { localTime } from '../features/survey/time'
 import { statusLabels } from '../features/survey/status'
@@ -5,18 +6,34 @@ import SurveyProgress from './SurveyProgress'
 
 
 export default function ResultView({ result }: { result: Guidance }) {
+  const [copyMessage, setCopyMessage] = useState('')
+  const [copyFailed, setCopyFailed] = useState(false)
+  const inquiry = [`주택: ${result.summary.housingLabel}`, `위치: ${result.summary.roomLabel} · ${result.summary.facilityLabel}`, `증상: ${result.summary.symptomLabel}`, ...result.summary.answerLabels, result.contactDraft].join('\n')
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(inquiry)
+      setCopyFailed(false); setCopyMessage('문의 내용을 복사했어요.')
+    } catch { setCopyFailed(true); setCopyMessage('자동으로 복사하지 못했어요. 아래 내용을 선택해 직접 복사해 주세요.') }
+  }
   return <><SurveyProgress step={3} /><article className="notice result-view">
     <p className="eyebrow">안내 결과</p><h1>{statusLabels[result.status]}</h1>
     {!result.isCurrent && <p className="past-note">과거 결과예요. 현재 입력이나 기준과 다를 수 있어요.</p>}
-    <p>{result.savedToHistory ? '계정의 이전 결과에 저장됐어요.' : '현재 익명 상담에 저장됐어요. 로그인 계정의 이전 결과로 이전되지 않아요.'}</p>
-    <p><time dateTime={result.generatedAt}>{localTime(result.generatedAt)}</time> 생성 · {localTime(result.retainedUntil)}까지 보관</p>
-    <dl className="summary"><dt>주택</dt><dd>{result.summary.housingLabel}</dd><dt>공간·시설물</dt><dd>{result.summary.roomLabel} · {result.summary.facilityLabel}</dd><dt>증상</dt><dd>{result.summary.symptomLabel}</dd></dl>
-    {result.summary.description && <p className="user-description">입력한 내용: {result.summary.description}</p>}
-    {!!result.summary.answerLabels.length && <ul>{result.summary.answerLabels.map((answer, index) => <li key={index}>{answer}</li>)}</ul>}
-    <h2>안내 내용</h2><ul>{result.guidance.map((text, index) => <li key={index}>{text}</li>)}</ul>
+    <h2>지금 할 일</h2><p>{result.status === 'SAFETY_PRIORITY' ? '일반 보수 안내보다 안전 확인을 먼저 받아 주세요.' : result.status === 'NEED_MORE_INFO' ? '아래의 추가 확인 내용을 살펴보고 입력을 보완해 주세요.' : '관리사무소 또는 담당 기관에 아래 내용을 전달해 주세요.'}</p>
+    <ul>{result.guidance.map((text, index) => <li key={index}>{text}</li>)}</ul>
     {!!result.checks.length && <><h2>확인할 내용</h2><ul>{result.checks.map((text, index) => <li key={index}>{text}</li>)}</ul></>}
     {!!result.followUpQuestions.length && <><h2>추가 확인</h2><ul>{result.followUpQuestions.map((text, index) => <li key={index}>{text}</li>)}</ul></>}
-    {!!result.citations.length && <><h2>정보 출처</h2><ul>{result.citations.map(citation => <li key={citation.chunkId}>{citation.kind === 'LAW_CRITERIA' ? '법령 기준' : citation.kind === 'LH_OPERATION' ? '운영 자료' : '안전 자료'} · {citation.use === 'RELATED' ? '참고 자료' : '안내 근거'}<br />{/^https:\/\//.test(citation.url) ? <a href={citation.url} target="_blank" rel="noopener noreferrer">{citation.title} · {citation.locator}</a> : citation.title}</li>)}</ul></>}
-    <h2>직접 문의할 내용</h2><p className="contact-draft">{result.contactDraft}</p><p>{result.disclaimer}</p>
+    <h2>직접 문의할 내용</h2><p className="contact-draft">{inquiry}</p><button type="button" className="secondary" onClick={() => void copy()}>문의 내용 복사</button>
+    <p role="status">{copyMessage}</p>{copyFailed && <textarea className="copy-text" aria-label="복사할 문의 내용" readOnly autoFocus rows={6} value={inquiry} onFocus={event => event.target.select()} />}
+    <p>{result.disclaimer}</p>
+    <details><summary>입력한 내용과 설문 답변</summary>
+      <dl className="summary"><dt>주택</dt><dd>{result.summary.housingLabel}</dd><dt>공간·시설물</dt><dd>{result.summary.roomLabel} · {result.summary.facilityLabel}</dd><dt>증상</dt><dd>{result.summary.symptomLabel}</dd></dl>
+      {result.summary.description && <p className="user-description">입력한 내용: {result.summary.description}</p>}
+      {!!result.summary.answerLabels.length && <ul>{result.summary.answerLabels.map((answer, index) => <li key={index}>{answer}</li>)}</ul>}
+    </details>
+    {!!result.citations.length && <details><summary>정보 출처</summary><ul>{result.citations.map(citation => <li key={citation.chunkId}>{citation.kind === 'LAW_CRITERIA' ? '법령 기준' : citation.kind === 'LH_OPERATION' ? '운영 자료' : '안전 자료'} · {citation.use === 'RELATED' ? '참고 자료' : '안내 근거'}<br />{/^https:\/\//.test(citation.url) ? <a href={citation.url} target="_blank" rel="noopener noreferrer">{citation.title} · {citation.locator}</a> : citation.title}</li>)}</ul></details>}
+    <details><summary>저장 위치와 보관 기간</summary>
+      <p>{result.savedToHistory ? '계정의 이전 결과에 저장됐어요.' : '현재 익명 상담에 저장됐어요. 로그인 계정의 이전 결과로 이전되지 않아요.'}</p>
+      <p><time dateTime={result.generatedAt}>{localTime(result.generatedAt)}</time> 생성 · {localTime(result.retainedUntil)}까지 보관</p>
+    </details>
   </article></>
 }
