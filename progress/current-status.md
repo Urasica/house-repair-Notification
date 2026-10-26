@@ -1,6 +1,6 @@
 # 현재 상태와 남은 작업
 
-갱신: 2026-10-22 · 서비스 관측 기준: 2026-10-19 [R019](records/19-local-deploy-persona-ux-review.md)
+갱신: 2026-10-26 · 서비스 관측 기준: 2026-10-26 [R028](records/28-ux15-local-redeployment.md)
 
 현재 판단과 실행할 작업은 이 문서에서만 수정한다. 실시간 상태 화면은 아니며 관측 이후 실행 여부는 보장하지 않는다. 시험 수치·명령별 결과는 연결한 당시 기록에서 확인한다. [남은 작업](#남은-작업) · [증거 색인](records/README.md) · [갱신 방법](README.md)
 
@@ -18,18 +18,18 @@
 | M12 | 운영 이미지·격리 로컬 HTTPS 준비 완료; 실제 운영 출시 인수 대기 | [R007](records/07-m12-deployment-review.md), [남은 작업](#m12-docker-운영-배포와-mvp-출시-확인) |
 | M13 | 독립 챗봇·대화 초기화·사이트 내 답변 구현/격리 검증 및 기존 로컬 서비스 재배포 완료 | [R009](records/09-m13-chat-review.md), [R010](records/10-local-redeploy-image-cleanup.md) |
 | M14 | PC·모바일 시인성·화면 밀도·홈 말투 개선과 소스/모의 API 검증 및 개발 서비스 재배포 완료 | [R016](records/16-responsive-ui-visibility.md), [R017](records/17-mobile-density-plain-language.md), [R018](records/18-friendly-home-copy.md), [R019](records/19-local-deploy-persona-ux-review.md) |
-| M15 | UX01~UX08 최소 수정·선택적 설문 불러오기·개별 커밋과 소스/격리 실제 API 통합 검증 완료. 개발 8080 재배포는 미수행 | [R027](records/27-ux08-focus-and-integration.md), [UX06 경계](records/25-ux06-opt-in-survey-chat.md) |
+| M15 | UX01~UX08 최소 수정·선택적 설문 불러오기·개별 커밋과 소스/격리 통합 검증 및 개발 8080 재배포·실제 브라우저/생성 응답 확인 완료 | [R027](records/27-ux08-focus-and-integration.md), [R028](records/28-ux15-local-redeployment.md), [UX06 경계](records/25-ux06-opt-in-survey-chat.md) |
 
 ## 환경별 적용과 검증
 
 | 환경 | 마지막 근거·일자 | 확인 범위와 남은 제한 |
 | --- | --- | --- |
 | 격리 시험 `repair-guide-test` / `http://localhost:18081` | [R027](records/27-ux08-focus-and-integration.md) · 2026-10-22 | 최종 UX 소스/이미지·schema 0006_m13·실제 카탈로그/DB 브라우저 통합·접근성, 백엔드/프론트 회귀·계약 일치 확인. 별도 시험 볼륨, OpenAI OFF/mock. 이전 시험 볼륨 보존 |
-| 개발 `repair-guide` / `http://localhost:8080` | [R019](records/19-local-deploy-persona-ux-review.md) · 2026-10-19 | M14 UI 반영, schema `0006_m13`·기존 배포 전후 건수 유지. 실제 설문/회원 이력/독립 챗봇 점검과 승인된 가상 누수·조문 응답 확인. 발견한 UX 장애는 미수정; 두 백업 사본은 같은 PC |
+| 개발 `repair-guide` / `http://localhost:8080` | [R028](records/28-ux15-local-redeployment.md) · 2026-10-26 | 최종 UX01~UX08 적용, schema `0006_m13`·기존 핵심 6종 데이터 건수/내용 지문 유지. 실제 PC/모바일 설문·회원 이력·선택적 설문 불러오기/복원·취소/초점·로그아웃과 실제 근거 생성 응답 확인. 백업 사본 두 개는 같은 PC |
 | 격리 HTTPS preview / `https://localhost:18880` | [R007](records/07-m12-deployment-review.md) · 2026-10-06 | 당시 schema `0005_m10`, OpenAI OFF의 배포/보안 검증. M13 반영·현재 실행 여부를 확인한 기록은 없음 |
 | 실제 운영 서버·도메인 | [M12 작업](#m12-docker-운영-배포와-mvp-출시-확인) | 대상·담당/일정과 운영 설정·검증 증거 미확정. 운영 출시 완료로 판정하지 않음 |
 
-실제 OpenAI의 임베딩/검색 평가와 생성 평가는 각각 [R004](records/04-m09-knowledge-review.md)·[R005](records/05-m10-chat-review.md)의 당시 범위다. M13 mock 회귀는 [R009 검증 결과](records/09-m13-chat-review.md#검증-결과)를 따른다. 추가로 [R019](records/19-local-deploy-persona-ux-review.md)에서 승인된 가상 누수 문답과 조문 설명의 실제 제공자 응답을 관찰했으며 전체 품질 재평가로 해석하지 않는다. 이전 UI 분류 기록은 [R008](records/08-local-ui-review.md)에 있다.
+실제 OpenAI의 임베딩/검색 평가와 생성 평가는 각각 [R004](records/04-m09-knowledge-review.md)·[R005](records/05-m10-chat-review.md)의 당시 범위다. M13 mock 회귀는 [R009 검증 결과](records/09-m13-chat-review.md#검증-결과)를 따른다. 추가로 [R019](records/19-local-deploy-persona-ux-review.md)·[R028](records/28-ux15-local-redeployment.md)에서 승인된 가상 누수와 조문 설명의 실제 제공자 응답을 확인했으며 전체 품질 재평가로 해석하지 않는다. 이전 UI 분류 기록은 [R008](records/08-local-ui-review.md)에 있다.
 
 ## 자료와 외부 입력
 
@@ -47,7 +47,7 @@
 
 책임별 설계 정리와 D01/D02 해결 완료(2026-10-18). 설문 캐시 식별은 코드를 보완하고 백엔드 디렉터리 구조는 문서를 실제 배치에 맞췄다. 당시 코드·문서·프론트 회귀 검증은 [R015](records/15-design-implementation-alignment.md), 이후 개발 서비스 재배포는 [R019](records/19-local-deploy-persona-ux-review.md)를 따른다.
 
-PC·모바일 UI와 부드러운 홈 안내의 개발 배포 관측은 [R019](records/19-local-deploy-persona-ux-review.md)를 따른다. 이후 발견한 UX01~UX08은 [최종 구현/검증](records/27-ux08-focus-and-integration.md)에 따라 수정했다. UX06에는 사용자가 선택한 본인 설문 결과의 입력만 챗봇으로 복사하도록 요구를 개정했다. 개발 8080에는 아직 이 수정들을 재배포하지 않았다. 실제 기기·스크린리더·실제 이용자 조사도 미수행이다.
+PC·모바일 UI 이후 발견한 UX01~UX08은 [최종 구현/검증](records/27-ux08-focus-and-integration.md)에 따라 수정하고 [R028](records/28-ux15-local-redeployment.md)에서 개발 8080에 배포·확인했다. UX06은 사용자가 선택한 본인 설문 결과의 입력만 챗봇으로 복사한다. 실제 기기·스크린리더·실제 이용자 조사는 미수행이다.
 
 ## 남은 작업
 
@@ -78,4 +78,4 @@ PC·모바일 UI와 부드러운 홈 안내의 개발 배포 관측은 [R019](re
 
 ## M15. 서비스 흐름의 진행 장애와 이해 개선
 
-사용자가 요청한 최소 수정·선택적 설문 불러오기·UX별 커밋을 완료했다. 기존 작업의 기준 커밋은 c46ea96이다. 완료 ID·커밋·검증과 한계는 [R027](records/27-ux08-focus-and-integration.md)에 보존한다. 이 단계의 구현 대기 행은 없으며 개발 8080 배포와 실제 운영 인수는 완료로 표시하지 않는다. 법적 판단 범위, 검토된 자료와 ID, 계정 격리는 유지한다.
+사용자가 요청한 최소 수정·선택적 설문 불러오기·UX별 커밋과 개발 8080 재배포/검증을 완료했다. 기존 작업의 기준 커밋은 c46ea96이다. 구현 ID·커밋·회귀는 [R027](records/27-ux08-focus-and-integration.md), 배포·실제 응답·데이터 보존은 [R028](records/28-ux15-local-redeployment.md)에 보존한다. 이 단계의 구현 대기 행은 없으며 실제 운영 인수는 M12로 남는다. 법적 판단 범위, 검토된 자료와 ID, 계정 격리는 유지한다.
