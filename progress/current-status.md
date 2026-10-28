@@ -1,6 +1,6 @@
 # 현재 상태와 남은 작업
 
-갱신: 2026-10-26 · 서비스 관측 기준: 2026-10-26 [R028](records/28-ux15-local-redeployment.md)
+갱신: 2026-10-28 · 서비스 관측 기준: 2026-10-28 [R029](records/29-insufficient-information-examples.md)
 
 현재 판단과 실행할 작업은 이 문서에서만 수정한다. 실시간 상태 화면은 아니며 관측 이후 실행 여부는 보장하지 않는다. 시험 수치·명령별 결과는 연결한 당시 기록에서 확인한다. [남은 작업](#남은-작업) · [증거 색인](records/README.md) · [갱신 방법](README.md)
 
@@ -19,13 +19,14 @@
 | M13 | 독립 챗봇·대화 초기화·사이트 내 답변 구현/격리 검증 및 기존 로컬 서비스 재배포 완료 | [R009](records/09-m13-chat-review.md), [R010](records/10-local-redeploy-image-cleanup.md) |
 | M14 | PC·모바일 시인성·화면 밀도·홈 말투 개선과 소스/모의 API 검증 및 개발 서비스 재배포 완료 | [R016](records/16-responsive-ui-visibility.md), [R017](records/17-mobile-density-plain-language.md), [R018](records/18-friendly-home-copy.md), [R019](records/19-local-deploy-persona-ux-review.md) |
 | M15 | UX01~UX08 최소 수정·선택적 설문 불러오기·개별 커밋과 소스/격리 통합 검증 및 개발 8080 재배포·실제 브라우저/생성 응답 확인 완료 | [R027](records/27-ux08-focus-and-integration.md), [R028](records/28-ux15-local-redeployment.md), [UX06 경계](records/25-ux06-opt-in-survey-chat.md) |
+| M16 | 정보 부족 설문/채팅의 가상 보수 검토 예시·과거 저장 호환·소스/실제 DB 검증 및 개발 8080 반영·PC/모바일 Browser Use 확인 완료 | [R029](records/29-insufficient-information-examples.md) |
 
 ## 환경별 적용과 검증
 
 | 환경 | 마지막 근거·일자 | 확인 범위와 남은 제한 |
 | --- | --- | --- |
 | 격리 시험 `repair-guide-test` / `http://localhost:18081` | [R027](records/27-ux08-focus-and-integration.md) · 2026-10-22 | 최종 UX 소스/이미지·schema 0006_m13·실제 카탈로그/DB 브라우저 통합·접근성, 백엔드/프론트 회귀·계약 일치 확인. 별도 시험 볼륨, OpenAI OFF/mock. 이전 시험 볼륨 보존 |
-| 개발 `repair-guide` / `http://localhost:8080` | [R028](records/28-ux15-local-redeployment.md) · 2026-10-26 | 최종 UX01~UX08 적용, schema `0006_m13`·기존 핵심 6종 데이터 건수/내용 지문 유지. 실제 PC/모바일 설문·회원 이력·선택적 설문 불러오기/복원·취소/초점·로그아웃과 실제 근거 생성 응답 확인. 백업 사본 두 개는 같은 PC |
+| 개발 `repair-guide` / `http://localhost:8080` | [R029](records/29-insufficient-information-examples.md) · 2026-10-28 | UX01~UX08에 정보 부족 가상 보수 검토 예시 추가. schema `0006_m13`·기존 자료 유지. 실제 PC/모바일 UNKNOWN 설문·문의 복사 분리·채팅 예시/복원 확인. 전체 UX와 데이터 내용 지문·실제 생성 확인은 R028 당시 범위. 백업 사본 두 개는 같은 PC |
 | 격리 HTTPS preview / `https://localhost:18880` | [R007](records/07-m12-deployment-review.md) · 2026-10-06 | 당시 schema `0005_m10`, OpenAI OFF의 배포/보안 검증. M13 반영·현재 실행 여부를 확인한 기록은 없음 |
 | 실제 운영 서버·도메인 | [M12 작업](#m12-docker-운영-배포와-mvp-출시-확인) | 대상·담당/일정과 운영 설정·검증 증거 미확정. 운영 출시 완료로 판정하지 않음 |
 

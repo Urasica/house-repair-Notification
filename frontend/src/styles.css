@@ -105,6 +105,10 @@ textarea { resize: vertical; }
 .result-view details { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 8px; }
 .result-view summary { cursor: pointer; min-height: 44px; padding-block: 10px; font-weight: 650; }
 .copy-text { width: 100%; }
+.repair-examples { margin-block: 20px; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: #f3f6f2; }
+.repair-examples h3 { margin: 0 0 12px; font-size: 19px; line-height: 1.5; }
+.repair-examples li + li { margin-top: 12px; }
+.notice .repair-examples p:last-child { margin-bottom: 0; }
 .auth-panel, .member-panel, .chat-panel { margin-top: 32px; }
 .auth-panel { max-width: 540px; margin-inline: auto; }
 .auth-panel h1, .member-panel h1 { font-size: 32px; }

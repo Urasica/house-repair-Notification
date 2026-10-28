@@ -216,6 +216,7 @@ async def test_runtime_purpose_privacy_failure_and_deadline(pg_session):
 
     result = await answer("private@example.com 제10조 내용을 알려 주세요")
     assert result.answer_mode == "GROUNDED" and result.status == "GUIDANCE_AVAILABLE"
+    assert result.reference_examples == []
     for content in [
         "제10조로 우리 집 무료 교체가 되나요?",
         "제10조 내용과 LH 비용도 알려 주세요",
@@ -223,6 +224,7 @@ async def test_runtime_purpose_privacy_failure_and_deadline(pg_session):
     ]:
         result = await answer(content)
         assert result.answer_mode == "TEMPLATE" and result.status == "NEED_CONFIRMATION"
+        assert len(result.reference_examples) == 2
     assert generator.calls == 1
     assert all("private" not in query for query in embed.inputs)
     result = await answer("가스 냄새가 나요 제10조 설명")

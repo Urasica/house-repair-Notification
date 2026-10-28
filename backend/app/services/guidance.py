@@ -10,10 +10,11 @@ from app.domain.constants import DISCLAIMER, INSUFFICIENT_INFORMATION_MESSAGE, G
 from app.schemas.catalog import CatalogDefinition
 from app.schemas.contracts import GuidanceResult, ResultSummary, Session
 from app.services.embeddings import Embeddings, EmbeddingUnavailable
+from app.services.repair_examples import repair_examples
 from app.services.retrieval import retrieve, revalidate_citations
 from app.services.survey_policy import survey_policy
 
-ENGINE_VERSION = "survey-v3"
+ENGINE_VERSION = "survey-v4-reference-examples"
 
 
 def add_years(value: datetime, years: int) -> datetime:
@@ -92,6 +93,7 @@ async def evaluate_survey(
             answer_labels=answers,
         ),
         guidance=guidance,
+        reference_examples=repair_examples(catalog, context, policy.status),
         checks=[],
         follow_up_questions=(
             list(
@@ -145,6 +147,7 @@ async def evaluate_survey(
                     "status": found.status,
                     "reason_codes": [found.reason],
                     "citations": found.citations(),
+                    "reference_examples": repair_examples(catalog, context, found.status),
                     "guidance": found.guidance
                     + (
                         [INSUFFICIENT_INFORMATION_MESSAGE]

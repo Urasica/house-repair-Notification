@@ -152,6 +152,15 @@ it('history GET restores clarification and stale labels without generation', asy
   expect(host.textContent).toContain('설문 답을 확인해 주세요.')
   expect(sent).toHaveLength(0)
 })
+it('restores hypothetical repair examples with the saved answer and keeps clarification visible', async () => {
+  replies = [{ ...answer(crypto.randomUUID()), referenceExamples: ['연결 부위의 보수를 검토할 수 있어요.'] }]
+  await render()
+  await until(() => expect(host.querySelector('.repair-examples')).not.toBeNull())
+  expect(host.textContent).toContain('가상 예시')
+  expect(host.querySelectorAll('.repair-examples li')).toHaveLength(1)
+  expect(host.textContent).toContain('설문 답을 확인해 주세요.')
+  expect(sent).toHaveLength(0)
+})
 
 it('ignores late completion after logout and clears chat recovery data', async () => {
   held = true

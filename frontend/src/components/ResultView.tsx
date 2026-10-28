@@ -3,6 +3,7 @@ import type { Guidance } from '../features/survey/storage'
 import { localTime } from '../features/survey/time'
 import { statusLabels } from '../features/survey/status'
 import SurveyProgress from './SurveyProgress'
+import RepairExamples from './RepairExamples'
 
 
 export default function ResultView({ result }: { result: Guidance }) {
@@ -23,6 +24,7 @@ export default function ResultView({ result }: { result: Guidance }) {
     <ul>{result.guidance.map((text, index) => <li key={index}>{text}</li>)}</ul>
     {!!result.checks.length && <><h2>확인할 내용</h2><ul>{result.checks.map((text, index) => <li key={index}>{text}</li>)}</ul></>}
     {!!result.followUpQuestions.length && <><h2>추가 확인</h2><ul>{result.followUpQuestions.map((text, index) => <li key={index}>{text}</li>)}</ul></>}
+    <RepairExamples examples={result.referenceExamples} />
     <h2>직접 문의할 내용</h2><p className="contact-draft">{inquiry}</p><button type="button" className="secondary" onClick={() => void copy()}>문의 내용 복사</button>
     <p role="status">{copyMessage}</p>{copyFailed && <textarea className="copy-text" aria-label="복사할 문의 내용" readOnly autoFocus rows={6} value={inquiry} onFocus={event => event.target.select()} />}
     <p>{result.disclaimer}</p>

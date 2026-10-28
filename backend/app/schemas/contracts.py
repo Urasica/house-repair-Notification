@@ -135,6 +135,7 @@ class GuidanceResult(APIModel):
     ]
     summary: ResultSummary
     guidance: list[str]
+    reference_examples: list[str] = Field(default_factory=list, max_length=2)
     checks: list[str]
     follow_up_questions: list[str]
     contact_draft: str
@@ -177,6 +178,7 @@ class ChatResponse(APIModel):
     user_message: ChatMessage
     assistant_message: ChatMessage
     follow_up_questions: list[str]
+    reference_examples: list[str] = Field(default_factory=list, max_length=2)
     disclaimer: str
     is_current: bool
 

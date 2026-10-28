@@ -432,6 +432,8 @@ export interface components {
             followUpQuestions: string[];
             /** Iscurrent */
             isCurrent: boolean;
+            /** Referenceexamples */
+            referenceExamples?: string[];
             /**
              * Requestid
              * Format: uuid
@@ -612,6 +614,8 @@ export interface components {
             knowledgeReleaseId: string | null;
             /** Reasoncodes */
             reasonCodes: ("HAZARD_SIGNAL" | "HOUSING_OUT_OF_SCOPE" | "MISSING_INPUT" | "NO_APPLICABLE_SOURCE" | "SOURCE_CONFLICT" | "SOURCE_UNAVAILABLE" | "MATCHED_OPERATION_RULE")[];
+            /** Referenceexamples */
+            referenceExamples?: string[];
             /**
              * Retaineduntil
              * Format: date-time

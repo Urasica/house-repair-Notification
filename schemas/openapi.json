@@ -272,6 +272,14 @@
             "title": "Iscurrent",
             "type": "boolean"
           },
+          "referenceExamples": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2,
+            "title": "Referenceexamples",
+            "type": "array"
+          },
           "requestId": {
             "format": "uuid",
             "title": "Requestid",
@@ -738,6 +746,14 @@
               "type": "string"
             },
             "title": "Reasoncodes",
+            "type": "array"
+          },
+          "referenceExamples": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2,
+            "title": "Referenceexamples",
             "type": "array"
           },
           "retainedUntil": {

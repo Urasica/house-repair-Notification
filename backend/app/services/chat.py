@@ -12,6 +12,7 @@ from app.schemas.contracts import ChatMessage, ChatResponse
 from app.services.chat_context import chat_policy
 from app.services.embeddings import Embeddings, EmbeddingUnavailable
 from app.services.generation import PROMPT_VERSION, GenerationUnavailable, Responses, annex_texts
+from app.services.repair_examples import repair_examples
 from app.services.retrieval import question_purpose, retrieve, revalidate_citations
 from app.services.survey_policy import survey_policy
 
@@ -57,6 +58,7 @@ async def chat_response(
     deadline=None,
 ):
     status, questions, guidance = chat_policy(snapshot.context, content)
+    purpose = question_purpose(content)
     now = datetime.now(UTC)
     response = ChatResponse(
         request_id=request_id,
@@ -82,6 +84,9 @@ async def chat_response(
             is_current=True,
         ),
         follow_up_questions=questions,
+        reference_examples=(
+            repair_examples(catalog, snapshot.context, status) if purpose == "OPERATION" else []
+        ),
         disclaimer=DISCLAIMER,
         is_current=True,
     )
@@ -99,6 +104,7 @@ async def chat_response(
                 "status": GuidanceStatus.SAFETY_PRIORITY,
                 "answer_mode": "TEMPLATE",
                 "follow_up_questions": [],
+                "reference_examples": [],
                 "assistant_message": response.assistant_message.model_copy(
                     update={
                         "content": "일반 보수 안내보다 안전 확인이 우선이에요. "
@@ -113,7 +119,6 @@ async def chat_response(
         or not settings.openai_enabled
     ):
         return response
-    purpose = question_purpose(content)
     # Free text and raw conversation never leave the server. Selected labels are reviewed.
     labels = []
     for field, items in [
@@ -153,6 +158,11 @@ async def chat_response(
             response = response.model_copy(
                 update={
                     "status": GuidanceStatus(found.status),
+                    "reference_examples": (
+                        repair_examples(catalog, snapshot.context, found.status)
+                        if purpose == "OPERATION"
+                        else []
+                    ),
                     "assistant_message": response.assistant_message.model_copy(
                         update={
                             "content": "\n".join(

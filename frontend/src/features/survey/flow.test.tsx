@@ -158,6 +158,19 @@ it('explains how to check an unknown housing type before continuing', async () =
   await render('/select', true)
   await until(() => expect(host.textContent).toContain('임대차계약서나 입주 안내문'))
 })
+it('shows hypothetical examples separately and leaves them out of the copied inquiry', async () => {
+  current = filledSession()
+  result = { ...resultFixture(current), referenceExamples: ['배관 연결 부위의 보수를 검토할 수 있어요.', '손상 부위의 보수나 교체를 검토할 수 있어요.'] }
+  const writeText = vi.fn().mockResolvedValue(undefined)
+  vi.stubGlobal('navigator', { clipboard: { writeText } })
+  await render('/result/' + resultId, true)
+  await until(() => expect(host.querySelector('[aria-label="보수 검토 예시"]')).not.toBeNull())
+  expect(host.querySelectorAll('.repair-examples li')).toHaveLength(2)
+  expect(host.textContent).toContain('가상 예시')
+  expect(host.textContent).toContain('실제 처리 이력이나 보수 승인을 뜻하지 않으며')
+  await click(button('문의 내용 복사'))
+  expect(writeText.mock.calls[0][0]).not.toContain('검토할 수 있어요')
+})
 it.each([true, false])('copies a contextual inquiry or provides manual copy recovery (clipboard=%s)', async available => {
   current = filledSession(); current.context.description = '비공개 추가 설명'
   result = resultFixture(current)

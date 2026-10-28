@@ -116,6 +116,7 @@ async def test_survey_embeds_only_labels_and_withdrawal_blocks_final_save(pg_ses
         snapshot, CATALOG, settings, database=BoundDatabase(pg_session), provider=provider
     )
     assert result.status == "NEED_CONFIRMATION"
+    assert len(result.reference_examples) == 2
     assert result.citations and all(c.use == "RELATED" for c in result.citations)
     assert all("private" not in t for t in provider.inputs)
     assert await revalidate_citations(pg_session, result, settings)
@@ -126,6 +127,7 @@ async def test_survey_embeds_only_labels_and_withdrawal_blocks_final_save(pg_ses
         snapshot, CATALOG, settings, database=BoundDatabase(pg_session), provider=provider
     )
     assert failure.reason_codes == ["SOURCE_UNAVAILABLE"] and not failure.citations
+    assert failure.reference_examples == result.reference_examples
     snapshot.context.answers["immediate-danger"] = "YES"
     safety = await evaluate_survey(
         snapshot, CATALOG, settings, database=BoundDatabase(pg_session), provider=provider

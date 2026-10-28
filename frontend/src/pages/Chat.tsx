@@ -3,6 +3,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { ApiError } from '../api/client'
 import { Feedback, Waiting } from '../components/Feedback'
 import SurveyImport from '../components/SurveyImport'
+import RepairExamples from '../components/RepairExamples'
 import { useAuth } from '../features/auth/useAuth'
 import { chatHistory, importSurvey, pendingChat, saveChatPending, sendChat } from '../features/chat/api'
 import type { ChatResponse } from '../features/chat/api'
@@ -183,6 +184,7 @@ function Conversation({ session, reference, restart }: { session: Session; refer
         {(!item.isCurrent || item.contextRevision !== session.revision) && <p className="past-note">이전 입력이나 기준의 답변이에요. 현재 상황과 다를 수 있어요.</p>}
         <div aria-label="답변 내용">{item.assistantMessage.content.split(/\n{2,}/).map((text, index) => <p key={index} className="chat-content">{text}</p>)}</div>
         {!!item.followUpQuestions.length && <ul>{item.followUpQuestions.map((question, index) => <li key={index}>{question}</li>)}</ul>}
+        <RepairExamples examples={item.referenceExamples} />
         {!!item.assistantMessage.citations.length && <ul aria-label="정보 출처">{item.assistantMessage.citations.map(citation => <li key={citation.chunkId}>
           <details><summary>{citation.use === 'RELATED' ? '참고 자료' : '설명 근거'} · {citation.title} · {citation.locator}</summary>
             {citation.excerpt && <p className="chat-content">{citation.excerpt}</p>}

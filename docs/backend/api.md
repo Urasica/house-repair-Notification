@@ -162,6 +162,7 @@ type GuidanceResult = {
   summary: {housingLabel: string; roomLabel: string; facilityLabel: string;
     symptomLabel: string; description: string; answerLabels: string[]};
   guidance: string[];
+  referenceExamples?: string[];
   checks: string[];
   followUpQuestions: string[];
   contactDraft: string;
@@ -185,7 +186,8 @@ type ChatMessage = {id: string; requestId: string; role: "USER" | "ASSISTANT";
 type ChatResponse = {requestId: string; contextRevision: number;
   answerMode: "GROUNDED" | "CLARIFY" | "TEMPLATE"; status: GuidanceStatus;
   userMessage: ChatMessage; assistantMessage: ChatMessage;
-  followUpQuestions: string[]; disclaimer: string; isCurrent: boolean};
+  followUpQuestions: string[]; referenceExamples?: string[];
+  disclaimer: string; isCurrent: boolean};
 
 type ChatHistory = {items: ChatResponse[]; nextCursor: string | null};
 
@@ -195,6 +197,8 @@ type RequestState = {requestId: string; kind: "SURVEY" | "CHAT";
 ```
 
 회원 채팅은 1~2,000자이며 공백만 있으면 거부한다. 실패한 처리 중 입력은 완료 대화 목록에 넣지 않는다. 원본 대화의 단기 저장과 장기 질문 기록은 분리한다.
+
+GuidanceResult와 ChatResponse는 `referenceExamples?: string[]`를 제공한다(최대 2개, 기본 빈 목록). 입력 정보가 부족할 때 표시하는 편집된 가상 보수 검토 예시이며 적용 근거·실제 처리 이력이 아니다. 예시의 표시·제외 기준은 [챗봇 답변 정책](../product/chat.md#4-웹사이트-내-답변과-근거-표시)을 설문에도 적용한다. 생성 당시 응답에 함께 저장·재생하며, 기존 저장본은 예시 없이 조회한다. 예시를 실제 문의 문장·외부 제공자 입력에 합치지 않는다. DB 열 변경은 없다.
 
 ChatHistory.items는 COMPLETED인 CHAT 요청의 저장된 ChatResponse를 사용한다. 각 항목에 질문·답변·answerMode·status·followUpQuestions·disclaimer·contextRevision을 함께 반환하며 응답과 두 메시지의 isCurrent는 조회 시 재계산한다. 정렬은 요청 created_at·id 오름차순, limit는 질문·답변 쌍 기준 기본 20·최대 50이다. nextCursor 이후의 쌍을 조회하고 마지막은 null이다. PROCESSING·FAILED·DELETED는 제외한다. 새로고침 시 같은 표시 정보를 복원하며 조회 때문에 모델을 재호출하지 않는다.
 
