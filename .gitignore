@@ -17,5 +17,9 @@ htmlcov/
 *.egg-info/
 data/private/
 artifacts/
+/progress/
+/data/operations/
+test-results/
+playwright-report/
 .DS_Store
 Thumbs.db

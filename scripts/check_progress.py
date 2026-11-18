@@ -320,9 +320,10 @@ def main() -> int:
         check=True,
         capture_output=True,
     )
-    files = sorted({ROOT / name for name in result.stdout.decode("utf-8").split("\0") if name})
+    files = {ROOT / name for name in result.stdout.decode("utf-8").split("\0") if name}
+    files.update((ROOT / "progress").rglob("*.md"))
     # Git may still list deleted tracked files during a rename/refactor.
-    files = [path for path in files if path.is_file()]
+    files = sorted(path for path in files if path.is_file())
     errors, entries = check_records(ROOT)
     errors.extend(check_references(ROOT, entries))
     index = ROOT / "progress/records/README.md"

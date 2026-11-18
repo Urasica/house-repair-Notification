@@ -1,6 +1,6 @@
 # 로컬 실행과 개발 검증
 
-기준: [개발 규칙](standards.md) · 환경별 상태: [현재 작업판](../../progress/current-status.md)
+개발 환경의 기준은 [개발 규칙](standards.md)을 따른다. Windows에서 별도 로컬 서버를 시작하는 BAT는 [Windows 실행](../operations/deployment.md#windows-실행)을 참고한다.
 
 로컬 서비스는 `.env.ops`와 `compose.deletions.yaml`을 함께 사용한다. 아래 기본 명령은 비밀·자료가 없는 초기 환경 구성용이다. 보존할 서비스 재생성 시에는 `--env-file .env --env-file .env.ops -f compose.yaml -f compose.deletions.yaml`을 지정해 즉시 삭제 파일 내보내기를 유지한다. 기존 데이터 변경 전 백업·정리·복원과 별도 ops 이미지 설정은 [보존·백업 안내](../operations/retention-backup.md)를 따른다.
 
@@ -87,4 +87,4 @@ DB 모델은 `backend/app/db/models.py`, migration은 `backend/alembic/versions/
 
 ## 5. 배포와 운영 검증
 
-운영 설정과 릴리스 순서는 [배포 안내](../operations/deployment.md), 보존·삭제·백업·복원은 [운영 절차](../operations/retention-backup.md)에서 관리한다. 개발 `.env`를 운영 설정으로 재사용하지 않는다. 실제 빌드 digest·명령별 결과·시험 건수는 [진행 기록](../../progress/records/README.md)에 남긴다.
+운영 설정과 릴리스 순서는 [배포 안내](../operations/deployment.md), 보존·삭제·백업·복원은 [운영 절차](../operations/retention-backup.md)에서 관리한다. 개발 `.env`를 운영 설정으로 재사용하지 않는다. 실제 빌드 digest·명령별 결과·시험 건수는 로컬 `progress/records/`에 남긴다.

@@ -20,4 +20,4 @@ M08 원문과 M08A 실제 목록을 사용했다. 원문과 벡터는 접근 제
 
 현재 자료는 LAW_CRITERIA뿐이다. 일반 설문은 법령을 RELATED로 인용하며 NEED_CONFIRMATION을 유지한다. 명시적 법령 설명은 확인된 조문에만 APPLICABLE을 허용하며, 외부 규정 미검증·별표 4 손상 문구·누락 조문이 포함된 설명은 확인 안내로 남긴다. 운영 문의와 혼합 문의에는 LH_OPERATION이 필요하다.
 
-재현 절차와 제한은 [지식 반입·검색 운영 안내](../../../docs/ai/knowledge-publication.md), 완료 기록은 [M09 기록](../../../progress/records/04-m09-knowledge-review.md)을 따른다.
+재현 절차와 제한은 [지식 반입·검색 운영 안내](../../../docs/ai/knowledge-publication.md)를 따른다.

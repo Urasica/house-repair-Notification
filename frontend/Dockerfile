@@ -8,4 +8,4 @@ RUN npm run build
 FROM caddy:2.11.4-alpine@sha256:6aeddd44c3078b0f9a35206472a11420648a79c184603ef95957d0a20044cb2b
 COPY --from=build /app/dist /srv
 COPY Caddyfile /etc/caddy/Caddyfile
-COPY Caddyfile.prod Caddyfile.tunnel Caddyfile.preview-local /etc/caddy/
+COPY Caddyfile.prod /etc/caddy/

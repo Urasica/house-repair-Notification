@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test('HTTPS deployment enforces secure cookies, origin, CSRF and body limits', async ({ page, baseURL }) => {
-  test.skip(!baseURL?.startsWith('https://'), 'Requires the production HTTPS preview')
+  test.skip(!baseURL?.startsWith('https://'), 'Requires an HTTPS deployment')
   const origin = new URL(baseURL!).origin
   const api = page.request
   const credentials = { email: `deploy-${Date.now()}@example.com`, password: 'test-only-strong-passphrase' }

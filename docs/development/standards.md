@@ -1,6 +1,6 @@
 # 개발 기준과 입력 형식
 
-기준: [전체 안내](../README.md) · 진행: [MVP 작업](../../progress/README.md)
+[전체 설계 안내](../README.md)
 
 ## 1. 공통 구현 기준
 
@@ -32,11 +32,11 @@ Python 3.12, Node 22 계열을 기준으로 한다. FastAPI 0.142.2·Pydantic 2.
 
 ## 4. 작업·검증·기록
 
-작업 단위마다 산출물·필요한 검증·진행 문서를 함께 변경한다. 진행 문서는 [갱신 규칙](../../progress/README.md)에 따라 현재 판단·남은 작업을 하나의 작업판에서 관리하고 당시 증거는 새 기록으로 남긴다. 기록의 메타데이터는 한 번만 작성하며 `python scripts/check_progress.py --write`로 색인을 자동 생성·검사한다. 과거 시험 건수를 복사하거나 소급 수정하지 않는다. 이전 번호 경로의 안내 파일은 사용하지 않고 현재 작업판·정식 기록으로 직접 연결한다. CI는 `python scripts/check_progress.py`로 생성 누락·참조 오류·이전 구조 재생성을 읽기 전용 검사하며, 검사기 변경 시 문서 검사 회귀 시험도 실행한다.
+산출물과 검증을 작업 단위로 정리한다. 진행 기록을 보관하는 작업 환경에서는 로컬 `progress/README.md`에 따라 작업판과 증거를 갱신하고 `python scripts/check_progress.py --write`로 색인을 검사한다. 진행 기록은 Git에서 제외한다.
 
 Python은 Ruff·pytest, 프론트는 타입 검사·ESLint·Vitest·빌드를 사용한다. DB 제약·삭제·벡터 검증은 실제 PostgreSQL + pgvector에서 실행하며 SQLite로 대체하지 않는다.
 
-외부 입력의 확인 상태와 적용 제한은 [최신 상태의 자료/입력 표](../../progress/current-status.md#자료와-외부-입력), 운영 인수 항목은 [작업 문서](../../progress/current-status.md#남은-작업)에서 관리한다. 원문·목록·지식·생성 평가의 당시 결과는 [증거 색인](../../progress/records/README.md)에서 찾는다.
+외부 입력의 확인 상태와 운영 인수 항목은 로컬 `progress/current-status.md`에서 관리한다.
 
 ## 5. 계약과 스키마 변경
 

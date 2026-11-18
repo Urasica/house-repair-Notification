@@ -4,7 +4,7 @@
 
 ## 1. 책임과 검증 범위
 
-QA는 권한·저장·단일 DB·RAG 선행·자료 완전성·보존·삭제·복구를 검증한다. 실행 절차는 [보존·백업](../operations/retention-backup.md)과 [배포](../operations/deployment.md)를 따른다. 실제 판정·미완료 항목은 [현재 작업판](../../progress/current-status.md)에서 관리한다.
+QA는 권한·저장·단일 DB·RAG 선행·자료 완전성·보존·삭제·복구를 검증한다. 실행 절차는 [보존·백업](../operations/retention-backup.md)과 [배포](../operations/deployment.md)를 따른다. 실제 판정과 미완료 항목은 로컬 `progress/current-status.md`에서 관리한다.
 
 초기에는 한 서버에서 Docker Compose로 운영한다. Kubernetes·Swarm·여러 서버·별도 Redis·Celery·상시 배치 워커·관측 전용 스택을 도입하지 않는다. 운영 담당자·사업자·서버 사양·도메인은 배포 인수 전에 확정한다.
 
