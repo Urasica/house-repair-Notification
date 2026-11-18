@@ -99,6 +99,7 @@ class Citation(APIModel):
     title: str
     locator: str
     url: str
+    explanation: str | None = None
     excerpt: str | None = None
     effective_date: str | None
     reviewed_at: AwareDatetime

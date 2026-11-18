@@ -104,6 +104,30 @@ it('sends once, restores complete display metadata and escapes user content', as
   expect(JSON.stringify(sessionStorage)).not.toContain('private@example.com')
 })
 
+it('shows the explanation first with the law text and official link inside its source', async () => {
+  const result = answer(crypto.randomUUID())
+  const explanation = '물이 보이면 어디를 통해 들어왔는지 살펴봐요.'
+  result.assistantMessage.citations = [{
+    chunkId: crypto.randomUUID(), documentVersionId: crypto.randomUUID(), kind: 'LAW_CRITERIA', use: 'RELATED',
+    title: '공동주택 하자판정기준', locator: '제10조', explanation, excerpt: '누수 하자 기준 원문',
+    url: 'https://law.go.kr/example', effectiveDate: '2026-07-08',
+    reviewedAt: '2026-10-04T00:00:00Z', reviewUntil: '2027-01-02T00:00:00Z',
+  }]
+  replies = [result]
+  await render(); await until(() => expect(host.textContent).toContain(explanation))
+
+  const displayed = host.querySelector('[aria-label="답변 내용"]')!
+  expect(displayed.firstElementChild?.firstElementChild?.firstElementChild?.textContent).toBe(explanation)
+  const details = displayed.querySelector('details')!
+  expect(details.open).toBe(false)
+  const summary = details.querySelector('summary')!
+  expect(summary.textContent).toBe('근거 보기 · 제10조')
+  await act(async () => summary.click())
+  expect(details.open).toBe(true)
+  expect(details.querySelector('.source-excerpt')?.textContent).toBe('누수 하자 기준 원문')
+  expect(details.querySelector('a')?.href).toBe('https://law.go.kr/example')
+})
+
 it('imports only after choosing a saved survey and explicitly requesting it', async () => {
   current.context = { description: '', answers: {} }
   await render(); await until(() => expect(host.querySelector('#chat-input')).not.toBeNull())

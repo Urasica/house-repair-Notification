@@ -4,6 +4,7 @@ import json
 import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from pathlib import Path
 from uuid import UUID
 
 from sqlalchemy import select
@@ -12,6 +13,8 @@ from app.db.models import KnowledgeChunk, KnowledgeDocument, KnowledgeSet
 from app.schemas.contracts import Citation, Context
 from app.services.embeddings import validate_vector
 from app.services.knowledge_source import digest
+
+LAW_EXPLANATIONS = json.loads(Path(__file__).with_name("law_explanations.json").read_bytes())
 
 
 def question_purpose(question: str) -> str:
@@ -49,7 +52,7 @@ class Retrieval:
     guidance: list[str] = field(default_factory=list)
     candidate_count: int = 0
 
-    def citations(self, *, excerpts=False):
+    def citations(self, *, excerpts=False, explain=False):
         output = {}
         for bundle in self.evidence:
             for chunk, document in [
@@ -57,6 +60,14 @@ class Retrieval:
                 *bundle.related,
                 *(bundle.context if excerpts else []),
             ]:
+                note = LAW_EXPLANATIONS.get(chunk.locator) if explain else None
+                explanation = (
+                    note["explanation"]
+                    if document.kind == "LAW_CRITERIA"
+                    and note
+                    and note["contentHash"] == chunk.content_hash
+                    else None
+                )
                 output[chunk.id] = Citation(
                     chunk_id=chunk.id,
                     document_version_id=document.id,
@@ -65,7 +76,8 @@ class Retrieval:
                     title=document.title,
                     locator=chunk.locator,
                     url=document.url,
-                    excerpt=source_excerpt(chunk) if excerpts else None,
+                    explanation=explanation,
+                    excerpt=source_excerpt(chunk) if excerpts or explanation else None,
                     effective_date=document.effective_date.isoformat()
                     if document.effective_date
                     else None,

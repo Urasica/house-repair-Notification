@@ -113,6 +113,13 @@ textarea { resize: vertical; }
 .result-view h2 { margin-top: 28px; }
 .result-view details { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 8px; }
 .result-view summary { cursor: pointer; min-height: 44px; padding-block: 10px; font-weight: 650; }
+.law-explanations { display: grid; gap: 12px; }
+.law-explanations > div > p { margin-top: 0; }
+.law-explanations .evidence-source { margin: 0; }
+.evidence-source summary { color: var(--green); cursor: pointer; }
+.evidence-source-title { font-weight: 650; }
+.evidence-source-meta { font-size: .875rem; }
+.source-excerpt { white-space: pre-wrap; overflow-wrap: anywhere; }
 .copy-text { width: 100%; }
 .repair-examples { margin-block: 20px; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: #f3f6f2; }
 .repair-examples h3 { margin: 0 0 12px; font-size: 19px; line-height: 1.5; }

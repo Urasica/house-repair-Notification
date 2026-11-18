@@ -14,7 +14,7 @@ from app.services.embeddings import EmbeddedBatch, EmbeddingUnavailable
 from app.services.guidance import evaluate_survey
 from app.services.knowledge import embed_release, import_bundle, withdraw_source
 from app.services.knowledge_source import prepare_source
-from app.services.retrieval import revalidate_citations
+from app.services.retrieval import LAW_EXPLANATIONS, revalidate_citations
 
 pytestmark = pytest.mark.integration
 
@@ -86,8 +86,14 @@ async def test_import_resume_and_metadata_release_reuses_identical_vectors(pg_se
         await import_bundle(pg_session, bundle, catalog_review, review, settings)
 
 
-async def test_survey_embeds_only_labels_and_withdrawal_blocks_final_save(pg_session):
+async def test_survey_embeds_only_labels_and_withdrawal_blocks_final_save(pg_session, monkeypatch):
     release, document, chunk = await seed_release(pg_session)
+    explanation = "물이 지금도 떨어지는지와 물자국만 남았는지를 살펴봐요."
+    monkeypatch.setitem(
+        LAW_EXPLANATIONS,
+        chunk.locator,
+        {"contentHash": chunk.content_hash, "explanation": explanation},
+    )
     release.status = "PUBLISHED"
     release.published_at = datetime.now(UTC)
     await pg_session.flush()
@@ -118,6 +124,8 @@ async def test_survey_embeds_only_labels_and_withdrawal_blocks_final_save(pg_ses
     assert result.status == "NEED_CONFIRMATION"
     assert len(result.reference_examples) == 2
     assert result.citations and all(c.use == "RELATED" for c in result.citations)
+    assert result.citations[0].explanation == explanation
+    assert result.citations[0].excerpt == chunk.body
     assert all("private" not in t for t in provider.inputs)
     assert await revalidate_citations(pg_session, result, settings)
     assert await withdraw_source(pg_session, document.source_key, "test-only") == 1

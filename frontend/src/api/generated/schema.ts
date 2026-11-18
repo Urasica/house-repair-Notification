@@ -468,6 +468,8 @@ export interface components {
             effectiveDate: string | null;
             /** Excerpt */
             excerpt?: string | null;
+            /** Explanation */
+            explanation?: string | null;
             /**
              * Kind
              * @enum {string}

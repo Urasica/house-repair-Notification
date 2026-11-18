@@ -362,6 +362,17 @@
             ],
             "title": "Excerpt"
           },
+          "explanation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation"
+          },
           "kind": {
             "enum": [
               "LAW_CRITERIA",

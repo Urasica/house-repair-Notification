@@ -157,14 +157,19 @@ async def evaluate_survey(
         return unavailable_result(result, OPENAI_UNAVAILABLE_MESSAGE)
     if found.reason == "SOURCE_UNAVAILABLE":
         return unavailable_result(result)
+    citations = found.citations(explain=True)
+    guidance = found.guidance
+    if found.status == "NEED_CONFIRMATION":
+        guidance = ([] if any(c.explanation for c in citations) else guidance) + [
+            NO_APPLICABLE_GUIDANCE_MESSAGE
+        ]
     return result.model_copy(
         update={
             "status": found.status,
             "reason_codes": [found.reason],
-            "citations": found.citations(),
+            "citations": citations,
             "reference_examples": repair_examples(catalog, context, found.status),
-            "guidance": found.guidance
-            + ([NO_APPLICABLE_GUIDANCE_MESSAGE] if found.status == "NEED_CONFIRMATION" else []),
+            "guidance": guidance,
         }
     )
 

@@ -166,6 +166,10 @@ async def chat_response(
                 )
             if found.reason == "SOURCE_UNAVAILABLE":
                 return fallback(response)
+            citations = found.citations(
+                excerpts=True,
+                explain=purpose == "OPERATION" or found.status == "GUIDANCE_AVAILABLE",
+            )
             if found.status != "GUIDANCE_AVAILABLE":
                 message = NO_APPLICABLE_GUIDANCE_MESSAGE
                 if purpose == "LAW_EXPLANATION":
@@ -179,8 +183,30 @@ async def chat_response(
                     update={
                         "assistant_message": response.assistant_message.model_copy(
                             update={
-                                "content": "\n".join(found.guidance + [message]),
-                                "citations": found.citations(excerpts=True),
+                                "content": (
+                                    message
+                                    if any(c.explanation for c in citations)
+                                    else "\n".join(found.guidance + [message])
+                                ),
+                                "citations": citations,
+                            }
+                        ),
+                    }
+                )
+            if purpose == "LAW_EXPLANATION" and all(
+                c.explanation for c in found.citations(explain=True) if c.use == "APPLICABLE"
+            ):
+                return response.model_copy(
+                    update={
+                        "answer_mode": "GROUNDED",
+                        "status": GuidanceStatus.GUIDANCE_AVAILABLE,
+                        "assistant_message": response.assistant_message.model_copy(
+                            update={
+                                "content": (
+                                    "구체적인 하자 여부는 현장 상태와 원문에 적힌 조건을 "
+                                    "함께 살펴봐야 해요."
+                                ),
+                                "citations": citations,
                             }
                         ),
                     }
@@ -203,7 +229,7 @@ async def chat_response(
                     "assistant_message": response.assistant_message.model_copy(
                         update={
                             "content": prefix + "\n\n".join(statements + annex_texts(found)),
-                            "citations": found.citations(excerpts=True),
+                            "citations": citations,
                         }
                     ),
                 }

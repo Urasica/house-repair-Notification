@@ -144,7 +144,8 @@ type Citation = {
   title: string;
   locator: string;
   url: string;
-  excerpt?: string | null; // 새 근거 기반 채팅의 사이트 내 근거 표시용 원문
+  explanation?: string | null; // 원문 버전이 일치할 때 표시하는 쉬운 법령 설명
+  excerpt?: string | null; // 사이트 내 근거 펼침 영역의 원문
   effectiveDate: string | null;
   reviewedAt: string;
   reviewUntil: string;
@@ -216,7 +217,7 @@ ChatHistory.items는 COMPLETED인 CHAT 요청의 저장된 ChatResponse를 사�
 
 사용자의 질문 통계는 자료 개선용이며 RAG 지식으로 자동 복사하지 않는다. 서버는 입력·대화·근거 중 식별정보를 제거한 최소 내용만 OpenAI에 전달한다. 결과 문구·안전 안내·문의 문구에서 전화번호·이메일·연락처 패턴이 검출되면 제거 또는 템플릿 대체한다. 출처 URL은 검토된 원문 확인용만 허용한다.
 
-ChatResponse의 assistantMessage.content에는 사이트에서 읽을 답변·조건 또는 확인 사항을 포함한다. 링크만 반환해 답변을 대신하지 않는다. 새 근거 기반 채팅의 Citation.excerpt는 검토된 원문과 필요한 조건·단서를 서버가 구성하고 현재 응답·저장·이력 조회에 함께 제공한다. URL·제목·시행일도 DB에서만 조립하며 선택적 원문 링크를 열지 않아도 필요한 근거를 확인할 수 있어야 한다.
+ChatResponse의 assistantMessage.content에는 사이트에서 읽을 답변·조건 또는 확인 사항을 포함한다. 챗봇과 설문에서 원문 해시가 일치하는 편집 설명이 있으면 해당 Citation의 explanation과 excerpt를 함께 제공한다. 화면은 설명 아래에서 해당 원문과 공식 링크를 펼쳐 볼 수 있게 표시한다. 인용은 현재 응답·저장·이력 조회에 포함되며 URL·제목·시행일은 DB 값으로 조립한다.
 
 ## 6. 단일 프로세스 동시성·중복 방지
 

@@ -23,6 +23,7 @@ from app.schemas.contracts import Context, Session
 from app.services.catalog import publish_catalog
 from app.services.chat import chat_response
 from app.services.chat_context import chat_policy, confirmed_context
+from app.services.retrieval import LAW_EXPLANATIONS
 
 
 def test_chat_confirms_own_context_without_survey_answers():
@@ -337,7 +338,10 @@ async def test_chat_creation_requires_account_and_legacy_history_is_read_only(
 
 
 @pytest.mark.integration
-async def test_empty_chat_can_explain_law_and_returns_complete_inline_evidence(pg_session):
+@pytest.mark.parametrize("with_explanation", [False, True])
+async def test_empty_chat_can_explain_law_and_returns_complete_inline_evidence(
+    pg_session, monkeypatch, with_explanation
+):
     release, doc, chunk = await seed_release(pg_session)
     release.status, release.published_at = "PUBLISHED", datetime.now(UTC)
     await pg_session.flush()
@@ -355,9 +359,15 @@ async def test_empty_chat_can_explain_law_and_returns_complete_inline_evidence(p
         expires_at=now + timedelta(hours=24),
     )
 
-    class Generator:
-        async def generate(self, *args, **kwargs):
-            return [chunk.body]
+    explanation = "천장이나 벽에서 물이 보이면 먼저 어디를 통해 들어왔는지 살펴봐요."
+    if with_explanation:
+        monkeypatch.setitem(
+            LAW_EXPLANATIONS,
+            chunk.locator,
+            {"contentHash": chunk.content_hash, "explanation": explanation},
+        )
+    generator = AsyncMock()
+    generator.generate.return_value = [chunk.body]
 
     response = await chat_response(
         snapshot,
@@ -368,13 +378,20 @@ async def test_empty_chat_can_explain_law_and_returns_complete_inline_evidence(p
         [],
         database=BoundDatabase(pg_session),
         embeddings=FakeEmbedding(),
-        generator=Generator(),
+        generator=generator,
     )
     assert response.status == "GUIDANCE_AVAILABLE" and response.answer_mode == "GROUNDED"
-    assert chunk.body in response.assistant_message.content
     citation = response.assistant_message.citations[0]
     assert citation.excerpt == chunk.body and citation.locator == chunk.locator
     assert citation.title == doc.title and citation.use == "APPLICABLE"
+    if with_explanation:
+        assert citation.explanation == explanation
+        assert chunk.body not in response.assistant_message.content
+        generator.generate.assert_not_awaited()
+    else:
+        assert citation.explanation is None
+        assert chunk.body in response.assistant_message.content
+        generator.generate.assert_awaited_once()
 
 
 @pytest.mark.integration
