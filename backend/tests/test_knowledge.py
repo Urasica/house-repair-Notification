@@ -304,10 +304,15 @@ async def test_operational_conditions_and_conflict_override_vector_rank(pg_sessi
     assert (
         await retrieve(pg_session, release.id, VECTOR, settings, CONTEXT_INPUT, building=True)
     ).status == "NEED_CONFIRMATION"
-    context = CONTEXT_INPUT.model_copy(update={"answers": {"cause": "AGING"}})
+    context = CONTEXT_INPUT.model_copy(
+        update={"facility_id": "pipe", "answers": {"cause": "AGING"}}
+    )
     assert (
         await retrieve(pg_session, release.id, VECTOR, settings, context, building=True)
     ).status == "GUIDANCE_AVAILABLE"
+    unconfirmed = context.model_copy(update={"facility_id": None})
+    found = await retrieve(pg_session, release.id, VECTOR, settings, unconfirmed, building=True)
+    assert found.status == "NEED_CONFIRMATION" and found.citations()[0].use == "RELATED"
     other = KnowledgeChunk(
         document_id=doc.id,
         ordinal=1,

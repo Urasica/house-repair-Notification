@@ -226,6 +226,7 @@ async def retrieve(
         rule = metadata.get("operationRule")
         if (
             purpose == "OPERATION"
+            and context.facility_id not in {None, "unknown"}
             and document.kind == "LH_OPERATION"
             and document.scope_json.get("operationalUse") is True
             and operation_matches(rule, context)

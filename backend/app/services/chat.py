@@ -167,11 +167,14 @@ async def chat_response(
             if found.reason == "SOURCE_UNAVAILABLE":
                 return fallback(response)
             if found.status != "GUIDANCE_AVAILABLE":
-                message = (
-                    "요청하신 조문을 설명할 수 있는 검토 자료를 찾지 못했어요."
-                    if purpose == "LAW_EXPLANATION"
-                    else NO_APPLICABLE_GUIDANCE_MESSAGE
-                )
+                message = NO_APPLICABLE_GUIDANCE_MESSAGE
+                if purpose == "LAW_EXPLANATION":
+                    message = "요청하신 조문을 설명할 수 있는 검토 자료를 찾지 못했어요."
+                elif snapshot.context.facility_id in {None, "unknown"}:
+                    message = (
+                        "말씀해 주신 증상만으로는 원인이 된 시설을 특정하기 어려워요. "
+                        "관리사무소에 문제가 보이는 위치와 언제부터 그랬는지 알려 주세요."
+                    )
                 return response.model_copy(
                     update={
                         "assistant_message": response.assistant_message.model_copy(

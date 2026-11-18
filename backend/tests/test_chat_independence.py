@@ -1,5 +1,6 @@
 # ruff: noqa: F811
 from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
@@ -19,6 +20,7 @@ from test_m08a_catalog import CATALOG
 
 from app.db.models import ChatUsage, Consultation, Message, QuestionRecord, Result, User
 from app.schemas.contracts import Context, Session
+from app.services.catalog import publish_catalog
 from app.services.chat import chat_response
 from app.services.chat_context import chat_policy, confirmed_context
 
@@ -52,6 +54,57 @@ def test_everyday_leakage_is_confirmed_without_catalog_phrasing_or_negative_gues
     assert partial.symptom_id == "leak"
     follow_up = confirmed_context(partial, "주방 배관이에요", CATALOG)
     assert follow_up.symptom_id == "leak" and follow_up.facility_id == "pipe"
+
+
+@pytest.mark.integration
+async def test_ceiling_leak_followups_use_symptom_reference_without_guessing_cause(pg_session):
+    settings = enabled()
+    catalog = await publish_catalog(pg_session, CATALOG, settings)
+    release, _, _ = await seed_release(pg_session, catalog=catalog)
+    now = datetime.now(UTC)
+    release.status, release.published_at = "PUBLISHED", now
+    await pg_session.flush()
+    snapshot = Session(
+        id=uuid4(),
+        purpose="CHAT",
+        access_mode="MEMBER",
+        catalog_version=catalog.version,
+        knowledge_release_id=release.id,
+        revision=0,
+        context=Context(),
+        current_result_id=None,
+        created_at=now,
+        expires_at=now + timedelta(hours=24),
+    )
+    embeddings = FakeEmbedding()
+    generator = AsyncMock()
+    for content in ("집 천장에서 물이 새고 있어", "LH 건설임대야 거실 천장", "거실 천장"):
+        snapshot.context = confirmed_context(snapshot.context, content, CATALOG)
+        response = await chat_response(
+            snapshot,
+            CATALOG,
+            settings,
+            content,
+            uuid4(),
+            [],
+            database=BoundDatabase(pg_session),
+            embeddings=embeddings,
+            generator=generator,
+        )
+        if snapshot.context.housing_type is None:
+            assert response.answer_mode == "CLARIFY" and len(response.follow_up_questions) == 1
+            assert "주택 유형" in response.follow_up_questions[0]
+            assert not embeddings.inputs
+        else:
+            assert snapshot.context.room_id == "living" and snapshot.context.symptom_id == "leak"
+            assert snapshot.context.facility_id is None
+            assert response.status == "NEED_CONFIRMATION" and not response.follow_up_questions
+            assert "문제가 보이는 위치" in response.assistant_message.content
+            citation = response.assistant_message.citations[0]
+            assert citation.locator == "제10조" and citation.use == "RELATED"
+    assert len(embeddings.inputs) == 2
+    assert all("천장" not in query for query in embeddings.inputs)
+    generator.generate.assert_not_awaited()
 
 
 @pytest.mark.integration
@@ -334,7 +387,7 @@ async def test_chat_confirms_conditions_in_conversation_and_enforces_its_own_rev
     request = {"requestId": str(uuid4()), "expectedRevision": 0, "content": "시설물이 고장났어요"}
     first = (await client.post(base + "/chat/messages", headers=headers, json=request)).json()
     assert first["answerMode"] == "CLARIFY"
-    assert all("채팅" in question for question in first["followUpQuestions"])
+    assert any("어떤 문제가 보이나요" in question for question in first["followUpQuestions"])
     second = await client.post(
         base + "/chat/messages",
         headers=headers,

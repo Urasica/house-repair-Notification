@@ -110,13 +110,13 @@ def chat_policy(context, content):
             "주택 유형을 채팅으로 알려 주세요. LH 건설임대 또는 분양전환 전 임대주택인가요? "
             "모르면 모른다고 답해 주세요."
         )
-    if (not context.facility_id or not context.symptom_id) and not re.search(
+    if context.symptom_id in {None, "unknown"} and not re.search(
         r"제\s*\d+\s*조|별표\s*\d+", content
     ):
         questions.append(
-            "불편한 시설물을 채팅으로 알려 주세요. 예: 배관, 문, 창문."
-            if not context.facility_id
-            else "어떤 증상인지 채팅으로 알려 주세요. 예: 물이 새요, 문이 잠기지 않아요."
+            "어느 곳에서 어떤 문제가 보이나요? 예: 거실 천장에서 물이 떨어져요."
+            if context.facility_id in {None, "unknown"}
+            else "어떤 증상인지 알려 주세요. 예: 물이 새요, 문이 잠기지 않아요."
         )
     if questions:
         return (
