@@ -2,7 +2,7 @@
 
 개발 실행은 [로컬 실행과 검증](docs/development/local.md), 서비스 구조는 [설계 안내](docs/README.md)를 참고하세요.
 
-Windows에서는 Docker Desktop을 켜고 `test-deploy.bat`를 실행한 뒤 [로컬 서버](http://localhost:18880)에 접속하세요. 종료는 `stop-test-deploy.bat`를 실행하세요. [실행·운영 배포 안내](docs/operations/deployment.md)
+Windows에서는 Docker Desktop을 켜고 `test-deploy.bat`를 실행한 뒤 콘솔에 표시된 주소로 접속하세요. 실행 설정은 `.env`를 우선하며, 종료는 `stop-test-deploy.bat`를 실행하세요. [실행·운영 배포 안내](docs/operations/deployment.md)
 
 LH 공공주택 입주민이 집 안의 불편이나 하자를 쉽게 설명하고, 보수 관련 기준과 문의할 내용을 확인할 수 있도록 돕는 웹 서비스입니다. 이 문서는 상세 설계가 아닌 서비스 방향과 UI 시안 구성을 정리한 초안입니다.
 

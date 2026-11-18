@@ -3,9 +3,6 @@ param([ValidateSet('Start', 'Stop')][string]$Action = 'Start')
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$localUrl = 'http://localhost:18880'
-$composeArgs = @('--host', 'npipe:////./pipe/dockerDesktopLinuxEngine', 'compose',
-    '--project-name', 'repair-guide-local', '--env-file', '.env.example', '-f', 'compose.yaml')
 
 function Invoke-Compose([string]$Step, [string[]]$Command, [switch]$Admin) {
     $ErrorActionPreference = 'Continue'
@@ -21,22 +18,39 @@ try {
         throw 'Install and start Docker Desktop with Linux containers.'
     }
 
-    # Exported Compose variables take precedence over --env-file, including DB URLs.
-    foreach ($line in Get-Content -LiteralPath '.env.example') {
-        if ($line -match '^([A-Z][A-Z0-9_]*)=') {
+    $envFiles = @('.env.example')
+    $composeFiles = @('compose.yaml')
+    $project = 'repair-guide-local'
+    if (Test-Path -LiteralPath '.env' -PathType Leaf) {
+        $project = 'repair-guide'
+        if (Test-Path -LiteralPath '.env.ops' -PathType Leaf) {
+            $envFiles += '.env.ops'
+            $composeFiles += 'compose.deletions.yaml'
+        }
+        $envFiles += '.env'
+    }
+
+    # Compose would otherwise pick exported shell values over the selected files.
+    foreach ($line in Get-Content -LiteralPath $envFiles) {
+        if ($line -match '^\s*(?:export\s+)?([A-Z][A-Z0-9_]*)\s*=') {
             Remove-Item -LiteralPath ('Env:' + $Matches[1]) -ErrorAction SilentlyContinue
         }
     }
     Remove-Item -LiteralPath Env:DOCKER_CONTEXT -ErrorAction SilentlyContinue
-    $env:WEB_PORT = '18880'
-    $env:WEB_ORIGINS = '["' + $localUrl + '"]'
+    if ($project -eq 'repair-guide-local') {
+        $env:WEB_PORT = '18880'
+        $env:WEB_ORIGINS = '["http://localhost:18880"]'
+    }
+    $composeArgs = @('--host', 'npipe:////./pipe/dockerDesktopLinuxEngine', 'compose', '--project-name', $project)
+    foreach ($file in $envFiles) { $composeArgs += @('--env-file', $file) }
+    foreach ($file in $composeFiles) { $composeArgs += @('-f', $file) }
 
     New-Item -ItemType Directory -Path '.cache' -Force | Out-Null
     $localDeployLock = [IO.File]::Open((Join-Path $root '.cache/local-deploy.lock'), 'OpenOrCreate', 'ReadWrite', 'None')
 
     if ($Action -eq 'Stop') {
         Invoke-Compose 'Stopping the local server' @('down')
-        Write-Host 'Local server stopped. Database volume retained.'
+        Write-Host "Local server stopped ($project). Database volume retained."
         exit 0
     }
 
@@ -49,7 +63,8 @@ try {
     Invoke-Compose 'Publishing the reviewed catalog' @('run', '--rm', '--no-deps', '--volume', $catalogMount,
         'api', 'python', '-m', 'app.commands.catalog', 'publish', '/catalog.json')
     Invoke-Compose 'Starting the local server' @('up', '-d', '--no-build', '--wait', 'api', 'web')
-    Write-Host "Local server: $localUrl"
+    $binding = Invoke-Compose 'Finding the local address' @('port', 'web', '80')
+    Write-Host ('Local server: http://' + $binding.Replace('127.0.0.1:', 'localhost:'))
     Write-Host 'Stop with stop-test-deploy.bat.'
 } catch {
     [Console]::Error.WriteLine('FAILED: ' + $_.Exception.Message)

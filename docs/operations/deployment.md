@@ -2,11 +2,11 @@
 
 ## Windows 실행
 
-Docker Desktop을 Linux 컨테이너 모드로 시작한 뒤 `test-deploy.bat`를 실행한다. Docker Compose가 이미지를 빌드하고 DB 스키마와 검토된 설문 목록을 준비한다. 완료 메시지가 뜨면 [로컬 서버](http://localhost:18880)에 접속한다.
+Docker Desktop을 Linux 컨테이너 모드로 시작한 뒤 `test-deploy.bat`를 실행한다. Docker Compose가 이미지를 빌드하고 DB 스키마와 검토된 설문 목록을 준비한다. 완료되면 콘솔에 표시된 로컬 주소에 접속한다.
 
-서버는 `127.0.0.1:18880`에 연결되며 Compose 프로젝트와 DB 볼륨 이름은 각각 `repair-guide-local`, `repair-guide-local_database`다. `stop-test-deploy.bat`로 컨테이너와 네트워크를 정리한다. 시험 중 입력한 내용은 DB 볼륨에 남아 다음 실행에서 이어진다. 포트가 이미 사용 중이면 해당 포트를 점유한 서비스를 확인한다.
+`.env`가 있으면 `.env.example` 위에 적용하고 기존 개발 Compose 프로젝트 `repair-guide`와 DB 볼륨을 사용한다. 포트를 바꾸는 경우 `WEB_PORT`와 `WEB_ORIGINS`의 로컬 주소를 함께 맞춘다. OpenAI 사용 여부는 `OPENAI_ENABLED`를 따른다. `.env.ops`도 있으면 개발 프로젝트의 삭제 기록 내보내기를 적용한다. DB 접속값을 수정할 때는 기존 볼륨의 계정·암호와 맞춰야 한다.
 
-실행 설정은 저장소의 `.env.example`을 사용한다. OpenAI는 꺼져 있으며, 검토된 설문 목록과 기본 안내를 확인할 수 있다. 예전 `repair-guide-preview`와 개발 `repair-guide`의 데이터는 각자 별도 볼륨에 있다.
+`.env`가 없으면 별도 프로젝트 `repair-guide-local`을 [localhost:18880](http://localhost:18880)에서 실행한다. 이 경우 OpenAI는 꺼져 있다. `stop-test-deploy.bat`는 같은 설정 파일을 기준으로 프로젝트를 선택하며 DB 볼륨은 보존한다. `.env`를 추가하거나 제거해서 실행 방식을 바꿀 때는 먼저 기존 방식으로 서버를 종료한다.
 
 ## 실제 운영 서버 구성
 
