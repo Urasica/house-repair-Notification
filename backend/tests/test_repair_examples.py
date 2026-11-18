@@ -6,8 +6,8 @@ from test_m08a_catalog import CATALOG, answer_unknowns, context_for
 
 from app.core.config import Settings
 from app.schemas.contracts import Context, GuidanceResult, Session
-from app.services.chat import chat_response, fallback
-from app.services.guidance import evaluate_survey, unavailable_result
+from app.services.chat import chat_response
+from app.services.guidance import evaluate_survey
 from app.services.repair_examples import repair_examples
 
 
@@ -35,9 +35,25 @@ async def test_all_unknown_survey_answers_keep_inquiry_and_add_two_pipe_examples
     assert all("배관" in example for example in result.reference_examples)
     assert any("보수나 교체를 검토" in example for example in result.reference_examples)
     assert not result.citations
-    assert unavailable_result(result).reference_examples == result.reference_examples
     old_payload = result.model_dump(exclude={"reference_examples"})
     assert GuidanceResult.model_validate(old_payload).reference_examples == []
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+async def test_completed_door_survey_explains_why_search_is_unavailable(enabled):
+    context = answer_unknowns(context_for("opening-function", "door", "entrance"))
+    context.answers.update({"detail-opening-function": "CLOSE", "immediate-danger": "NO"})
+    settings = Settings(
+        _env_file=None,
+        openai_enabled=enabled,
+        openai_api_key="test-only",
+        openai_chat_model="test-only",
+    )
+    result = await evaluate_survey(snapshot(context), CATALOG, settings)
+    assert result.status == "GUIDANCE_UNAVAILABLE"
+    assert result.reason_codes == ["SOURCE_UNAVAILABLE"]
+    assert ("검색 자료가 없어" if enabled else "OpenAI 연결이 꺼져") in result.guidance[0]
+    assert not result.citations and not result.reference_examples
 
 
 @pytest.mark.parametrize("status", ["SAFETY_PRIORITY", "OUT_OF_SCOPE", "GUIDANCE_AVAILABLE"])
@@ -87,10 +103,10 @@ def test_other_symptoms_use_reviewed_options_and_never_present_interrupt_or_unkn
     [
         (Context(), "잘 모르겠어요", "NEED_MORE_INFO", 2),
         (Context(housing_type="UNKNOWN"), "모르겠어요", "NEED_CONFIRMATION", 2),
-        (context_for("leak", "pipe"), "어떻게 하나요?", "NEED_CONFIRMATION", 2),
+        (context_for("leak", "pipe"), "어떻게 하나요?", "GUIDANCE_UNAVAILABLE", 0),
         (context_for("leak", "pipe"), "가스 냄새가 나요", "SAFETY_PRIORITY", 0),
         (Context(housing_type="OTHER"), "잘 모르겠어요", "OUT_OF_SCOPE", 0),
-        (context_for("leak", "pipe"), "제10조 내용 설명", "NEED_CONFIRMATION", 0),
+        (context_for("leak", "pipe"), "제10조 내용 설명", "GUIDANCE_UNAVAILABLE", 0),
     ],
 )
 async def test_chat_clarification_fallback_and_safety_examples(context, content, status, count):
@@ -100,8 +116,8 @@ async def test_chat_clarification_fallback_and_safety_examples(context, content,
     assert result.status == status
     assert len(result.reference_examples) == count
     assert not result.assistant_message.citations
-    if count:
-        assert fallback(result).reference_examples == result.reference_examples
+    if status == "GUIDANCE_UNAVAILABLE":
+        assert "OpenAI 연결이 꺼져" in result.assistant_message.content
 
 
 def test_examples_do_not_repeat_contact_details_from_catalog_options():

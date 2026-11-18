@@ -134,7 +134,7 @@ knowledgeReleaseId는 DB의 knowledge_sets.id에 대응하며 세션 카탈로�
 
 ```typescript
 type GuidanceStatus = "SAFETY_PRIORITY" | "OUT_OF_SCOPE" | "NEED_MORE_INFO"
-  | "NEED_CONFIRMATION" | "GUIDANCE_AVAILABLE";
+  | "NEED_CONFIRMATION" | "GUIDANCE_UNAVAILABLE" | "GUIDANCE_AVAILABLE";
 
 type Citation = {
   chunkId: string;
@@ -207,6 +207,8 @@ ChatHistory.items는 COMPLETED인 CHAT 요청의 저장된 ChatResponse를 사�
 처리 순서는 검토된 위험 신호 → 범위 → 필수 정보 → 내부 RAG 적격 근거·충돌 → 안내다. 지원 범위·정보 부족·직접 문의의 기본 정책은 자료가 없어도 실행한다.
 
 설문은 완성 목록의 선택·답을 검색 질문으로 만들고 PostgreSQL + pgvector에서 근거를 찾는다. 필요하면 OpenAI Embeddings를 호출하지만 OpenAI 답변 생성은 사용하지 않는다. 적격 안내 템플릿·규칙이 없으면 NEED_CONFIRMATION과 연락처 없는 직접 문의 문구를 만든다. 법령 자료만으로 LH 운영 결론을 확정하지 않는다.
+
+근거 검색이 필요한 요청에서 OpenAI 비활성화, 임베딩·생성 실패, 검색 자료 미준비나 철회가 확인되면 `GUIDANCE_UNAVAILABLE`과 원인에 맞는 안내를 반환한다. 설문에는 `SOURCE_UNAVAILABLE`을 기록한다. 안전 우선·범위 밖·추가 확인은 기존 규칙이 우선한다. 검색에 성공했지만 적용되는 운영 근거가 없으면 `NEED_CONFIRMATION`으로 처리한다.
 
 회원 챗봇은 독립 CHAT 세션의 질문과 확인된 대화 맥락으로 안전·범위·질문별 필수 조건을 확인하고 내부 검색 후 OpenAI Responses API를 호출한다. 설문 답이나 결과를 가져오지 않으며 추가 확인은 채팅에서 처리한다. tools=[]로 웹 검색·브라우징·MCP·임의 URL 요청을 제공하지 않는다. 적격 근거가 없으면 생성 호출 없이 직접 문의 템플릿을 반환한다. 근거가 있더라도 모델 사전 지식의 기간·비용·보수 조건을 추가하지 못하게 검증한다. 구체 계약·모델 설정은 [RAG 설계](../ai/rag.md)를 따른다.
 

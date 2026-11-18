@@ -232,8 +232,10 @@ async def test_runtime_purpose_privacy_failure_and_deadline(pg_session):
     generator.failure = True
     result = await answer("제10조 설명")
     assert result.answer_mode == "TEMPLATE" and not result.assistant_message.citations
+    assert result.status == "GUIDANCE_UNAVAILABLE" and "OpenAI" in result.assistant_message.content
     result = await answer("제10조 설명", deadline=asyncio.get_running_loop().time() - 1)
     assert result.answer_mode == "TEMPLATE"
+    assert result.status == "GUIDANCE_UNAVAILABLE"
 
 
 @pytest.mark.integration

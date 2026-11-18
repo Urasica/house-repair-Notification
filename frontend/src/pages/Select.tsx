@@ -52,7 +52,7 @@ function SelectForm({ session, reference, catalog }: { session: Session; referen
     } catch (cause) { if (referenceIsActive(reference, epoch)) setError(cause) }
   }
   return <>
-    <SurveyProgress step={1} />
+    <SurveyProgress step={1} controls={<EndConsultation reference={reference} disabled={locked} />} />
     <div className="consultation-layout">
     <section className="notice form-panel"><p className="eyebrow">01 · 주택과 증상</p><h1>어디가 불편한가요?</h1><p>공간을 먼저 고르면, 그곳에 맞는 시설물과 증상을 차례로 선택할 수 있어요.</p>
       {reference.mode === 'GUEST' && <p>비회원 설문은 현재 창에서 이어볼 수 있어요. 결과를 계정에 모아 두고 싶으시면 로그인한 뒤 새 설문을 시작해 주세요.</p>}
@@ -71,7 +71,6 @@ function SelectForm({ session, reference, catalog }: { session: Session; referen
     </section>
     <SelectionSummary catalog={catalog} context={context} />
     </div>
-    <EndConsultation reference={reference} disabled={locked} />
   </>
 }
 

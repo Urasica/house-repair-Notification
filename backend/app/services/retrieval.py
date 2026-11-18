@@ -139,7 +139,7 @@ async def retrieve(
         or (not building and (release.published_at is None or release.published_at > now))
     ):
         return Retrieval(reason="SOURCE_UNAVAILABLE")
-    filters = [
+    release_filters = [
         KnowledgeDocument.knowledge_set_id == release_id,
         KnowledgeDocument.status == "APPROVED",
         KnowledgeDocument.reviewed_at <= now,
@@ -147,6 +147,7 @@ async def retrieve(
         KnowledgeChunk.embedding.is_not(None),
         KnowledgeChunk.content_hash == KnowledgeChunk.embedded_content_hash,
     ]
+    filters = list(release_filters)
     if context.housing_type and context.housing_type != "UNKNOWN":
         filters.append(
             KnowledgeDocument.scope_json["housingTypes"].contains([context.housing_type])
@@ -179,6 +180,10 @@ async def retrieve(
             ).limit(20)
         )
     ).all()
+    if not candidates and not await session.scalar(
+        select(KnowledgeChunk.id).join(KnowledgeDocument).where(*release_filters).limit(1)
+    ):
+        return Retrieval(reason="SOURCE_UNAVAILABLE")
     result = Retrieval(candidate_count=len(candidates))
     groups = {}
     seen = set()
@@ -233,6 +238,8 @@ async def retrieve(
         if chunk.id not in seen:
             seen.add(chunk.id)
             result.evidence.append(evidence)
+    if candidates and not result.evidence:
+        return Retrieval(reason="SOURCE_UNAVAILABLE", candidate_count=len(candidates))
     # Check conflicts across all 20 candidates before reducing to 5 evidence bundles.
     if any(len(values) > 1 for values in groups.values()):
         return Retrieval(reason="SOURCE_CONFLICT", candidate_count=len(candidates))

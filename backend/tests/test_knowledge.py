@@ -280,16 +280,14 @@ async def test_real_exact_search_law_purpose_annex_and_filters(pg_session):
     assert all(c.use == "RELATED" for c in incomplete.citations())
     chunk.metadata_json = {**chunk.metadata_json, "relatedChunkIds": [str(uuid4())]}
     await pg_session.flush()
-    assert not (
-        await retrieve(pg_session, release.id, VECTOR, settings, CONTEXT_INPUT, building=True)
-    ).evidence
+    broken = await retrieve(pg_session, release.id, VECTOR, settings, CONTEXT_INPUT, building=True)
+    assert not broken.evidence and broken.reason == "SOURCE_UNAVAILABLE"
     chunk.metadata_json = {**chunk.metadata_json, "relatedChunkIds": []}
     await pg_session.flush()
     doc.review_until = datetime.now(UTC) - timedelta(days=1)
     await pg_session.flush()
-    assert not (
-        await retrieve(pg_session, release.id, VECTOR, settings, CONTEXT_INPUT, building=True)
-    ).evidence
+    expired = await retrieve(pg_session, release.id, VECTOR, settings, CONTEXT_INPUT, building=True)
+    assert not expired.evidence and expired.reason == "SOURCE_UNAVAILABLE"
 
 
 @pytest.mark.integration

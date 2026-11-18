@@ -6,7 +6,15 @@ from uuid import uuid4
 
 from app.core.config import Settings
 from app.db.models import Consultation, KnowledgeSet, Result
-from app.domain.constants import DISCLAIMER, INSUFFICIENT_INFORMATION_MESSAGE, GuidanceStatus
+from app.domain.constants import (
+    DISCLAIMER,
+    INSUFFICIENT_INFORMATION_MESSAGE,
+    KNOWLEDGE_UNAVAILABLE_MESSAGE,
+    NO_APPLICABLE_GUIDANCE_MESSAGE,
+    OPENAI_DISABLED_MESSAGE,
+    OPENAI_UNAVAILABLE_MESSAGE,
+    GuidanceStatus,
+)
 from app.schemas.catalog import CatalogDefinition
 from app.schemas.contracts import GuidanceResult, ResultSummary, Session
 from app.services.embeddings import Embeddings, EmbeddingUnavailable
@@ -14,7 +22,7 @@ from app.services.repair_examples import repair_examples
 from app.services.retrieval import retrieve, revalidate_citations
 from app.services.survey_policy import survey_policy
 
-ENGINE_VERSION = "survey-v4-reference-examples"
+ENGINE_VERSION = "survey-v5-unavailable"
 
 
 def add_years(value: datetime, years: int) -> datetime:
@@ -115,59 +123,60 @@ async def evaluate_survey(
         retained_until=retained_until,
         is_current=True,
     )
-    if (
-        database is not None
-        and settings.openai_enabled
-        and snapshot.knowledge_release_id
-        and policy.status == GuidanceStatus.NEED_CONFIRMATION
-    ):
-        # Only catalog-reviewed labels leave the server; no free-text personal data.
-        query = " · ".join(
-            [
-                result.summary.housing_label,
-                result.summary.room_label,
-                result.summary.facility_label,
-                result.summary.symptom_label,
-                *answers,
-            ]
-        )
-        try:
-            vector = (await (provider or Embeddings(settings)).embed([query])).vectors[0]
-            async with database.session() as session:
-                found = await retrieve(
-                    session,
-                    snapshot.knowledge_release_id,
-                    vector,
-                    settings,
-                    context,
-                    catalog_version=snapshot.catalog_version,
-                )
-            result = result.model_copy(
-                update={
-                    "status": found.status,
-                    "reason_codes": [found.reason],
-                    "citations": found.citations(),
-                    "reference_examples": repair_examples(catalog, context, found.status),
-                    "guidance": found.guidance
-                    + (
-                        [INSUFFICIENT_INFORMATION_MESSAGE]
-                        if found.status == "NEED_CONFIRMATION"
-                        else []
-                    ),
-                }
+    if policy.status != GuidanceStatus.NEED_CONFIRMATION or context.symptom_id == "unknown":
+        return result
+    # A survey with no known answers can still show the input-dependent examples.
+    has_known_answer = any(value != "UNKNOWN" for value in context.answers.values())
+    if not settings.openai_enabled:
+        return unavailable_result(result, OPENAI_DISABLED_MESSAGE) if has_known_answer else result
+    if database is None or not snapshot.knowledge_release_id:
+        return unavailable_result(result) if has_known_answer else result
+
+    # Only catalog-reviewed labels leave the server; no free-text personal data.
+    query = " · ".join(
+        [
+            result.summary.housing_label,
+            result.summary.room_label,
+            result.summary.facility_label,
+            result.summary.symptom_label,
+            *answers,
+        ]
+    )
+    try:
+        vector = (await (provider or Embeddings(settings)).embed([query])).vectors[0]
+        async with database.session() as session:
+            found = await retrieve(
+                session,
+                snapshot.knowledge_release_id,
+                vector,
+                settings,
+                context,
+                catalog_version=snapshot.catalog_version,
             )
-        except EmbeddingUnavailable:
-            result = unavailable_result(result)
-    return result
-
-
-def unavailable_result(result):
+    except EmbeddingUnavailable:
+        return unavailable_result(result, OPENAI_UNAVAILABLE_MESSAGE)
+    if found.reason == "SOURCE_UNAVAILABLE":
+        return unavailable_result(result)
     return result.model_copy(
         update={
-            "status": GuidanceStatus.NEED_CONFIRMATION,
+            "status": found.status,
+            "reason_codes": [found.reason],
+            "citations": found.citations(),
+            "reference_examples": repair_examples(catalog, context, found.status),
+            "guidance": found.guidance
+            + ([NO_APPLICABLE_GUIDANCE_MESSAGE] if found.status == "NEED_CONFIRMATION" else []),
+        }
+    )
+
+
+def unavailable_result(result, message=KNOWLEDGE_UNAVAILABLE_MESSAGE):
+    return result.model_copy(
+        update={
+            "status": GuidanceStatus.GUIDANCE_UNAVAILABLE,
             "reason_codes": ["SOURCE_UNAVAILABLE"],
             "citations": [],
-            "guidance": [INSUFFICIENT_INFORMATION_MESSAGE],
+            "guidance": [message],
+            "reference_examples": [],
             "checks": [],
             "follow_up_questions": [],
         }

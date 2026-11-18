@@ -1,41 +1,12 @@
-import { useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { ApiError } from '../api/client'
-import { createSession, getCatalog } from '../features/survey/api'
-import { useSurvey } from '../features/survey/useSurvey'
-import { clearSession, identityEpoch, storeSession } from '../features/survey/storage'
+import { useStartSurvey } from '../features/survey/useStartSurvey'
 import { Feedback, Waiting } from '../components/Feedback'
 
 export default function Home() {
-  const { auth, reference, query, client } = useSurvey()
-  const catalog = useQuery({ queryKey: ['catalog-ready'], queryFn: () => getCatalog(), retry: false })
-  const navigate = useNavigate()
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<unknown>(null)
-  const guard = useRef(false)
+  const { auth, reference, query, catalog, busy, error, start } = useStartSurvey()
+  const ongoing = reference && query.data && !query.isError ? query.data : null
   const preparing = catalog.error instanceof ApiError && catalog.error.code === 'CATALOG_NOT_READY'
-  async function start() {
-    if (!catalog.data || guard.current || auth.isError || auth.isPending) return
-    const epoch = identityEpoch()
-    guard.current = true; setBusy(true); setError(null)
-    try {
-      const created = await createSession(catalog.data.version, auth.data?.csrfToken)
-      if (identityEpoch() !== epoch) return
-      const surveyQueries = { predicate: (q: { queryKey: readonly unknown[] }) => ['session', 'result', 'questions'].includes(String(q.queryKey[0])) }
-      await client.cancelQueries(surveyQueries)
-      if (identityEpoch() !== epoch) return
-      client.removeQueries(surveyQueries)
-      if (reference) clearSession(reference)
-      storeSession(created.session, created.sessionToken)
-      client.setQueryData(['session', created.session.id, auth.data?.user?.id ?? null, 'SURVEY'], created.session)
-      void navigate('/select')
-    } catch (cause) {
-      if (identityEpoch() !== epoch) return
-      setError(cause)
-      if (cause instanceof ApiError && cause.code === 'CATALOG_UPDATED') void catalog.refetch()
-    } finally { guard.current = false; if (identityEpoch() === epoch) setBusy(false) }
-  }
   return <>
     <section className="intro" aria-labelledby="page-title">
       <h1 id="page-title">집 안의 불편함, 함께 살펴봐요</h1>
@@ -46,9 +17,12 @@ export default function Home() {
     <section className="notice start-panel" aria-live="polite" aria-labelledby="notice-title">
       {catalog.isPending ? <Waiting /> : preparing ? <><h2 id="notice-title">안내 서비스를 준비하고 있어요</h2><p>더 정확한 안내를 위해 자료를 준비하고 있어요. 준비가 끝나면 설문을 이용하실 수 있어요.</p><button disabled>설문 준비 중</button></> : catalog.isError ? <Feedback error={catalog.error} retry={() => void catalog.refetch()} /> : <>
         <h2 id="notice-title">몇 가지 질문으로 알아봐요</h2><p>{auth.data?.user ? '안내 결과는 ‘이전 결과’에 모아 둘게요. 나중에 다시 살펴보실 수 있어요.' : '로그인 없이도 괜찮아요. 몇 가지 질문에 편하게 답해 주세요.'}</p>
-        <button disabled={busy || auth.isPending || auth.isError} onClick={() => void start()}>{busy ? '상담을 시작하고 있어요' : '새 설문 시작'}</button>
+        <div className="actions home-survey-actions">
+          {ongoing && <Link className="button-link" to={ongoing.currentResultId ? '/result/' + ongoing.currentResultId : '/survey'}>진행 중인 상담 이어가기</Link>}
+          <button className={ongoing ? 'secondary' : undefined} disabled={busy || auth.isPending || auth.isError} onClick={() => void start()}>{busy ? '상담을 시작하고 있어요' : '새 설문 시작'}</button>
+        </div>
       </>}
-      {reference && query.data && !query.isError && <p className="continue-link"><Link className="button-link secondary" to={query.data.currentResultId ? '/result/' + query.data.currentResultId : '/survey'}>진행 중인 상담 이어가기</Link></p>}
+      {ongoing && !catalog.data && <p className="continue-link"><Link className="button-link" to={ongoing.currentResultId ? '/result/' + ongoing.currentResultId : '/survey'}>진행 중인 상담 이어가기</Link></p>}
       {auth.isError && <Feedback error={auth.error} retry={() => void auth.refetch()} />}
       {!!error && <Feedback error={error} />}
     </section>

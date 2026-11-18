@@ -88,7 +88,7 @@ function SurveyActive({ session, reference, catalog }: { session: Session; refer
     } catch (cause) { if (referenceIsActive(reference, epoch)) setSaveError(cause) }
   }
   return <>
-    <SurveyProgress step={2} />
+    <SurveyProgress step={2} controls={<EndConsultation reference={reference} disabled={locked} />} />
     <div className="consultation-layout">
     <section className="notice form-panel"><p className="eyebrow">02 · 간단 설문</p><h1>간단히 확인해 주세요</h1><p>선택한 답은 자동으로 저장돼요. 위험 확인 항목을 선택하면 저장 후 안내 결과를 먼저 확인해요.</p>
       <p className="context-path">{[catalog.rooms.find(item => item.id === session.context.roomId)?.label, facilityLabel(catalog, session.context.roomId, session.context.facilityId), catalog.symptoms.find(item => item.id === session.context.symptomId)?.label].filter(Boolean).join(' → ') || '주택·증상을 선택하면 관련 질문을 확인할 수 있어요.'}</p>
@@ -107,7 +107,6 @@ function SurveyActive({ session, reference, catalog }: { session: Session; refer
     </section>
     <SelectionSummary catalog={catalog} context={session.context} />
     </div>
-    <EndConsultation reference={reference} disabled={locked} />
   </>
 }
 

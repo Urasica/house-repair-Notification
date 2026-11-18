@@ -59,6 +59,8 @@ function Conversation({ session, reference, restart }: { session: Session; refer
   const [pendingContent, setPendingContent] = useState<string | null>(null)
   const guard = useRef(false)
   const input = useRef<HTMLTextAreaElement>(null)
+  const thread = useRef<HTMLDivElement>(null)
+  const [showSidebar, setShowSidebar] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<unknown>(null)
   const [notice, setNotice] = useState('')
@@ -84,6 +86,13 @@ function Conversation({ session, reference, restart }: { session: Session; refer
   }
   const items = [...new Map([...latest, ...(history.data?.pages.flatMap(page => page.items) ?? [])].map(item => [item.requestId, item])).values()]
     .sort((a, b) => a.userMessage.createdAt.localeCompare(b.userMessage.createdAt))
+  const lastRequest = items.at(-1)?.requestId
+  const sending = pendingContent !== null && !items.some(item => item.requestId === pending?.requestId)
+  useEffect(() => {
+    const panel = thread.current
+    const turn = panel?.querySelector<HTMLElement>('.chat-list > li:last-child')
+    if (panel && turn) panel.scrollTop = turn.offsetTop
+  }, [lastRequest, sending])
   function clear() { saveChatPending(session.id, null); setPending(null); setPendingContent(null) }
   function complete(result: ChatResponse) {
     clear(); setDraft(''); setNotice('대화가 저장됐어요.')
@@ -161,26 +170,40 @@ function Conversation({ session, reference, restart }: { session: Session; refer
     } catch (cause) { if (identityEpoch() === epoch) { setError(cause); setConfirmReset(false) } }
     finally { guard.current = false; if (identityEpoch() === epoch) setResetting(false) }
   }
-  return <section className="notice chat-panel">
-    <p className="eyebrow">회원 상담</p><h1>검토된 자료로 질문하기</h1>
-    <p>관련 조문 원문과 확인할 내용을 안내해요. 보수·비용·교체 여부는 담당 기관 확인이 필요해요.</p>
-    <p>필요한 내용은 이 대화에서 확인할게요. 원하시면 이전 설문을 골라 불러올 수도 있어요.</p>
-    <p>이 대화는 현재 창에서 이어볼 수 있어요. 로그아웃하거나 창을 닫으면 새 대화로 시작해요.</p>
-    {catalog.data && <p className="context-path">확인한 내용: {[catalog.data.housingTypes.find(item => item.id === session.context.housingType)?.label, catalog.data.rooms.find(item => item.id === session.context.roomId)?.label, catalog.data.facilities.find(item => item.id === session.context.facilityId)?.label, catalog.data.symptoms.find(item => item.id === session.context.symptomId)?.label].filter(Boolean).join(' · ') || '아직 없어요. 불편한 증상부터 알려 주세요.'}{!!Object.keys(session.context.answers ?? {}).length && ` · 설문 답변 ${Object.keys(session.context.answers ?? {}).length}개`}</p>}
-    <SurveyImport disabled={busy || !!pending || resetting || confirmReset || delay.waiting} load={loadSurvey} />
-    <button className="secondary" disabled={busy || !!pending || resetting} onClick={() => setConfirmReset(true)}>대화 초기화</button>
+  const contextLabels = [
+    catalog.data?.housingTypes.find(item => item.id === session.context.housingType)?.label,
+    catalog.data?.rooms.find(item => item.id === session.context.roomId)?.label,
+    catalog.data?.facilities.find(item => item.id === session.context.facilityId)?.label,
+    catalog.data?.symptoms.find(item => item.id === session.context.symptomId)?.label,
+  ].filter(Boolean)
+  const answerCount = Object.keys(session.context.answers ?? {}).length
+  const inputLocked = busy || !!pending || confirmReset || resetting
+  return <section className="chat-workspace" aria-label="보수 상담 챗봇">
+    <header className="chat-heading">
+      <h1>보수 상담 챗봇</h1>
+      <button type="button" className="secondary chat-sidebar-toggle" aria-controls="chat-sidebar" aria-expanded={showSidebar} onClick={() => setShowSidebar(!showSidebar)}>대화 정보</button>
+    </header>
+    <aside id="chat-sidebar" className="chat-sidebar" data-open={showSidebar} aria-label="대화 정보">
+      <button type="button" className="secondary" disabled={busy || !!pending || resetting} onClick={() => setConfirmReset(true)}>대화 초기화</button>
     {confirmReset && <section className="notice confirm-panel" role="group" aria-label="대화 초기화 확인">
       <p>현재 대화와 챗봇에서 확인한 내용이 지워지고 새 대화를 시작합니다. 설문·결과 이력과 별도 보존되는 질문 분석 기록은 유지됩니다.</p>
       <div className="actions"><button className="danger" disabled={resetting} onClick={() => void reset()}>초기화 확인</button>
       <button className="secondary" disabled={resetting} onClick={() => { setConfirmReset(false); input.current?.focus() }}>취소</button></div>
     </section>}
-    <p className="muted">질문 원문과 대화는 상담 만료 후 7일 이내 정리해요. 식별정보를 제외한 질문 분류·선택 정보는 기본 5년 보관해요. OpenAI에는 선택·설문 답변 라벨, 조문 번호와 검토 자료만 보내요. 이름·주소·연락처는 입력하지 마세요.</p>
-    {history.isPending && <Waiting />}
-    {history.isError && <Feedback error={history.error} retry={() => void history.refetch()} />}
-    {history.data && !items.length && <p role="status">새 대화가 준비됐어요. 궁금한 조문이나 증상을 바로 질문해 주세요.</p>}
-    <ol className="chat-list" aria-label="저장된 대화">{items.map(item => <li key={item.requestId}>
-      <article><h2>내 질문</h2><p className="chat-content">{item.userMessage.content}</p>
-        <h2>{statusLabels[item.status]}</h2><p className="eyebrow">{item.answerMode === 'GROUNDED' ? '근거 확인 답변' : item.answerMode === 'CLARIFY' ? '추가 확인' : '기본 안내'} · {localTime(item.assistantMessage.createdAt)}</p>
+      <div className="chat-context"><h2>확인한 내용</h2>
+        {contextLabels.length || answerCount ? <ul>{contextLabels.map(label => <li key={label}>{label}</li>)}{!!answerCount && <li>설문 답변 {answerCount}개</li>}</ul> : <p>아직 확인한 내용이 없어요.</p>}
+      </div>
+      <details><summary>대화와 개인정보</summary><p>이 창에서 대화를 이어갈 수 있어요. 질문 원문은 상담 만료 후 7일 이내 정리하고, 식별정보가 없는 분류·선택 정보는 기본 5년 보관해요. OpenAI에는 선택·답변 라벨, 조문 번호와 검토 자료만 보내요.</p></details>
+    </aside>
+    <div className="chat-main">
+      <div ref={thread} className="chat-thread" role="region" aria-label="상담 대화" tabIndex={0}>
+        {history.isPending && <Waiting />}
+        {history.isError && <Feedback error={history.error} retry={() => void history.refetch()} />}
+        {history.data && !items.length && !sending && <div className="chat-welcome"><h2>어디가 불편하신가요?</h2><p>증상이나 궁금한 조문을 적어 주세요. 필요한 내용은 대화에서 하나씩 확인할게요.</p></div>}
+        <ol className="chat-list" aria-label="저장된 대화">{items.map(item => <li key={item.requestId}>
+      <p className="chat-bubble chat-content"><span className="sr-only">내 질문. </span>{item.userMessage.content}</p>
+      <article className="chat-answer" aria-label="챗봇 답변">
+        <h2>{statusLabels[item.status]}</h2><p className="chat-meta">{item.answerMode === 'GROUNDED' ? '근거 확인 답변 · ' : item.answerMode === 'CLARIFY' ? '추가 확인 · ' : ''}<time dateTime={item.assistantMessage.createdAt}>{localTime(item.assistantMessage.createdAt)}</time></p>
         {(!item.isCurrent || item.contextRevision !== session.revision) && <p className="past-note">이전 입력이나 기준의 답변이에요. 현재 상황과 다를 수 있어요.</p>}
         <div aria-label="답변 내용">{item.assistantMessage.content.split(/\n{2,}/).map((text, index) => <p key={index} className="chat-content">{text}</p>)}</div>
         {!!item.followUpQuestions.length && <ul>{item.followUpQuestions.map((question, index) => <li key={index}>{question}</li>)}</ul>}
@@ -192,19 +215,28 @@ function Conversation({ session, reference, restart }: { session: Session; refer
             {/^https:\/\//.test(citation.url) && <a href={citation.url} target="_blank" rel="noopener noreferrer">원문 확인 (선택)</a>}
           </details>
         </li>)}</ul>}<p>{item.disclaimer}</p></article>
-    </li>)}</ol>
-    {history.hasNextPage && <button className="secondary" disabled={history.isFetchingNextPage} onClick={() => void history.fetchNextPage()}>다음 대화 보기</button>}
-    {error != null && <Feedback error={error} />}
-    <p role="status">{busy ? notice || '답변을 확인하고 저장하고 있어요.' : notice}</p>
-    {pending && <div className="notice"><p>이전 전송의 완료 여부를 먼저 확인해 주세요. 새로고침 후에도 중복 전송하지 않아요.</p>
-      <button disabled={busy || delay.waiting} onClick={() => void recover()}>전송 결과 확인</button>
-      {pendingContent !== null && <button className="secondary" disabled={busy || delay.waiting} onClick={() => { if (!guard.current && pendingContent !== null) void execute(pending, pendingContent) }}>같은 요청 다시 보내기</button>}
-    </div>}
-    <form onSubmit={event => { event.preventDefault(); submit() }}>
-      <label htmlFor="chat-input">궁금한 내용</label>
-      <textarea id="chat-input" ref={input} value={draft} onChange={event => setDraft(event.target.value)} maxLength={2000} required disabled={busy || !!pending || confirmReset || resetting} rows={4} aria-describedby="chat-help" />
-      <p id="chat-help">최대 2,000자 · 예: 주방 싱크대 아래에서 물이 새요.</p>
-      <button type="submit" disabled={busy || !!pending || confirmReset || resetting || delay.waiting || !draft.trim()}>질문 보내기</button>
-    </form>
+    </li>)}{sending && <li><p className="chat-bubble chat-content"><span className="sr-only">내 질문. </span>{pendingContent}</p></li>}</ol>
+        {history.hasNextPage && <button className="secondary" disabled={history.isFetchingNextPage} onClick={() => void history.fetchNextPage()}>다음 대화 보기</button>}
+      </div>
+      <div className="chat-compose-area">
+        {error != null && <Feedback error={error} />}
+        <p className="chat-status" role="status">{busy ? notice || '답변을 확인하고 있어요.' : notice}</p>
+        {pending && !busy && <div className="chat-recovery"><p>이전 질문의 전송 결과를 확인해 주세요.</p>
+          <button type="button" disabled={busy || delay.waiting} onClick={() => void recover()}>전송 결과 확인</button>
+          {pendingContent !== null && <button type="button" className="secondary" disabled={busy || delay.waiting} onClick={() => { if (!guard.current && pendingContent !== null) void execute(pending, pendingContent) }}>같은 요청 다시 보내기</button>}
+        </div>}
+        <form className="chat-composer" onSubmit={event => { event.preventDefault(); submit() }}>
+          <label className="sr-only" htmlFor="chat-input">궁금한 내용</label>
+          <textarea id="chat-input" ref={input} value={sending ? '' : draft} onChange={event => setDraft(event.target.value)} onKeyDown={event => {
+            if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing && event.keyCode !== 229) { event.preventDefault(); submit() }
+          }} maxLength={2000} required disabled={inputLocked} rows={1} placeholder="예: 주방 싱크대 아래에서 물이 새요" aria-describedby="chat-help" />
+          <div className="chat-composer-actions">
+            <SurveyImport disabled={inputLocked || delay.waiting} load={loadSurvey} />
+            <button type="submit" disabled={inputLocked || delay.waiting || !draft.trim()}>질문 보내기</button>
+          </div>
+        </form>
+        <p id="chat-help">이름·주소·연락처는 적지 마세요. <span>Enter로 보내기 · Shift+Enter로 줄바꿈</span></p>
+      </div>
+    </div>
   </section>
 }

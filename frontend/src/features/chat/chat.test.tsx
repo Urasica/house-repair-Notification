@@ -247,9 +247,9 @@ it('disables reset while sending and shows evidence in the site without opening 
   const result = answer(crypto.randomUUID())
   result.assistantMessage.citations = [{ chunkId: crypto.randomUUID(), documentVersionId: crypto.randomUUID(), kind: 'LAW_CRITERIA', use: 'APPLICABLE', title: '검토 자료', locator: '제10조', url: 'https://example.invalid/source', excerpt: '원문의 적용 조건과 단서', effectiveDate: '2026-01-01', reviewedAt: new Date().toISOString(), reviewUntil: new Date(Date.now() + 86400000).toISOString() }]
   replies = [result]
-  await render(); await until(() => expect(host.querySelector('details')).not.toBeNull())
-  expect(host.querySelector('details')?.textContent).toContain('원문의 적용 조건과 단서')
-  expect(host.querySelector('details summary')?.textContent).toContain('제10조')
+  await render(); await until(() => expect(host.querySelector('[aria-label="정보 출처"] details')).not.toBeNull())
+  expect(host.querySelector('[aria-label="정보 출처"] details')?.textContent).toContain('원문의 적용 조건과 단서')
+  expect(host.querySelector('[aria-label="정보 출처"] summary')?.textContent).toContain('제10조')
   held = true
   await enter('추가 질문'); await submit()
   expect(button('대화 초기화').disabled).toBe(true)

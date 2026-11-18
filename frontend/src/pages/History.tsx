@@ -3,6 +3,7 @@ import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-quer
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Feedback, Waiting } from '../components/Feedback'
 import ResultView from '../components/ResultView'
+import NewSurveyButton from '../components/NewSurveyButton'
 import { useAuth } from '../features/auth/useAuth'
 import { deleteQuestions, deleteResult, getHistory, getHistoryResult } from '../features/survey/api'
 import { identityEpoch } from '../features/survey/storage'
@@ -78,5 +79,5 @@ export function HistoryDetail() {
   const result = useQuery({ queryKey: ['history-result', resultId, auth.data?.user?.id ?? null, 'SURVEY'], queryFn: ({ signal }) => getHistoryResult(resultId, signal), retry: false })
   if (result.isPending) return <Waiting />
   if (result.isError) return <Feedback error={result.error} retry={() => void result.refetch()} />
-  return <><ResultView result={result.data} /><div className="actions"><Link className="button-link secondary" to="/history">이전 결과 목록</Link><Link className="button-link" to="/">새 상담 시작</Link></div><DeleteRecord resultId={resultId} /></>
+  return <><ResultView result={result.data} actions={<><Link className="button-link secondary" to="/history">이전 결과 목록</Link><NewSurveyButton /></>} /><DeleteRecord resultId={resultId} /></>
 }

@@ -632,7 +632,7 @@ export interface components {
          * GuidanceStatus
          * @enum {string}
          */
-        GuidanceStatus: "SAFETY_PRIORITY" | "OUT_OF_SCOPE" | "NEED_MORE_INFO" | "NEED_CONFIRMATION" | "GUIDANCE_AVAILABLE";
+        GuidanceStatus: "SAFETY_PRIORITY" | "OUT_OF_SCOPE" | "NEED_MORE_INFO" | "NEED_CONFIRMATION" | "GUIDANCE_UNAVAILABLE" | "GUIDANCE_AVAILABLE";
         /** HousingItem */
         HousingItem: {
             id: components["schemas"]["HousingType"];

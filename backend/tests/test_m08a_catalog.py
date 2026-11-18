@@ -221,7 +221,8 @@ async def test_real_catalog_api_branch_save_history_delete_and_no_resurrection(p
         )
         assert evaluated.status_code == 201
         result = evaluated.json()
-        assert result["status"] == "NEED_CONFIRMATION"
+        assert result["status"] == "GUIDANCE_UNAVAILABLE"
+        assert result["reasonCodes"] == ["SOURCE_UNAVAILABLE"]
         assert result["savedToHistory"] is member
         assert result["summary"]["symptomLabel"] == "물이 새거나 물 자국이 있어요"
         assert result["citations"] == []

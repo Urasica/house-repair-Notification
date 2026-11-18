@@ -814,6 +814,7 @@
           "OUT_OF_SCOPE",
           "NEED_MORE_INFO",
           "NEED_CONFIRMATION",
+          "GUIDANCE_UNAVAILABLE",
           "GUIDANCE_AVAILABLE"
         ],
         "title": "GuidanceStatus",

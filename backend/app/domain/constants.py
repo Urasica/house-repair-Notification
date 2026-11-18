@@ -19,6 +19,7 @@ class GuidanceStatus(StrEnum):
     OUT_OF_SCOPE = "OUT_OF_SCOPE"
     NEED_MORE_INFO = "NEED_MORE_INFO"
     NEED_CONFIRMATION = "NEED_CONFIRMATION"
+    GUIDANCE_UNAVAILABLE = "GUIDANCE_UNAVAILABLE"
     GUIDANCE_AVAILABLE = "GUIDANCE_AVAILABLE"
 
 
@@ -70,4 +71,11 @@ INSUFFICIENT_INFORMATION_MESSAGE = (
     "지금 알려주신 내용만으로는 보수 대상인지 정하기 어려워요. "
     "관리사무소 또는 담당 기관에 상태와 보수 절차를 확인해 주세요."
 )
+NO_APPLICABLE_GUIDANCE_MESSAGE = (
+    "확인한 자료만으로는 보수 대상인지 정하기 어려워요. "
+    "관리사무소 또는 담당 기관에 상태와 보수 절차를 확인해 주세요."
+)
+OPENAI_DISABLED_MESSAGE = "현재 OpenAI 연결이 꺼져 있어 관련 기준을 확인할 수 없어요."
+OPENAI_UNAVAILABLE_MESSAGE = "OpenAI에서 필요한 응답을 받지 못했어요. 잠시 후 다시 시도해 주세요."
+KNOWLEDGE_UNAVAILABLE_MESSAGE = "현재 사용할 수 있는 검색 자료가 없어 답변을 제공하기 어려워요."
 DISCLAIMER = "실제 보수 여부는 담당 기관 확인이 필요해요."

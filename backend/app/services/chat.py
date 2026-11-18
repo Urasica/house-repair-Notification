@@ -7,7 +7,15 @@ from types import SimpleNamespace
 from uuid import uuid4
 
 from app.db.models import Consultation
-from app.domain.constants import DISCLAIMER, INSUFFICIENT_INFORMATION_MESSAGE, GuidanceStatus
+from app.domain.constants import (
+    DISCLAIMER,
+    INSUFFICIENT_INFORMATION_MESSAGE,
+    KNOWLEDGE_UNAVAILABLE_MESSAGE,
+    NO_APPLICABLE_GUIDANCE_MESSAGE,
+    OPENAI_DISABLED_MESSAGE,
+    OPENAI_UNAVAILABLE_MESSAGE,
+    GuidanceStatus,
+)
 from app.schemas.contracts import ChatMessage, ChatResponse
 from app.services.chat_context import chat_policy
 from app.services.embeddings import Embeddings, EmbeddingUnavailable
@@ -23,14 +31,15 @@ def project_question(content):
     return question_purpose(content) + " " + " ".join(dict.fromkeys(locators))
 
 
-def fallback(response):
+def fallback(response, message=KNOWLEDGE_UNAVAILABLE_MESSAGE):
     return response.model_copy(
         update={
             "answer_mode": "TEMPLATE",
-            "status": GuidanceStatus.NEED_CONFIRMATION,
+            "status": GuidanceStatus.GUIDANCE_UNAVAILABLE,
             "follow_up_questions": [],
+            "reference_examples": [],
             "assistant_message": response.assistant_message.model_copy(
-                update={"content": INSUFFICIENT_INFORMATION_MESSAGE, "citations": []}
+                update={"content": message, "citations": []}
             ),
         }
     )
@@ -113,12 +122,12 @@ async def chat_response(
                 ),
             }
         )
-    if (
-        status != "NEED_CONFIRMATION"
-        or not snapshot.knowledge_release_id
-        or not settings.openai_enabled
-    ):
+    if status != "NEED_CONFIRMATION" or guidance:
         return response
+    if not settings.openai_enabled:
+        return fallback(response, OPENAI_DISABLED_MESSAGE)
+    if not snapshot.knowledge_release_id:
+        return fallback(response)
     # Free text and raw conversation never leave the server. Selected labels are reviewed.
     labels = []
     for field, items in [
@@ -155,26 +164,24 @@ async def chat_response(
                     question=content,
                     catalog_version=snapshot.catalog_version,
                 )
-            response = response.model_copy(
-                update={
-                    "status": GuidanceStatus(found.status),
-                    "reference_examples": (
-                        repair_examples(catalog, snapshot.context, found.status)
-                        if purpose == "OPERATION"
-                        else []
-                    ),
-                    "assistant_message": response.assistant_message.model_copy(
-                        update={
-                            "content": "\n".join(
-                                found.guidance + [INSUFFICIENT_INFORMATION_MESSAGE]
-                            ),
-                            "citations": found.citations(excerpts=True),
-                        }
-                    ),
-                }
-            )
+            if found.reason == "SOURCE_UNAVAILABLE":
+                return fallback(response)
             if found.status != "GUIDANCE_AVAILABLE":
-                return response
+                message = (
+                    "요청하신 조문을 설명할 수 있는 검토 자료를 찾지 못했어요."
+                    if purpose == "LAW_EXPLANATION"
+                    else NO_APPLICABLE_GUIDANCE_MESSAGE
+                )
+                return response.model_copy(
+                    update={
+                        "assistant_message": response.assistant_message.model_copy(
+                            update={
+                                "content": "\n".join(found.guidance + [message]),
+                                "citations": found.citations(excerpts=True),
+                            }
+                        ),
+                    }
+                )
             statements = await (generator or Responses(settings)).generate(
                 query, recent, found, purpose, timeout=min(20, max(0.01, deadline - loop.time()))
             )
@@ -188,13 +195,18 @@ async def chat_response(
             return response.model_copy(
                 update={
                     "answer_mode": "GROUNDED",
+                    "status": GuidanceStatus.GUIDANCE_AVAILABLE,
+                    "reference_examples": [],
                     "assistant_message": response.assistant_message.model_copy(
-                        update={"content": prefix + "\n\n".join(statements + annex_texts(found))}
+                        update={
+                            "content": prefix + "\n\n".join(statements + annex_texts(found)),
+                            "citations": found.citations(excerpts=True),
+                        }
                     ),
                 }
             )
     except (EmbeddingUnavailable, GenerationUnavailable, TimeoutError):
-        return fallback(response)
+        return fallback(response, OPENAI_UNAVAILABLE_MESSAGE)
 
 
 def stored_response(response, snapshot, settings):
