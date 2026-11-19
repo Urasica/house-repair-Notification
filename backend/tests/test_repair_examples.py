@@ -7,6 +7,7 @@ from test_m08a_catalog import CATALOG, answer_unknowns, context_for
 from app.core.config import Settings
 from app.schemas.contracts import Context, GuidanceResult, Session
 from app.services.chat import chat_response
+from app.services.chat_context import confirmed_context
 from app.services.guidance import evaluate_survey
 from app.services.repair_examples import repair_examples
 
@@ -142,3 +143,25 @@ async def test_reviewed_survey_hazard_clears_examples_before_chat_returns():
         database=None,
     )
     assert chat.status == "SAFETY_PRIORITY" and not chat.reference_examples
+
+
+@pytest.mark.parametrize(
+    ("content", "status"),
+    [
+        ("LH 건설임대 거실 천장에서 물이 떨어지고 있어요.", "GUIDANCE_UNAVAILABLE"),
+        ("LH 건설임대 현관문이 경첩에서 빠져서 곧 떨어질 것 같아요.", "SAFETY_PRIORITY"),
+        ("욕실 타일이 떨어지려고 해요.", "SAFETY_PRIORITY"),
+        ("창틀은 멀쩡한데 물방울이 떨어져요.", "NEED_MORE_INFO"),
+        ("분양주택 콘센트에서 연기가 나요.", "SAFETY_PRIORITY"),
+    ],
+)
+async def test_chat_distinguishes_falling_fixtures_from_dripping_water(content, status):
+    context = confirmed_context(Context(), content, CATALOG)
+    response = await chat_response(
+        snapshot(context), CATALOG, Settings(_env_file=None), content, uuid4(), [], database=None
+    )
+    assert response.status == status
+    if status == "SAFETY_PRIORITY":
+        assert not response.follow_up_questions and not response.reference_examples
+    if status == "GUIDANCE_UNAVAILABLE":
+        assert context.symptom_id == "leak"

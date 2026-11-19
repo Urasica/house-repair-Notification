@@ -6,6 +6,22 @@ from app.domain.constants import SUPPORTED_HOUSING_TYPES, GuidanceStatus, Housin
 from app.services.retrieval import question_purpose
 from app.services.survey_policy import survey_policy
 
+IMMEDIATE_HAZARD = re.compile(
+    r"가스\s*(?:냄새|누출)|타는\s*냄새|연기|스파크|불꽃|불이\s*났|감전|붕괴"
+)
+FALLING_FIXTURE = re.compile(
+    r"(?:현관문|문짝|문|창문|창틀|유리|타일|조명(?:기구)?|전등|난간|천장재|천장판|"
+    r"가구|선반|벽돌|마감재|시설물|부품)(?:이|가|은|는|\s)\s*"
+    r"(?:(?!(?:빗물|물방울|물)(?:이|가|은|는))[^.!?,\n]){0,36}?"
+    r"(?:떨어질|떨어지(?:고|려고)|떨어졌|떨어져|낙하할)"
+)
+
+
+def reports_immediate_hazard(content: str) -> bool:
+    return (
+        IMMEDIATE_HAZARD.search(content) is not None or FALLING_FIXTURE.search(content) is not None
+    )
+
 
 def leak_observation(content):
     """Recognize observations as fixed labels without forwarding the user's wording."""
@@ -70,8 +86,12 @@ def confirmed_context(previous, content, catalog):
             if catalog.version == "m08a-20261004-v2":
                 if item.id == "pipe":
                     terms.append("배관")
-                if item.id == "leak" and not re.search(r"새지|안\s*새|새는.*아니", content):
-                    terms.extend(["물이 새", "물이 샙", "물샘"])
+                if item.id == "leak" and not re.search(
+                    r"새지|안\s*새|새는.*아니|떨어지지|안\s*떨어", content
+                ):
+                    terms.extend(
+                        ["물이 새", "물이 샙", "물샘", "물이 떨어", "물방울이 떨어", "빗물이 떨어"]
+                    )
             lengths = [len(term) for term in terms if len(term) > 1 and term in content]
             if lengths and item.id != "unknown":
                 matches.append((max(lengths), item.id))

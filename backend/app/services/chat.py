@@ -17,7 +17,7 @@ from app.domain.constants import (
     GuidanceStatus,
 )
 from app.schemas.contracts import ChatMessage, ChatResponse
-from app.services.chat_context import chat_policy, leak_observation
+from app.services.chat_context import chat_policy, leak_observation, reports_immediate_hazard
 from app.services.embeddings import Embeddings, EmbeddingUnavailable
 from app.services.generation import PROMPT_VERSION, GenerationUnavailable, Responses, annex_texts
 from app.services.repair_examples import repair_examples
@@ -105,8 +105,8 @@ async def chat_response(
         if snapshot.context.room_id and snapshot.context.facility_id and snapshot.context.symptom_id
         else None
     )
-    if (survey and survey.status == GuidanceStatus.SAFETY_PRIORITY) or re.search(
-        r"가스\s*(?:냄새|누출)|타는\s*냄새|연기|스파크|불꽃|불이\s*났|감전|붕괴|떨어지고", content
+    if (survey and survey.status == GuidanceStatus.SAFETY_PRIORITY) or reports_immediate_hazard(
+        content
     ):
         return response.model_copy(
             update={
