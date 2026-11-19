@@ -75,7 +75,7 @@ NO_APPLICABLE_GUIDANCE_MESSAGE = (
     "확인한 자료만으로는 보수 대상인지 정하기 어려워요. "
     "관리사무소 또는 담당 기관에 상태와 보수 절차를 확인해 주세요."
 )
-OPENAI_DISABLED_MESSAGE = "현재 OpenAI 연결이 꺼져 있어 관련 기준을 확인할 수 없어요."
-OPENAI_UNAVAILABLE_MESSAGE = "OpenAI에서 필요한 응답을 받지 못했어요. 잠시 후 다시 시도해 주세요."
-KNOWLEDGE_UNAVAILABLE_MESSAGE = "현재 사용할 수 있는 검색 자료가 없어 답변을 제공하기 어려워요."
+OPENAI_DISABLED_MESSAGE = "지금은 안내 서비스 연결이 꺼져 있어 관련 기준을 확인할 수 없어요."
+OPENAI_UNAVAILABLE_MESSAGE = "안내에 필요한 응답을 받지 못했어요. 잠시 후 다시 시도해 주세요."
+KNOWLEDGE_UNAVAILABLE_MESSAGE = "지금 확인할 수 있는 기준 자료가 없어요."
 DISCLAIMER = "실제 보수 여부는 담당 기관 확인이 필요해요."

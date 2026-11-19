@@ -132,7 +132,7 @@ test('complete door survey explains unavailable search and keeps actions near th
   }
   await page.getByRole('button', { name: '안내 결과 확인', exact: true }).click()
   await expect(page.getByRole('heading', { name: '지금은 안내할 수 없어요' })).toBeVisible()
-  await expect(page.getByText(/OpenAI 연결이 꺼져 있어/)).toBeVisible()
+  await expect(page.getByText(/안내 서비스 연결이 꺼져 있어/)).toBeVisible()
   await expect(page.getByText('이런 경우에는 보수를 검토할 수 있어요')).toHaveCount(0)
   await expect(page.getByRole('region', { name: '설문 상담 관리' }).getByRole('button', { name: '상담 종료' })).toBeInViewport()
   const actions = page.getByRole('navigation', { name: '설문 작업' })

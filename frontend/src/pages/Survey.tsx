@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import Consultation from '../components/Consultation'
 import EndConsultation from '../components/EndConsultation'
+import EvaluationRecovery from '../components/EvaluationRecovery'
 import SelectionSummary from '../components/SelectionSummary'
 import SurveyProgress from '../components/SurveyProgress'
 import { facilityLabel } from '../features/survey/presentation'
@@ -102,7 +103,7 @@ function SurveyActive({ session, reference, catalog }: { session: Session; refer
       {!!evaluation.error && <Feedback error={evaluation.error} />}
       {evaluation.error instanceof ApiError && evaluation.error.code === 'CONTEXT_CONFLICT' && <button className="secondary" onClick={() => void reload()}>최신 입력 불러오기</button>}
       {evaluation.message && <p role="status">{evaluation.message}</p>}
-      {evaluation.pending ? <div className="recovery-panel"><p>평가 요청이 남아 있어요. 저장된 결과를 먼저 확인해 주세요.</p><div className="actions"><button disabled={evaluation.busy || evaluation.waiting} onClick={() => void evaluation.recover()}>완료 여부 확인</button><button className="secondary" disabled={evaluation.busy || evaluation.waiting} onClick={evaluation.resend}>같은 요청 다시 보내기</button></div></div> : <button disabled={saving || evaluation.busy || evaluation.waiting || !!saveError || !matching} onClick={() => { if (missing[0]) { setShowMissing(true); focusMissing(missing[0].questionId) } else evaluation.start() }}>{evaluation.busy ? '평가하고 있어요' : evaluation.message ? '새 평가로 다시 시도' : '안내 결과 확인'}</button>}
+      {evaluation.pending ? <EvaluationRecovery evaluation={evaluation} /> : <button disabled={saving || evaluation.busy || evaluation.waiting || !!saveError || !matching} onClick={() => { if (missing[0]) { setShowMissing(true); focusMissing(missing[0].questionId) } else evaluation.start() }}>{evaluation.busy ? '평가하고 있어요' : evaluation.message ? '새 평가로 다시 시도' : '안내 결과 확인'}</button>}
       {!locked && <p className="continue-link"><Link className="button-link secondary" to="/select">주택·증상 수정</Link></p>}
     </section>
     <SelectionSummary catalog={catalog} context={session.context} />

@@ -8,7 +8,9 @@ import { EvidenceSources, LawExplanations } from './EvidenceSources'
 import ContactDraft from './ContactDraft'
 
 
-export default function ResultView({ result, controls, actions }: { result: Guidance; controls?: ReactNode; actions: ReactNode }) {
+export default function ResultView({ result, controls, actions, retryControls }: {
+  result: Guidance; controls?: ReactNode; actions: ReactNode; retryControls?: ReactNode
+}) {
   const unavailable = result.status === 'GUIDANCE_UNAVAILABLE'
   return <><SurveyProgress step={3} controls={controls} /><article className="notice result-view">
     <p className="eyebrow">안내 결과</p><h1>{statusLabels[result.status]}</h1>
@@ -17,7 +19,7 @@ export default function ResultView({ result, controls, actions }: { result: Guid
       <h2>지금 할 일</h2>
       <ul>{result.guidance.map((text, index) => <li key={index}>{text}</li>)}</ul>
     </>}
-    <nav className="actions result-actions" aria-label="설문 작업">{actions}</nav>
+    <nav className="actions result-actions" aria-label="설문 작업">{retryControls}{unavailable && <a className="button-link secondary" href="#contact-heading">문의 내용 보기·복사</a>}{actions}</nav>
     {!!result.checks.length && <><h2>확인할 내용</h2><ul>{result.checks.map((text, index) => <li key={index}>{text}</li>)}</ul></>}
     {!!result.followUpQuestions.length && <><h2>추가 확인</h2><ul>{result.followUpQuestions.map((text, index) => <li key={index}>{text}</li>)}</ul></>}
     {result.citations.some(citation => citation.explanation) && <>

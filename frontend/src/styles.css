@@ -100,7 +100,7 @@ textarea { resize: vertical; }
 .end-confirmation { position: absolute; z-index: 2; right: 0; top: calc(100% + 8px); width: min(390px, calc(100vw - 26px)); padding: 16px; box-shadow: 0 8px 24px #203a3020; }
 .end-confirmation .actions { margin-top: 12px; }
 .result-actions { margin: 0 0 24px; }
-.result-actions > section { flex-basis: 100%; }
+.result-actions > section, .result-actions > .recovery-panel { flex-basis: 100%; }
 .notice p.guidance-unavailable { background: #f8f4e8; border-left: 3px solid #a67b38; border-radius: 6px; padding: 12px 16px; color: inherit; }
 .continue-link, .notice p.continue-link { margin-top: 20px; margin-bottom: 0; }
 .recovery-panel, .past-note { background: #f5f0df; border-radius: 9px; padding: 16px; margin-block: 18px; }

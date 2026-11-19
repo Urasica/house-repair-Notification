@@ -150,7 +150,7 @@ async def test_survey_embeds_only_labels_and_withdrawal_blocks_final_save(pg_ses
     )
     assert failure.reason_codes == ["SOURCE_UNAVAILABLE"] and not failure.citations
     assert failure.status == "GUIDANCE_UNAVAILABLE" and not failure.reference_examples
-    assert "OpenAI에서 필요한 응답을 받지 못했어요" in failure.guidance[0]
+    assert "안내에 필요한 응답을 받지 못했어요" in failure.guidance[0]
     snapshot.context.answers["immediate-danger"] = "YES"
     safety = await evaluate_survey(
         snapshot, CATALOG, settings, database=BoundDatabase(pg_session), provider=provider

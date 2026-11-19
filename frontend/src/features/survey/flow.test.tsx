@@ -240,6 +240,38 @@ it('lets the user opt in to adding the saved observation and copies their edited
   expect(writeText).toHaveBeenCalledWith(revised)
   expect(fetcher.mock.calls.some(([, options]) => options?.method === 'PUT' || options?.method === 'POST')).toBe(false)
 })
+
+it.each(['OK', 'LOST'] as const)('retries an unavailable result with the saved revision and recovers on the same screen (%s)', async mode => {
+  current = filledSession()
+  result = { ...resultFixture(current), status: 'GUIDANCE_UNAVAILABLE', reasonCodes: ['SOURCE_UNAVAILABLE'], guidance: ['안내에 필요한 응답을 받지 못했어요.'] }
+  evaluationMode = mode
+  await render('/result/' + resultId, true)
+  await until(() => expect(button('입력한 내용으로 다시 시도').disabled).toBe(false))
+  const inquiry = host.querySelector<HTMLAnchorElement>('.result-actions a[href="#contact-heading"]')!
+  expect(inquiry.textContent).toBe('문의 내용 보기·복사')
+  expect(host.querySelector(inquiry.hash)?.textContent).toBe('직접 문의할 내용')
+  await click(button('입력한 내용으로 다시 시도'))
+  if (mode === 'LOST') {
+    await until(() => expect(button('완료 여부 확인').disabled).toBe(false))
+    await click(button('완료 여부 확인'))
+  }
+  await until(() => expect(host.textContent).toContain('지금 할 일'))
+  expect(sent).toHaveLength(1)
+  expect(sent[0].expectedRevision).toBe(current.revision)
+  expect(count('/context', 'PUT')).toBe(0)
+  expect(count('/questions', 'GET')).toBe(0)
+  expect(readPending(current.id)).toBeNull()
+})
+
+it('routes an unavailable old result to the newer survey instead of retrying with different inputs', async () => {
+  current = filledSession()
+  result = { ...resultFixture(current), status: 'GUIDANCE_UNAVAILABLE', reasonCodes: ['SOURCE_UNAVAILABLE'], isCurrent: false }
+  current = { ...current, revision: current.revision + 1 }
+  await render('/result/' + resultId, true)
+  await until(() => expect(host.textContent).toContain('최근 설문 확인'))
+  expect(host.textContent).not.toContain('입력한 내용으로 다시 시도')
+  expect(sent).toHaveLength(0)
+})
 it('invalidates descendants when a parent selection changes and preserves draft on a revision conflict', async () => {
   current = filledSession()
   await render('/select', true)
@@ -315,7 +347,7 @@ it('recovers a lost completed response by reading request state without another 
   await render('/survey', true)
   await until(() => expect(button('안내 결과 확인').disabled).toBe(false))
   await click(button('안내 결과 확인'))
-  await until(() => expect(host.textContent).toContain('평가 요청이 남아 있어요'))
+  await until(() => expect(host.textContent).toContain('안내 요청이 남아 있어요'))
   const request = readPending(sessionId)!
   expect(request).toEqual(sent[0])
   await click(button('완료 여부 확인'))

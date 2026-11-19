@@ -52,7 +52,7 @@ async def test_completed_door_survey_explains_why_search_is_unavailable(enabled)
     result = await evaluate_survey(snapshot(context), CATALOG, settings)
     assert result.status == "GUIDANCE_UNAVAILABLE"
     assert result.reason_codes == ["SOURCE_UNAVAILABLE"]
-    assert ("검색 자료가 없어" if enabled else "OpenAI 연결이 꺼져") in result.guidance[0]
+    assert ("기준 자료가 없어" if enabled else "안내 서비스 연결이 꺼져") in result.guidance[0]
     assert not result.citations and not result.reference_examples
 
 
@@ -117,7 +117,7 @@ async def test_chat_clarification_fallback_and_safety_examples(context, content,
     assert len(result.reference_examples) == count
     assert not result.assistant_message.citations
     if status == "GUIDANCE_UNAVAILABLE":
-        assert "OpenAI 연결이 꺼져" in result.assistant_message.content
+        assert "안내 서비스 연결이 꺼져" in result.assistant_message.content
 
 
 def test_examples_do_not_repeat_contact_details_from_catalog_options():
