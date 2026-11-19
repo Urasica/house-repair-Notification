@@ -8,6 +8,16 @@ Docker Desktop을 Linux 컨테이너 모드로 시작한 뒤 `test-deploy.bat`�
 
 `.env`가 없으면 별도 프로젝트 `repair-guide-local`을 [localhost:18880](http://localhost:18880)에서 실행한다. 이 경우 OpenAI는 꺼져 있다. `stop-test-deploy.bat`는 같은 설정 파일을 기준으로 프로젝트를 선택하며 DB 볼륨은 보존한다. `.env`를 추가하거나 제거해서 실행 방식을 바꿀 때는 먼저 기존 방식으로 서버를 종료한다.
 
+## Windows Cloudflare Quick Tunnel 테스트
+
+Docker Desktop과 `api-tunnel.cmd`를 사용할 수 있는 터미널에서 `test-tunnel-deploy.bat -OpenTunnel`을 실행한다. 출력된 HTTPS 주소에서 테스트하고, Ctrl+C로 공개 터널을 끊은 뒤 `stop-test-tunnel-deploy.bat`로 서버를 종료한다. [Cloudflare Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/)
+
+터널을 별도 창에서 열려면 `test-tunnel-deploy.bat`을 실행한 다음 `api-tunnel -Port 18081 -LocalHostHeader`를 실행한다. 기본 포트는 `18081`이며 배치 파일의 `-Port` 옵션과 터널의 포트를 함께 바꿀 수 있다. `8080`은 비어 있을 때 선택할 수 있다.
+
+`repair-guide-tunnel-test` Compose 프로젝트는 기본 예제 설정과 테스트 전용 DB 볼륨을 사용한다. 검토된 설문 목록을 게시하며 OpenAI는 꺼 둔다. 공개 주소를 가진 사람은 테스트 사이트에 접속할 수 있으므로 가상 입력과 테스트 계정으로 이용한다. 서버를 종료한 뒤에도 해당 테스트 DB 볼륨은 보존된다.
+
+FastAPI의 `tunnel_test` 설정에서만 HTTPS `*.trycloudflare.com`의 동일 출처 브라우저 요청을 허용한다. `-LocalHostHeader`를 사용해도 브라우저 Origin은 공개 주소로 전달된다. 로그인 쿠키에는 `Secure`와 `__Host-` 접두사를 적용하고 변경 요청은 기존 CSRF 토큰도 검사한다. 교차 출처 CORS는 `WEB_ORIGINS`의 명시 주소를 따른다.
+
 ## 실제 운영 서버 구성
 
 `.env.production.example`을 비밀 파일 `.env.production`으로 복사하고 고유 앱/관리자 DB 비밀번호·실제 HTTPS Origin·도메인·릴리스 태그를 설정한다. `.env.ops.example`을 별도 `.env.production.ops`로 복사해 BACKUP_SCOPE·암호화 키·삭제 기록·검토 파일·백업 경로를 설정한다. 로컬 `.env.ops`와 섞지 않는다. 원격 디렉터리가 실제 서버 밖 저장소에 마운트되었는지 확인해야 한다.

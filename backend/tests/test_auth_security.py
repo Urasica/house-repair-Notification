@@ -53,6 +53,34 @@ def test_tokens_are_distinct_csrf_is_recoverable_and_production_cookie_is_secure
     assert not Settings(_env_file=None).auth_cookie_secure
 
 
+@pytest.mark.parametrize("profile", ["development", "test", "tunnel_test", "production"])
+def test_quick_tunnel_origin_only_works_in_the_tunnel_test_profile(profile):
+    settings = Settings(
+        _env_file=None,
+        app_env=profile,
+        web_origins=["https://example.com"],
+        database_url="postgresql+psycopg://test:nondevelopment@localhost/db",
+    )
+    assert settings.allows_write_origin("https://example.com", None)
+    assert settings.allows_write_origin("https://blue-house.trycloudflare.com", "same-origin") == (
+        profile == "tunnel_test"
+    )
+    for origin in (
+        None,
+        "null",
+        "http://blue-house.trycloudflare.com",
+        "https://trycloudflare.com",
+        "https://blue-house.trycloudflare.com.evil.example",
+        "https://deep.blue-house.trycloudflare.com",
+        "https://blue-house.trycloudflare.com:8080",
+        "https://blue-house.trycloudflare.com/",
+        "https://-bad-label.trycloudflare.com",
+    ):
+        assert not settings.allows_write_origin(origin, "same-origin")
+    assert not settings.allows_write_origin("https://blue-house.trycloudflare.com", "same-site")
+    assert not settings.allows_write_origin("https://blue-house.trycloudflare.com", "cross-site")
+
+
 def test_rate_limit_expiry_bounded_storage_and_no_raw_identifiers():
     now = [0.0]
     limiter = AuthRateLimiter(

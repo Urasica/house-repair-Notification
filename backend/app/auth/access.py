@@ -22,7 +22,9 @@ class Principal:
 
 
 def require_json_origin(request: Request):
-    if request.headers.get("origin") not in request.app.state.settings.web_origins:
+    if not request.app.state.settings.allows_write_origin(
+        request.headers.get("origin"), request.headers.get("sec-fetch-site")
+    ):
         raise AppError(ErrorCode.UNAUTHORIZED, "이 요청은 허용되지 않아요.", 403)
     if (
         request.headers.get("content-type", "").split(";", 1)[0].strip().lower()

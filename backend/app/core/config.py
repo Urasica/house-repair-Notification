@@ -1,3 +1,4 @@
+import re
 from functools import lru_cache
 from typing import Literal
 
@@ -5,11 +6,15 @@ from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import make_url
 
+QUICK_TUNNEL_ORIGIN = re.compile(
+    r"https://[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.trycloudflare\.com"
+)
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    app_env: Literal["development", "test", "production"] = "development"
+    app_env: Literal["development", "test", "tunnel_test", "production"] = "development"
     database_url: SecretStr = SecretStr(
         "postgresql+psycopg://repair_guide:local-development-only@localhost:5432/repair_guide"
     )
@@ -38,11 +43,23 @@ class Settings(BaseSettings):
 
     @property
     def auth_cookie_name(self) -> str:
-        return "__Host-repair_auth" if self.app_env == "production" else "repair_auth"
+        return "__Host-repair_auth" if self.auth_cookie_secure else "repair_auth"
 
     @property
     def auth_cookie_secure(self) -> bool:
-        return self.app_env == "production"
+        return self.app_env in {"production", "tunnel_test"}
+
+    def allows_write_origin(self, origin: str | None, fetch_site: str | None) -> bool:
+        if origin in self.web_origins:
+            return True
+        # The tunnel rewrites Host to loopback, while the browser preserves Origin.
+        # Keep credentialed CORS limited to web_origins, independent of this check.
+        return (
+            self.app_env == "tunnel_test"
+            and fetch_site in {None, "same-origin"}
+            and origin is not None
+            and QUICK_TUNNEL_ORIGIN.fullmatch(origin) is not None
+        )
 
     @model_validator(mode="after")
     def validate_runtime(self):

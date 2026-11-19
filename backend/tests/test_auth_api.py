@@ -183,24 +183,31 @@ async def test_attempt_limit_and_retry_after(auth_client):
     assert int(limited.headers["retry-after"]) > 0
 
 
-async def test_secure_cookie_on_production_profile(pg_session):
+@pytest.mark.parametrize(
+    "profile,origin",
+    [
+        ("production", "https://example.com"),
+        ("tunnel_test", "https://blue-house.trycloudflare.com"),
+    ],
+)
+async def test_secure_cookie_on_https_profiles(pg_session, profile, origin):
     settings = Settings(
         _env_file=None,
-        app_env="production",
-        web_origins=["https://example.com"],
+        app_env=profile,
+        web_origins=["https://example.com"] if profile == "production" else [ORIGIN],
         database_url="postgresql+psycopg://test:nondevelopment@localhost/db",
     )
+    headers = {"Origin": origin, "Sec-Fetch-Site": "same-origin"}
+    if profile == "tunnel_test":
+        headers["Host"] = "127.0.0.1:18081"
     app = create_app(settings, BoundDatabase(pg_session))
     async with app.router.lifespan_context(app):
         async with httpx.AsyncClient(
-            transport=httpx.ASGITransport(app=app), base_url="https://example.com"
+            transport=httpx.ASGITransport(app=app), base_url=origin
         ) as client:
-            await client.post(
-                "/api/v1/auth/register", json=BODY, headers={"Origin": "https://example.com"}
-            )
-            response = await client.post(
-                "/api/v1/auth/login", json=BODY, headers={"Origin": "https://example.com"}
-            )
+            registered = await client.post("/api/v1/auth/register", json=BODY, headers=headers)
+            assert registered.status_code == 201
+            response = await client.post("/api/v1/auth/login", json=BODY, headers=headers)
             assert response.status_code == 200
             assert response.headers["set-cookie"].startswith("__Host-repair_auth=")
             assert (
@@ -208,6 +215,23 @@ async def test_secure_cookie_on_production_profile(pg_session):
                 and "HttpOnly" in response.headers["set-cookie"]
             )
             assert (await client.get("/api/v1/auth/me")).status_code == 200
+            if profile == "tunnel_test":
+                assert "access-control-allow-origin" not in response.headers
+                preflight = await client.options(
+                    "/api/v1/auth/logout",
+                    headers={
+                        "Origin": "https://other.trycloudflare.com",
+                        "Access-Control-Request-Method": "POST",
+                    },
+                )
+                assert preflight.status_code == 400
+                assert "access-control-allow-origin" not in preflight.headers
+            logout_headers = {**headers, "Content-Type": "application/json"}
+            denied = await client.post("/api/v1/auth/logout", headers=logout_headers)
+            assert denied.status_code == 403
+            logout_headers["X-CSRF-Token"] = response.json()["csrfToken"]
+            logout = await client.post("/api/v1/auth/logout", headers=logout_headers)
+            assert logout.status_code == 204
 
 
 def request_for(app, *, token=None, bearer=None):

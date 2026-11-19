@@ -1,5 +1,10 @@
 [CmdletBinding()]
-param([ValidateSet('Start', 'Stop')][string]$Action = 'Start')
+param(
+    [ValidateSet('Start', 'Stop')][string]$Action = 'Start',
+    [ValidateSet('Local', 'TunnelTest')][string]$Profile = 'Local',
+    [ValidateRange(1, 65535)][int]$Port = 18081,
+    [switch]$OpenTunnel
+)
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
@@ -18,10 +23,24 @@ try {
         throw 'Install and start Docker Desktop with Linux containers.'
     }
 
+    $tunnelTest = $Profile -eq 'TunnelTest'
+    if ($OpenTunnel) {
+        if (-not $tunnelTest -or $Action -ne 'Start') {
+            throw '-OpenTunnel requires a TunnelTest start.'
+        }
+        $tunnelCommand = Get-Command api-tunnel.cmd -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+        if (-not $tunnelCommand) { throw 'Add api-tunnel.cmd to PATH, or start the test server without -OpenTunnel.' }
+    }
+
     $envFiles = @('.env.example')
     $composeFiles = @('compose.yaml')
     $project = 'repair-guide-local'
-    if (Test-Path -LiteralPath '.env' -PathType Leaf) {
+    $lockName = 'local-deploy.lock'
+    if ($tunnelTest) {
+        $project = 'repair-guide-tunnel-test'
+        $composeFiles += 'compose.tunnel-test.yaml'
+        $lockName = 'tunnel-test-deploy.lock'
+    } elseif (Test-Path -LiteralPath '.env' -PathType Leaf) {
         $project = 'repair-guide'
         if (Test-Path -LiteralPath '.env.ops' -PathType Leaf) {
             $envFiles += '.env.ops'
@@ -37,7 +56,10 @@ try {
         }
     }
     Remove-Item -LiteralPath Env:DOCKER_CONTEXT -ErrorAction SilentlyContinue
-    if ($project -eq 'repair-guide-local') {
+    if ($tunnelTest) {
+        $env:WEB_PORT = [string]$Port
+        $env:WEB_ORIGINS = ConvertTo-Json -InputObject @("http://localhost:$Port", "http://127.0.0.1:$Port") -Compress
+    } elseif ($project -eq 'repair-guide-local') {
         $env:WEB_PORT = '18880'
         $env:WEB_ORIGINS = '["http://localhost:18880"]'
     }
@@ -46,7 +68,7 @@ try {
     foreach ($file in $composeFiles) { $composeArgs += @('-f', $file) }
 
     New-Item -ItemType Directory -Path '.cache' -Force | Out-Null
-    $localDeployLock = [IO.File]::Open((Join-Path $root '.cache/local-deploy.lock'), 'OpenOrCreate', 'ReadWrite', 'None')
+    $localDeployLock = [IO.File]::Open((Join-Path $root ".cache/$lockName"), 'OpenOrCreate', 'ReadWrite', 'None')
 
     if ($Action -eq 'Stop') {
         Invoke-Compose 'Stopping the local server' @('down')
@@ -65,7 +87,18 @@ try {
     Invoke-Compose 'Starting the local server' @('up', '-d', '--no-build', '--wait', 'api', 'web')
     $binding = Invoke-Compose 'Finding the local address' @('port', 'web', '80')
     Write-Host ('Local server: http://' + $binding.Replace('127.0.0.1:', 'localhost:'))
-    Write-Host 'Stop with stop-test-deploy.bat.'
+    if ($tunnelTest) {
+        Write-Host "Public test tunnel: api-tunnel -Port $Port -LocalHostHeader"
+        Write-Host 'Stop the tunnel with Ctrl+C, then run stop-test-tunnel-deploy.bat.'
+        if ($OpenTunnel) {
+            $localDeployLock.Dispose()
+            $localDeployLock = $null
+            & $tunnelCommand.Source -Port $Port -LocalHostHeader
+            if ($LASTEXITCODE -ne 0) { throw "api-tunnel exited with code $LASTEXITCODE." }
+        }
+    } else {
+        Write-Host 'Stop with stop-test-deploy.bat.'
+    }
 } catch {
     [Console]::Error.WriteLine('FAILED: ' + $_.Exception.Message)
     exit 1

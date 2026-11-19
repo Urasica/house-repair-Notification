@@ -48,6 +48,8 @@ backend/alembic/              # 단일 DB migration 이력
 
 계정 쿠키를 사용하는 POST/PUT/DELETE는 X-CSRF-Token과 허용 Origin을 확인한다. 로그인·가입처럼 인증 쿠키를 만들기 전의 JSON 요청도 허용 Origin·Content-Type을 확인한다. 웹·API는 같은 사이트의 프록시 경로로 제공한다. CORS는 설정한 웹 origin만 허용한다.
 
+별도 Windows 터널 테스트의 `APP_ENV=tunnel_test`는 HTTPS `*.trycloudflare.com`에서 웹과 API의 Origin이 같은 브라우저 요청을 허용한다. 이 프로필에도 HTTPS 전용 로그인 쿠키와 CSRF 토큰 검사를 적용한다. [터널 테스트 실행 안내](../operations/deployment.md#windows-cloudflare-quick-tunnel-테스트)
+
 계정 인증 없음·만료는 401 AUTH_REQUIRED/AUTH_EXPIRED다. 익명 토큰 없음·만료는 401 UNAUTHORIZED/SESSION_EXPIRED다. 유효한 인증으로 다른 사용자의 자원에 접근하면 404다. 본인 익명 세션을 조회할 수 있어도 챗봇 권한은 부여되지 않는다.
 
 ## 3. API 목록
