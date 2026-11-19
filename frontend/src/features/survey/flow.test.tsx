@@ -216,6 +216,30 @@ it.each([true, false])('copies a contextual inquiry or provides manual copy reco
   if (available) expect(host.textContent).toContain('문의 내용을 복사했어요')
   else expect(host.querySelector<HTMLTextAreaElement>('[aria-label="복사할 문의 내용"]')?.readOnly).toBe(true)
 })
+
+it('lets the user opt in to adding the saved observation and copies their edited wording', async () => {
+  current = filledSession()
+  result = { ...resultFixture(current), summary: { ...resultFixture(current).summary, description: '비가 온 다음 날에 얼룩이 커져요.' } }
+  const writeText = vi.fn().mockResolvedValue(undefined)
+  vi.stubGlobal('navigator', { clipboard: { writeText } })
+  await render('/result/' + resultId, true)
+  await until(() => expect(host.querySelector('#contact-heading')).not.toBeNull())
+  await click(button('문의 문장 수정'))
+  const editor = host.querySelector<HTMLTextAreaElement>('textarea.copy-text')!
+  expect(editor.value).not.toContain(result.summary.description)
+  await click(button('내가 적은 설명 넣기'))
+  expect(editor.value).toContain(result.summary.description)
+  const revised = '거실 천장 물자국을 확인해 주세요. 비가 온 다음 날에 얼룩이 커져요.'
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(editor, revised)
+    editor.dispatchEvent(new Event('input', { bubbles: true }))
+  })
+  await click(button('문의 문장 확인'))
+  expect(host.querySelector('.contact-draft')?.textContent).toBe(revised)
+  await click(button('문의 내용 복사'))
+  expect(writeText).toHaveBeenCalledWith(revised)
+  expect(fetcher.mock.calls.some(([, options]) => options?.method === 'PUT' || options?.method === 'POST')).toBe(false)
+})
 it('invalidates descendants when a parent selection changes and preserves draft on a revision conflict', async () => {
   current = filledSession()
   await render('/select', true)
