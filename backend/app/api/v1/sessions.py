@@ -66,10 +66,19 @@ def check_question_deletion(request: Request, owner_id):
         )
 
 
-@router.post("", status_code=201, response_model=SessionCreated, operation_id="createSession")
+@router.post(
+    "",
+    status_code=201,
+    response_model=SessionCreated,
+    operation_id="createSession",
+    responses={429: {"model": ErrorResponse}},
+)
 async def create_session(body: SessionCreate, request: Request):
     db, settings = request.app.state.database, request.app.state.settings
     require_json_origin(request)
+    request.app.state.session_creation_limiter.check(
+        request.client.host if request.client else "unknown"
+    )
     async with db.transaction() as session:
         principal = await account(request, session, required=body.purpose == SessionPurpose.CHAT)
         if principal:
@@ -150,7 +159,7 @@ async def replay_result(session, payload):
     status_code=201,
     response_model=GuidanceResult,
     operation_id="evaluateSurvey",
-    responses={200: {"model": GuidanceResult}},
+    responses={200: {"model": GuidanceResult}, 429: {"model": ErrorResponse}},
 )
 async def evaluate(
     consultation_id: UUID, body: EvaluationRequest, request: Request, response: Response

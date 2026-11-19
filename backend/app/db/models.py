@@ -175,6 +175,15 @@ class ChatUsage(Identity, Created, Base):
     owner_user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
 
 
+class SurveyUsage(Identity, Created, Base):
+    __tablename__ = "survey_usage"
+    __table_args__ = (
+        Index("ix_survey_usage_session_created", "session_key", "created_at"),
+        Index("ix_survey_usage_created", "created_at"),
+    )
+    session_key: Mapped[str] = mapped_column(String(64))
+
+
 class Message(Identity, Created, Base):
     __tablename__ = "messages"
     __table_args__ = (

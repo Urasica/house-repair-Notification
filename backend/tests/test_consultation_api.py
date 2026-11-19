@@ -78,6 +78,18 @@ async def evaluation(client, session, headers, request_id=None, revision=None):
     return response, request_id
 
 
+async def test_session_creation_limit_preserves_existing_consultation(survey_client):
+    client, app = survey_client
+    app.state.session_creation_limiter.address_limit = 1
+    session, headers, _ = await start(client)
+    limited = await client.post(
+        "/api/v1/sessions", json={"catalogVersion": "test-only-v1"}, headers={"Origin": ORIGIN}
+    )
+    assert limited.status_code == 429 and int(limited.headers["retry-after"]) > 0
+    existing = await client.get(f"/api/v1/sessions/{session['id']}", headers=headers)
+    assert existing.status_code == 200
+
+
 async def test_guest_creation_context_branching_evaluation_and_hashes(survey_client, pg_session):
     client, _ = survey_client
     session, headers, token = await start(client)

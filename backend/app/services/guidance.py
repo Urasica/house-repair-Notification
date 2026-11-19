@@ -19,6 +19,7 @@ from app.schemas.contracts import GuidanceResult, ResultSummary, Session
 from app.services.embeddings import Embeddings, EmbeddingUnavailable
 from app.services.repair_examples import repair_examples
 from app.services.retrieval import retrieve, revalidate_citations
+from app.services.survey_budget import reserve_survey_embedding
 from app.services.survey_policy import survey_policy
 
 ENGINE_VERSION = "survey-v5-unavailable"
@@ -141,6 +142,7 @@ async def evaluate_survey(
             *answers,
         ]
     )
+    await reserve_survey_embedding(database, snapshot.id, settings)
     try:
         vector = (await (provider or Embeddings(settings)).embed([query])).vectors[0]
         async with database.session() as session:

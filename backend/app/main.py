@@ -62,6 +62,9 @@ def create_app(settings: Settings | None = None, database: Database | None = Non
     app.state.settings = settings
     app.state.passwords = Passwords()
     app.state.auth_rate_limiter = AuthRateLimiter()
+    app.state.session_creation_limiter = AuthRateLimiter(
+        address_limit=settings.session_create_window_limit
+    )
     app.state.consultation_locks = ConsultationLocks()
     app.state.question_deletion_locks = ConsultationLocks()
     app.state.chat_budget_lock = asyncio.Lock()

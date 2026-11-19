@@ -17,7 +17,7 @@ class AuthRateLimiter:
         self.clock = clock
         self._buckets: OrderedDict[str, deque[float]] = OrderedDict()
 
-    def check(self, address: str, email: str):
+    def check(self, address: str, email: str | None = None):
         now = self.clock()
         for key in list(self._buckets):
             queue = self._buckets[key]
@@ -25,10 +25,9 @@ class AuthRateLimiter:
                 queue.popleft()
             if not queue:
                 del self._buckets[key]
-        keys = [
-            ("address:" + token_hash(address), self.address_limit),
-            ("email:" + token_hash(email), self.email_limit),
-        ]
+        keys = [("address:" + token_hash(address), self.address_limit)]
+        if email is not None:
+            keys.append(("email:" + token_hash(email), self.email_limit))
         for key, limit in keys:
             queue = self._buckets.get(key)
             if queue and len(queue) >= limit:

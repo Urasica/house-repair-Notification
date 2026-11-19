@@ -43,6 +43,7 @@ export function useEvaluation(ref: SessionRef, session: Session, userId: string 
     setError(cause)
     if (cause instanceof ApiError) {
       if (cause.code === 'REQUEST_DELETED') terminal(true)
+      else if (cause.code === 'RATE_LIMITED') { clearPending(ref.id); setPending(null) }
       else if (cause.code === 'REQUEST_FAILED' || cause.code === 'IDEMPOTENCY_CONFLICT' || cause.code === 'CONTEXT_CONFLICT') terminal(false)
       const delay = Number(cause.details.retryAfterMs ?? (cause.retryAfter ? cause.retryAfter * 1000 : 0))
       if (delay > 0) setWaitUntil(Date.now() + delay)

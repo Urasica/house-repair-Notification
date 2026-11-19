@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import case, delete, func, select, update
 
-from app.db.models import AuthSession, ChatUsage, Consultation, QuestionRecord, Result
+from app.db.models import AuthSession, ChatUsage, Consultation, QuestionRecord, Result, SurveyUsage
 from app.services.deletion import delete_result, log_deletion
 
 
@@ -58,6 +58,11 @@ async def cleanup(session, settings, *, now=None):
     counts["usage"] = (
         await session.execute(
             delete(ChatUsage).where(ChatUsage.created_at <= now - timedelta(days=2))
+        )
+    ).rowcount
+    counts["surveyUsage"] = (
+        await session.execute(
+            delete(SurveyUsage).where(SurveyUsage.created_at <= now - timedelta(days=2))
         )
     ).rowcount
     return counts

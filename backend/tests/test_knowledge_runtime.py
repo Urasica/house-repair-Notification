@@ -1,20 +1,25 @@
+import asyncio
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import pytest
+from sqlalchemy import delete
 from test_auth_api import BoundDatabase
 from test_database import seed_catalog
 from test_knowledge import VECTOR, seed_release, source_fixture
 from test_m08a_catalog import CATALOG, answer_unknowns, context_for
 
+from app.auth.security import token_hash
 from app.core.config import Settings
-from app.db.models import KnowledgeChunk
+from app.core.errors import AppError
+from app.db.models import KnowledgeChunk, SurveyUsage
 from app.schemas.contracts import Session
 from app.services.embeddings import EmbeddedBatch, EmbeddingUnavailable
 from app.services.guidance import evaluate_survey
 from app.services.knowledge import embed_release, import_bundle, withdraw_source
 from app.services.knowledge_source import prepare_source
 from app.services.retrieval import LAW_EXPLANATIONS, revalidate_citations
+from app.services.survey_budget import reserve_survey_embedding
 
 pytestmark = pytest.mark.integration
 
@@ -156,6 +161,76 @@ async def test_survey_embeds_only_labels_and_withdrawal_blocks_final_save(pg_ses
         snapshot, CATALOG, settings, database=BoundDatabase(pg_session), provider=provider
     )
     assert safety.status == "SAFETY_PRIORITY" and not safety.citations
+
+
+async def test_search_budget_limits_provider_calls_and_keeps_safety(pg_session):
+    release, _, _ = await seed_release(pg_session)
+    now = datetime.now(UTC)
+    release.status = "PUBLISHED"
+    release.published_at = now
+    await pg_session.flush()
+    snapshot = Session(
+        id=uuid4(),
+        access_mode="GUEST",
+        catalog_version=release.catalog_version,
+        knowledge_release_id=release.id,
+        revision=0,
+        context=answer_unknowns(context_for("leak", "waterproof", "bathroom")),
+        current_result_id=None,
+        created_at=now,
+        expires_at=now + timedelta(hours=24),
+    )
+    settings = Settings(
+        _env_file=None,
+        openai_enabled=True,
+        openai_api_key="test-only",
+        openai_chat_model="test-only",
+        survey_session_window_limit=1,
+        survey_daily_limit=2,
+    )
+    provider = FakeEmbedding()
+    database = BoundDatabase(pg_session)
+
+    async def evaluate(current):
+        return await evaluate_survey(
+            current, CATALOG, settings, database=database, provider=provider
+        )
+
+    assert (await evaluate(snapshot)).status == "NEED_CONFIRMATION"
+    with pytest.raises(AppError) as session_limit:
+        await evaluate(snapshot)
+    assert session_limit.value.status == 429
+    assert 0 < session_limit.value.details["retryAfterSeconds"] <= 600
+    assert (
+        await evaluate(snapshot.model_copy(update={"id": uuid4()}))
+    ).status == "NEED_CONFIRMATION"
+    with pytest.raises(AppError) as daily_limit:
+        await evaluate(snapshot.model_copy(update={"id": uuid4()}))
+    assert daily_limit.value.status == 429
+    assert "오늘의" in daily_limit.value.message
+    snapshot.context.answers["immediate-danger"] = "YES"
+    assert (await evaluate(snapshot)).status == "SAFETY_PRIORITY"
+    assert len(provider.inputs) == 2
+
+
+async def test_simultaneous_survey_reservations_share_one_daily_limit(pg_database):
+    settings = Settings(_env_file=None, survey_daily_limit=1)
+    ids = [uuid4(), uuid4()]
+    try:
+        results = await asyncio.gather(
+            *(reserve_survey_embedding(pg_database, identifier, settings) for identifier in ids),
+            return_exceptions=True,
+        )
+        assert results.count(None) == 1
+        rejected = next(result for result in results if result is not None)
+        assert isinstance(rejected, AppError) and rejected.status == 429
+    finally:
+        async with pg_database.transaction() as session:
+            await session.execute(
+                delete(SurveyUsage).where(
+                    SurveyUsage.session_key.in_([token_hash(str(i)) for i in ids])
+                )
+            )
 
 
 async def test_required_context_hash_and_review_changes_fail_closed(pg_session):
