@@ -79,7 +79,18 @@ async def test_ceiling_leak_followups_use_symptom_reference_without_guessing_cau
     )
     embeddings = FakeEmbedding()
     generator = AsyncMock()
-    for content in ("집 천장에서 물이 새고 있어", "LH 건설임대야 거실 천장", "거실 천장"):
+    turns = (
+        ("집 천장에서 물이 새고 있어", None),
+        ("LH 건설임대야 거실 천장", "문제가 보이는 위치"),
+        ("거실 천장", "문제가 보이는 위치"),
+        (
+            "비가 올 때만 그래요. 연락처는 private@example.com이에요.",
+            "비가 올 때만 물이 보였다는 점",
+        ),
+        ("비가 안 올 때도 물자국이 보여요.", "비가 오지 않을 때도 물자국이 보였다는 점"),
+        ("비가 올 때만 새는 건 아니에요.", "문제가 보이는 위치"),
+    )
+    for content, expected in turns:
         snapshot.context = confirmed_context(snapshot.context, content, CATALOG)
         response = await chat_response(
             snapshot,
@@ -100,11 +111,16 @@ async def test_ceiling_leak_followups_use_symptom_reference_without_guessing_cau
             assert snapshot.context.room_id == "living" and snapshot.context.symptom_id == "leak"
             assert snapshot.context.facility_id is None
             assert response.status == "NEED_CONFIRMATION" and not response.follow_up_questions
-            assert "문제가 보이는 위치" in response.assistant_message.content
+            assert expected in response.assistant_message.content
             citation = response.assistant_message.citations[0]
             assert citation.locator == "제10조" and citation.use == "RELATED"
-    assert len(embeddings.inputs) == 2
-    assert all("천장" not in query for query in embeddings.inputs)
+    assert len(embeddings.inputs) == 5
+    assert all(
+        "천장" not in query and "private@example.com" not in query for query in embeddings.inputs
+    )
+    assert "비가 올 때 새어요" in embeddings.inputs[2]
+    assert "비가 오지 않을 때도 물자국이 보여요" in embeddings.inputs[3]
+    assert embeddings.inputs[0] == embeddings.inputs[4]
     generator.generate.assert_not_awaited()
 
 

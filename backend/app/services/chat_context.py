@@ -7,6 +7,37 @@ from app.services.retrieval import question_purpose
 from app.services.survey_policy import survey_policy
 
 
+def leak_observation(content):
+    """Recognize observations as fixed labels without forwarding the user's wording."""
+    if re.search(r"모르|같아|같은|일까요|인가요|경우|아니|새(?:지|지는)\s*않", content):
+        return None
+    observations = [
+        (
+            r"비(?:가)?\s*(?:안\s*올|오지\s*않을)\s*때도[^.!?\n]*"
+            r"물\s*(?:자국|얼룩)(?:이|은|도)?\s*(?:보여|보였|있어|남아|남았|생겨|생겼)",
+            "비가 오지 않을 때도 물자국이 보여요",
+            "비가 오지 않을 때도 물자국이 보였다는 점을 관리사무소에 알려 주세요. "
+            "물이 지금도 떨어지는지, 마른 자국만 보이는지도 함께 전달하면 도움이 돼요.",
+        ),
+        (
+            r"비(?:가)?\s*올\s*때만\s*(?:그래|새|물[이가]?\s*(?:새|떨어))",
+            "비가 올 때 새어요",
+            "비가 올 때만 물이 보였다는 점을 관리사무소에 알려 주세요. "
+            "비가 그친 뒤에도 물이 떨어졌는지 알고 계시면 함께 전달해 주세요.",
+        ),
+        (
+            r"물(?:을)?\s*(?:쓸|사용할)\s*때만\s*(?:그래|새|물[이가]?\s*(?:새|떨어))",
+            "물을 사용할 때 새어요",
+            "물을 쓸 때만 물이 보였다는 점을 관리사무소에 알려 주세요. "
+            "그때 어느 곳에서 물을 쓰고 있었는지도 기억나면 함께 전달해 주세요.",
+        ),
+    ]
+    matches = [
+        (label, action) for pattern, label, action in observations if re.search(pattern, content)
+    ]
+    return matches[0] if len(matches) == 1 else None
+
+
 def confirmed_context(previous, content, catalog):
     context = previous.model_copy(deep=True)
     context.description = ""

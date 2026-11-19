@@ -17,7 +17,7 @@ from app.domain.constants import (
     GuidanceStatus,
 )
 from app.schemas.contracts import ChatMessage, ChatResponse
-from app.services.chat_context import chat_policy
+from app.services.chat_context import chat_policy, leak_observation
 from app.services.embeddings import Embeddings, EmbeddingUnavailable
 from app.services.generation import PROMPT_VERSION, GenerationUnavailable, Responses, annex_texts
 from app.services.repair_examples import repair_examples
@@ -128,6 +128,11 @@ async def chat_response(
         return fallback(response, OPENAI_DISABLED_MESSAGE)
     if not snapshot.knowledge_release_id:
         return fallback(response)
+    observation = (
+        leak_observation(content)
+        if purpose == "OPERATION" and snapshot.context.symptom_id == "leak"
+        else None
+    )
     # Free text and raw conversation never leave the server. Selected labels are reviewed.
     labels = []
     for field, items in [
@@ -143,6 +148,8 @@ async def chat_response(
             for option in question.options
             if option.value == survey.context.answers.get(question.question_id)
         )
+    if observation:
+        labels.append(observation[0])
     query = " · ".join([project_question(content), *labels])
     loop = asyncio.get_running_loop()
     deadline = deadline or loop.time() + settings.chat_timeout_seconds - 2
@@ -174,6 +181,8 @@ async def chat_response(
                 message = NO_APPLICABLE_GUIDANCE_MESSAGE
                 if purpose == "LAW_EXPLANATION":
                     message = "요청하신 조문을 설명할 수 있는 검토 자료를 찾지 못했어요."
+                elif observation:
+                    message = observation[1]
                 elif snapshot.context.facility_id in {None, "unknown"}:
                     message = (
                         "말씀해 주신 증상만으로는 원인이 된 시설을 특정하기 어려워요. "
