@@ -98,6 +98,26 @@ it('keeps the unpublished catalog empty and never starts a session', async () =>
   expect(host.textContent).not.toContain('시험용')
   expect(count('/sessions', 'POST')).toBe(0)
 })
+
+it('lets a person with an unknown facility report a visible ceiling leak', async () => {
+  const main = fetcher.getMockImplementation()!
+  fetcher.mockImplementation((url, options) => url.includes('/catalog') ? Promise.resolve(json({
+    ...catalog,
+    facilities: [...catalog.facilities, { id: 'finish', label: '벽·천장 마감', roomIds: ['test-room'] }, { id: 'unknown', label: '시설물을 잘 모르겠어요', roomIds: ['test-room'] }],
+    symptoms: [...catalog.symptoms, { id: 'leak', label: '물이 새거나 물 자국이 있어요', facilityIds: ['test-facility'] }],
+  })) : main(url, options))
+  await render('/select', true)
+  await until(() => expect(host.querySelector('#room')).not.toBeNull())
+  await radio('LH_CONSTRUCTION_RENTAL'); await choose('room', 'test-room'); await choose('facility', 'finish')
+  await click(button('벽·천장에서 물이 새거나 물자국이 보여요'))
+  expect(host.querySelector<HTMLSelectElement>('#facility')?.value).toBe('unknown')
+  const symptom = host.querySelector<HTMLSelectElement>('#symptom')!
+  expect(symptom.value).toBe('leak')
+  expect([...symptom.options].map(option => option.value)).not.toContain('test-symptom2')
+  await click(button('저장하고 설문으로'))
+  await until(() => expect(host.textContent).toContain('시험용 확인 질문'))
+  expect(current.context).toMatchObject({ roomId: 'test-room', facilityId: 'unknown', symptomId: 'leak' })
+})
 it.each([false, true])('completes selection, branch, evaluation and result with scoped caches (member=%s)', async memberMode => {
   isMember = memberMode
   const userId = memberMode ? member.user!.id : null

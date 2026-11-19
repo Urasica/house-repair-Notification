@@ -22,6 +22,13 @@ export function facilitiesForRoom(catalog: Catalog, roomId: string | null | unde
   return ordered ? ordered.flatMap(id => allowed.filter(item => item.id === id)) : allowed
 }
 
+export function symptomsForFacility(catalog: Catalog, roomId: Context['roomId'], facilityId: Context['facilityId']) {
+  const facilityIds = facilityId === 'unknown'
+    ? catalog.facilities.filter(item => item.roomIds.includes(roomId ?? '')).map(item => item.id)
+    : [facilityId ?? '']
+  return catalog.symptoms.filter(item => item.facilityIds.some(id => facilityIds.includes(id)))
+}
+
 export function facilityLabel(catalog: Catalog, roomId: string | null | undefined, facilityId: string | null | undefined) {
   const original = catalog.facilities.find(item => item.id === facilityId)?.label
   if (catalog.version !== 'm08a-20261004-v2') return original

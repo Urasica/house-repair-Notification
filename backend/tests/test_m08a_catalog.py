@@ -82,8 +82,9 @@ def test_every_real_symptom_has_reachable_questions_and_unknown_is_not_a_decisio
             assert not result.missing_fields
 
 
-def test_real_leak_branch_disappears_and_clears_its_answer():
-    context = answer_unknowns(context_for("leak", "waterproof", "bathroom"))
+@pytest.mark.parametrize("facility,room", [("waterproof", "bathroom"), ("unknown", "living")])
+def test_real_leak_branch_disappears_and_clears_its_answer(facility, room):
+    context = answer_unknowns(context_for("leak", facility, room))
     context.answers["detail-leak"] = "FLOWING"
     context.answers["leak-pattern"] = "RAIN"
     active = survey_policy(CATALOG, context)
@@ -91,8 +92,15 @@ def test_real_leak_branch_disappears_and_clears_its_answer():
     changed = active.context.model_copy(deep=True)
     changed.answers["detail-leak"] = "TRACE"
     inactive = survey_policy(CATALOG, changed, previous=active.context)
+    assert inactive.context.facility_id == facility and inactive.context.symptom_id == "leak"
     assert "leak-pattern" not in inactive.context.answers
     assert "leak-pattern" not in {q.question_id for q in inactive.questions}
+
+
+def test_unsure_facility_does_not_accept_a_symptom_from_an_unrelated_room():
+    with pytest.raises(AppError) as error:
+        survey_policy(CATALOG, context_for("elevator-defect", "unknown", "living"))
+    assert error.value.details == {"field": "symptomId"}
 
 
 def test_actual_source_conditions_and_ambiguous_annex_never_become_approval():

@@ -89,10 +89,13 @@ def survey_policy(
             selection_error("facilityId")
         canonical.facility_id = None
     facility_changed = previous is not None and previous.facility_id != canonical.facility_id
-    if (
-        canonical.symptom_id
-        and canonical.facility_id not in symptoms[canonical.symptom_id].facility_ids
-    ):
+    symptom = symptoms.get(canonical.symptom_id)
+    observed_in_room = (
+        symptom is not None
+        and canonical.facility_id == "unknown"
+        and any(canonical.room_id in facilities[item].room_ids for item in symptom.facility_ids)
+    )
+    if symptom and canonical.facility_id not in symptom.facility_ids and not observed_in_room:
         if not (room_changed or facility_changed):
             selection_error("symptomId")
         canonical.symptom_id = None
