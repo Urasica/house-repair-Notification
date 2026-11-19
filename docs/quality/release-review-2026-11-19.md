@@ -11,6 +11,8 @@
 | 높음 | Python 의존성 | `pip-audit`에서 중복을 제외한 보안 공지 5개와 영향 패키지 3개를 확인했다. 수정 버전 기준은 `certifi` 2026.10.18, `dnspython` 2.9.2, `opentelemetry-api` 1.45.2다. 서비스의 공격 도달 여부는 시험 범위 밖이다. 운영 이미지 갱신 뒤 재검색과 회귀 검증이 필요하다. [certifi](https://github.com/advisories/GHSA-6q48-6c7w-9gw2) · [dnspython](https://github.com/rthalley/dnspython/security/advisories/GHSA-vvf4-9x63-8xvv) · [OpenTelemetry](https://www.cve.org/CVERecord?id=CVE-2026-126360) |
 | 일정 | 검색 자료 검토 만료 | 게시 대상 법령 묶음의 검토 기한은 2027-01-02다. 만료되면 해당 자료가 새 안내에서 제외되므로 원문 재검토와 게시 일정을 확정한다. [자료 검토 기록](../../data/knowledge/m09-20261004/review.json) · [검색 적격성](../../backend/app/services/retrieval.py#L104) |
 
+후속 조치로 안전 분기(`a1b5b52`), 공개 요청 한도(`cf21d70`), 의존성 갱신(`13ce456`)을 반영했다. 법령 원문 대조 결과와 갱신 일정은 [검토 기한 점검과 갱신](../ai/knowledge-publication.md#검토-기한-점검과-갱신)에 기록했다.
+
 ## 검증 결과
 
 - 새 PostgreSQL·pgvector 볼륨에서 초기 마이그레이션과 Alembic 일치 검사를 통과했다. 백엔드 277개, 프런트엔드 69개, 린트·빌드·OpenAPI 계약을 확인했다.

@@ -3,15 +3,20 @@
 import argparse
 import asyncio
 import json
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID
 
+from sqlalchemy import func, select
+
 from app.core.config import get_settings
 from app.core.errors import AppError
-from app.db.models import Catalog, KnowledgeSet
+from app.db.models import Catalog, KnowledgeDocument, KnowledgeSet
 from app.db.session import Database
 from app.schemas.catalog import CatalogDefinition
 from app.schemas.contracts import Context
+from app.services.catalog import load_definition
+from app.services.consultations import latest_knowledge
 from app.services.embeddings import Embeddings, EmbeddingUnavailable
 from app.services.knowledge import (
     embed_release,
@@ -23,6 +28,32 @@ from app.services.knowledge import (
 )
 from app.services.knowledge_source import canonical, digest, prepare_source, read_bounded
 from app.services.retrieval import question_purpose, retrieve
+
+
+async def check_review_deadline(session, settings, warn_days: int, now: datetime) -> dict:
+    loaded = await load_definition(session)
+    if loaded is None:
+        return {"status": "NOT_READY"}
+    catalog, _ = loaded
+    report = {"status": "NOT_READY", "catalogVersion": catalog.version}
+    release_id = await latest_knowledge(session, catalog.version, settings)
+    if release_id is None:
+        return report
+    report["releaseId"] = str(release_id)
+    deadline = await session.scalar(
+        select(func.min(KnowledgeDocument.review_until)).where(
+            KnowledgeDocument.knowledge_set_id == release_id,
+            KnowledgeDocument.status == "APPROVED",
+        )
+    )
+    if deadline is None:
+        return report
+    status = "OK"
+    if deadline <= now:
+        status = "EXPIRED"
+    elif deadline <= now + timedelta(days=warn_days):
+        status = "REVIEW_DUE"
+    return {**report, "status": status, "reviewUntil": deadline.astimezone(UTC).isoformat()}
 
 
 async def evaluate_release(database, release_id, cases, provider, settings):
@@ -112,6 +143,13 @@ async def execute(args):
         }
     database = Database(settings)
     try:
+        if args.action == "check-review":
+            if not 0 <= args.warn_days <= 365:
+                raise ValueError("Review warning interval must be 0..365 days")
+            async with database.session() as session:
+                return await check_review_deadline(
+                    session, settings, args.warn_days, datetime.now(UTC)
+                )
         if args.action == "import":
             bundle = prepare_source(args.source, args.manifest_sha256)
             catalog_raw = read_bounded(args.catalog)
@@ -160,7 +198,7 @@ async def execute(args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        description="Verify, import, embed, evaluate and publish knowledge"
+        description="Verify, import, embed, evaluate, publish and check knowledge"
     )
     sub = parser.add_subparsers(dest="action", required=True)
     for action in ("validate", "import"):
@@ -180,9 +218,13 @@ def main(argv=None):
     command = sub.add_parser("withdraw")
     command.add_argument("--source-key", required=True)
     command.add_argument("--reason", required=True)
+    command = sub.add_parser("check-review", help="Check the published review deadline")
+    command.add_argument("--warn-days", type=int, default=30, help="Warning window (0..365 days)")
+    args = parser.parse_args(argv)
     try:
-        print(json.dumps(asyncio.run(execute(parser.parse_args(argv))), ensure_ascii=False))
-        return 0
+        report = asyncio.run(execute(args))
+        print(json.dumps(report, ensure_ascii=False))
+        return int(args.action == "check-review" and report["status"] != "OK")
     except (ValueError, KeyError, TypeError, OSError, AppError, EmbeddingUnavailable):
         # Credentials, source paragraphs, user text and provider bodies never enter command logs.
         print(json.dumps({"error": "KNOWLEDGE_OPERATION_FAILED"}))

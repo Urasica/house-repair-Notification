@@ -10,6 +10,7 @@ from test_knowledge import VECTOR, seed_release, source_fixture
 from test_m08a_catalog import CATALOG, answer_unknowns, context_for
 
 from app.auth.security import token_hash
+from app.commands.knowledge import check_review_deadline
 from app.core.config import Settings
 from app.core.errors import AppError
 from app.db.models import KnowledgeChunk, SurveyUsage
@@ -34,6 +35,36 @@ class FakeEmbedding:
             raise EmbeddingUnavailable("test-only")
         self.inputs.extend(texts)
         return EmbeddedBatch([VECTOR for _ in texts], len(texts))
+
+
+async def test_review_deadline_tracks_published_release_and_exact_boundaries(pg_session):
+    settings = Settings(_env_file=None)
+    now = datetime.now(UTC)
+    assert await check_review_deadline(pg_session, settings, 30, now) == {"status": "NOT_READY"}
+
+    release, document, _ = await seed_release(pg_session)
+    assert await check_review_deadline(pg_session, settings, 30, now) == {
+        "status": "NOT_READY",
+        "catalogVersion": release.catalog_version,
+    }
+    release.status = "PUBLISHED"
+    release.published_at = now
+    await pg_session.flush()
+
+    deadline = document.review_until
+    warning_start = deadline - timedelta(days=30)
+    assert await check_review_deadline(pg_session, settings, 30, warning_start) == {
+        "status": "REVIEW_DUE",
+        "catalogVersion": release.catalog_version,
+        "releaseId": str(release.id),
+        "reviewUntil": deadline.astimezone(UTC).isoformat(),
+    }
+    before_warning = warning_start - timedelta(microseconds=1)
+    assert (await check_review_deadline(pg_session, settings, 30, before_warning))["status"] == "OK"
+    assert (await check_review_deadline(pg_session, settings, 30, deadline))["status"] == "EXPIRED"
+
+    await withdraw_source(pg_session, document.source_key, "test-only")
+    assert (await check_review_deadline(pg_session, settings, 30, now))["status"] == "NOT_READY"
 
 
 async def test_import_resume_and_metadata_release_reuses_identical_vectors(pg_session, tmp_path):
