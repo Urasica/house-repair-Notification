@@ -4,7 +4,7 @@
 
 Windows에서는 Docker Desktop을 켜고 `test-deploy.bat`를 실행한 뒤 콘솔에 표시된 주소로 접속하세요. 실행 설정은 `.env`를 우선하며, 종료는 `stop-test-deploy.bat`를 실행하세요. [실행·운영 배포 안내](docs/operations/deployment.md)
 
-Cloudflare Quick Tunnel로 공유할 때는 `test-tunnel-deploy.bat -OpenTunnel`을 실행하세요. 별도 테스트 서버와 DB를 준비한 뒤 공개 테스트 주소를 표시합니다. [터널 테스트 실행 안내](docs/operations/deployment.md#windows-cloudflare-quick-tunnel-테스트)
+Cloudflare Quick Tunnel로 공유할 때는 실행 중인 8080 서버에 `api-tunnel -Port 8080 -LocalHostHeader`를 연결하세요. `test-deploy.bat -OpenTunnel`로 서버와 터널을 함께 시작할 수도 있습니다. [터널 테스트 실행 안내](docs/operations/deployment.md#windows-cloudflare-quick-tunnel-테스트)
 
 LH 공공주택 입주민이 집 안의 불편이나 하자를 쉽게 설명하고, 보수 관련 기준과 문의할 내용을 확인할 수 있도록 돕는 웹 서비스입니다. 이 문서는 상세 설계가 아닌 서비스 방향과 UI 시안 구성을 정리한 초안입니다.
 

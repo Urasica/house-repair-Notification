@@ -22,7 +22,7 @@ backend/tests/fixtures/catalog.test.json과 frontend/src/features/survey/test-fi
 
 ## 3. 실행 설정과 버전
 
-.env.example은 로컬 Docker의 공개 개발 기본값이며 실제 비밀은 .env에서만 관리한다. APP_ENV는 development/test/production, OPENAI_ENABLED는 예시 환경에서 기본 false다. 생성 모델은 gpt-5.4-mini, 임베딩 text-embedding-3-large·1536차원을 사용한다. 사용자 지정에 따라 임베딩 총비용 상한은 두지 않고 요청별 입력·시간 한도는 유지한다. 운영은 별도 DB 비밀번호·HTTPS origin을 요구한다. 질문·회원 결과는 3~5년 기본 5년, 상담·인증 24시간, 단기 기록 정리 유예 7일, 로그·백업 14일, 삭제 기록 15일이다.
+.env.example은 로컬 Docker의 공개 개발 기본값이며 실제 비밀은 .env에서만 관리한다. APP_ENV는 development/test/tunnel_test/production, OPENAI_ENABLED는 예시 환경에서 기본 false다. 생성 모델은 gpt-5.4-mini, 임베딩 text-embedding-3-large·1536차원을 사용한다. 사용자 지정에 따라 임베딩 총비용 상한은 두지 않고 요청별 입력·시간 한도는 유지한다. 운영은 별도 DB 비밀번호·HTTPS origin을 요구한다. 질문·회원 결과는 3~5년 기본 5년, 상담·인증 24시간, 단기 기록 정리 유예 7일, 로그·백업 14일, 삭제 기록 15일이다.
 
 Python 3.12, Node 22 계열을 기준으로 한다. FastAPI 0.142.2·Pydantic 2.13.5·SQLAlchemy 2.1.2·Psycopg 3.3.6·Alembic 1.20.0·pgvector Python 0.5.0을 선택했다. 프론트는 React 19.3.0·Vite 8.3.2·TypeScript 5.9.3을 사용한다. OpenAPI 타입 생성 도구의 TypeScript 5.x 호환 범위와 린트 도구의 호환 범위를 함께 만족하는 버전을 선택했다.
 

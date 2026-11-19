@@ -4,17 +4,15 @@
 
 Docker Desktop을 Linux 컨테이너 모드로 시작한 뒤 `test-deploy.bat`를 실행한다. Docker Compose가 이미지를 빌드하고 DB 스키마와 검토된 설문 목록을 준비한다. 완료되면 콘솔에 표시된 로컬 주소에 접속한다.
 
-`.env`가 있으면 `.env.example` 위에 적용하고 기존 개발 Compose 프로젝트 `repair-guide`와 DB 볼륨을 사용한다. 포트를 바꾸는 경우 `WEB_PORT`와 `WEB_ORIGINS`의 로컬 주소를 함께 맞춘다. OpenAI 사용 여부는 `OPENAI_ENABLED`를 따른다. `.env.ops`도 있으면 개발 프로젝트의 삭제 기록 내보내기를 적용한다. DB 접속값을 수정할 때는 기존 볼륨의 계정·암호와 맞춰야 한다.
+Windows 배치는 [localhost:8080](http://localhost:8080)에서 로컬·터널 테스트에 공통으로 사용할 서버를 실행한다. `.env`가 있으면 `.env.example` 위에 적용하고 기존 개발 Compose 프로젝트 `repair-guide`와 DB 볼륨을 사용한다. `WEB_ORIGINS`의 로컬 주소는 8080과 맞춘다. OpenAI 사용 여부는 `OPENAI_ENABLED`를 따르며, 검색에는 같은 DB에 게시된 지식 자료를 사용한다. `.env.ops`도 있으면 개발 프로젝트의 삭제 기록 내보내기를 적용한다. DB 접속값을 수정할 때는 기존 볼륨의 계정·암호와 맞춰야 한다.
 
-`.env`가 없으면 별도 프로젝트 `repair-guide-local`을 [localhost:18880](http://localhost:18880)에서 실행한다. 이 경우 OpenAI는 꺼져 있다. `stop-test-deploy.bat`는 같은 설정 파일을 기준으로 프로젝트를 선택하며 DB 볼륨은 보존한다. `.env`를 추가하거나 제거해서 실행 방식을 바꿀 때는 먼저 기존 방식으로 서버를 종료한다.
+`.env`가 없으면 예제 설정으로 `repair-guide-local` 프로젝트를 같은 8080 포트에서 실행한다. 이 경우 OpenAI는 꺼져 있다. `stop-test-deploy.bat`는 같은 설정 파일을 기준으로 프로젝트를 선택하며 DB 볼륨은 보존한다. `.env`를 추가하거나 제거해서 실행 방식을 바꿀 때는 먼저 실행 중인 서버를 종료한다.
 
 ## Windows Cloudflare Quick Tunnel 테스트
 
-Docker Desktop과 `api-tunnel.cmd`를 사용할 수 있는 터미널에서 `test-tunnel-deploy.bat -OpenTunnel`을 실행한다. 출력된 HTTPS 주소에서 테스트하고, Ctrl+C로 공개 터널을 끊은 뒤 `stop-test-tunnel-deploy.bat`로 서버를 종료한다. [Cloudflare Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/)
+공통 서버가 실행 중이면 `api-tunnel -Port 8080 -LocalHostHeader`를 실행한다. 서버와 터널을 한 번에 시작하려면 Docker Desktop과 `api-tunnel.cmd`를 사용할 수 있는 터미널에서 `test-deploy.bat -OpenTunnel`을 실행한다. 출력된 HTTPS 주소에서 테스트한다. Ctrl+C로 공개 터널을 끊고, 서버까지 종료하려면 `stop-test-deploy.bat`를 실행한다. [Cloudflare Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/)
 
-터널을 별도 창에서 열려면 `test-tunnel-deploy.bat`을 실행한 다음 `api-tunnel -Port 18081 -LocalHostHeader`를 실행한다. 기본 포트는 `18081`이며 배치 파일의 `-Port` 옵션과 터널의 포트를 함께 바꿀 수 있다. `8080`은 비어 있을 때 선택할 수 있다.
-
-`repair-guide-tunnel-test` Compose 프로젝트는 기본 예제 설정과 테스트 전용 DB 볼륨을 사용한다. 검토된 설문 목록을 게시하며 OpenAI는 꺼 둔다. 공개 주소를 가진 사람은 테스트 사이트에 접속할 수 있으므로 가상 입력과 테스트 계정으로 이용한다. 서버를 종료한 뒤에도 해당 테스트 DB 볼륨은 보존된다.
+기존 `test-tunnel-deploy.bat`와 `stop-test-tunnel-deploy.bat`는 같은 시작·종료 배치를 실행한다. 공개 주소에서 생성된 설문과 계정은 공통 DB에 저장되며, OpenAI 사용량은 `.env`에 설정한 계정에 반영된다.
 
 FastAPI의 `tunnel_test` 설정에서만 HTTPS `*.trycloudflare.com`의 동일 출처 브라우저 요청을 허용한다. `-LocalHostHeader`를 사용해도 브라우저 Origin은 공개 주소로 전달된다. 로그인 쿠키에는 `Secure`와 `__Host-` 접두사를 적용하고 변경 요청은 기존 CSRF 토큰도 검사한다. 교차 출처 CORS는 `WEB_ORIGINS`의 명시 주소를 따른다.
 
