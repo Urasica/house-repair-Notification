@@ -10,7 +10,6 @@ from app.domain.constants import (
     DISCLAIMER,
     INSUFFICIENT_INFORMATION_MESSAGE,
     KNOWLEDGE_UNAVAILABLE_MESSAGE,
-    NO_APPLICABLE_GUIDANCE_MESSAGE,
     OPENAI_DISABLED_MESSAGE,
     OPENAI_UNAVAILABLE_MESSAGE,
     GuidanceStatus,
@@ -159,13 +158,21 @@ async def evaluate_survey(
         return unavailable_result(result)
     citations = found.citations(explain=True)
     guidance = found.guidance
-    if found.status == "NEED_CONFIRMATION":
-        guidance = ([] if any(c.explanation for c in citations) else guidance) + [
-            NO_APPLICABLE_GUIDANCE_MESSAGE
-        ]
+    if found.status == GuidanceStatus.NEED_CONFIRMATION:
+        next_step = "관리사무소에 문제가 보이는 위치와 어떤 불편이 있는지 알려 주세요."
+        if found.reason == "SOURCE_CONFLICT":
+            summary = "자료마다 안내가 달라 담당 기관에 확인이 필요해요."
+        elif any(c.kind == "LAW_CRITERIA" for c in citations):
+            summary = "관련 기준을 찾았어요. 보수 여부를 알려면 현장 상태를 확인해야 해요."
+            if context.symptom_id == "leak":
+                summary = "물이 어디서 들어오는지 현장에서 확인해야 해요."
+                next_step = "관리사무소에 물이나 물자국이 보인 위치와 처음 발견한 때를 알려 주세요."
+        else:
+            summary = "선택한 증상에 맞는 기준을 찾기 어려웠어요."
+        guidance = [summary, next_step]
     return result.model_copy(
         update={
-            "status": found.status,
+            "status": GuidanceStatus(found.status),
             "reason_codes": [found.reason],
             "citations": citations,
             "reference_examples": repair_examples(catalog, context, found.status),

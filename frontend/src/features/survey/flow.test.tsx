@@ -194,12 +194,19 @@ it('shows hypothetical examples separately and leaves them out of the copied inq
 it.each([true, false])('copies a contextual inquiry or provides manual copy recovery (clipboard=%s)', async available => {
   current = filledSession(); current.context.description = '비공개 추가 설명'
   result = resultFixture(current)
+  result.citations = [{
+    chunkId: crypto.randomUUID(), documentVersionId: crypto.randomUUID(), kind: 'LAW_CRITERIA', use: 'RELATED',
+    title: '하자판정기준', locator: '제10조', explanation: '물이 들어오는 경로를 살펴봐요.', excerpt: '검토된 원문',
+    url: 'https://www.law.go.kr/', effectiveDate: '2026-07-08',
+    reviewedAt: '2026-10-04T00:00:00Z', reviewUntil: '2027-01-02T00:00:00Z',
+  }]
   const writeText = vi.fn().mockImplementation(() => available ? Promise.resolve() : Promise.reject(new Error('denied')))
   vi.stubGlobal('navigator', { clipboard: { writeText } })
   await render('/result/' + resultId, true)
   await until(() => expect(host.textContent).toContain('지금 할 일'))
   const article = host.querySelector('article')!
   expect(article.querySelector('h2')?.textContent).toBe('지금 할 일')
+  expect(article.textContent!.indexOf(result.guidance[0])).toBeLessThan(article.textContent!.indexOf('물이 들어오는 경로를 살펴봐요.'))
   expect(article.querySelector('details')?.open).toBe(false)
   await click(button('문의 내용 복사'))
   await until(() => expect(writeText).toHaveBeenCalledTimes(1))

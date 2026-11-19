@@ -126,8 +126,22 @@ async def test_survey_embeds_only_labels_and_withdrawal_blocks_final_save(pg_ses
     assert result.citations and all(c.use == "RELATED" for c in result.citations)
     assert result.citations[0].explanation == explanation
     assert result.citations[0].excerpt == chunk.body
+    assert result.guidance == [
+        "물이 어디서 들어오는지 현장에서 확인해야 해요.",
+        "관리사무소에 물이나 물자국이 보인 위치와 처음 발견한 때를 알려 주세요.",
+    ]
     assert all("private" not in t for t in provider.inputs)
     assert await revalidate_citations(pg_session, result, settings)
+    door = answer_unknowns(context_for("opening-function", "door", "entrance"))
+    unmatched = await evaluate_survey(
+        snapshot.model_copy(update={"context": door}),
+        CATALOG,
+        settings,
+        database=BoundDatabase(pg_session),
+        provider=provider,
+    )
+    assert unmatched.status == "NEED_CONFIRMATION" and not unmatched.citations
+    assert unmatched.guidance[0] == "선택한 증상에 맞는 기준을 찾기 어려웠어요."
     assert await withdraw_source(pg_session, document.source_key, "test-only") == 1
     assert not await revalidate_citations(pg_session, result, settings)
     provider.fail = True
