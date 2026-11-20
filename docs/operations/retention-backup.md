@@ -83,7 +83,7 @@ docker compose --env-file .env.restore --env-file .env.ops -f compose.yaml -f co
 
 ## 6. 재현 가능한 검증
 
-`.github/workflows/ci.yml`은 실제 pgvector/PostgreSQL migration·전체 API 시험·계약·프론트 검증·Playwright·암호화 복원·20개 동시 상담·DB 장애와 재시작을 연결한다. OpenAI는 OFF/mock이며 비밀이 필요 없다. 실행 결과는 CI와 로컬 검증 기록에서 확인한다.
+`Jenkinsfile`은 실제 pgvector/PostgreSQL migration·전체 API 시험·계약·프론트 검증·Playwright·암호화 복원·20개 동시 상담·DB 장애와 재시작을 연결한다. OpenAI는 OFF/mock이며 비밀이 필요 없다. Jenkins에서 테스트 결과와 산출물을 확인한다. [Jenkins 자동 테스트](../development/local.md#6-jenkins-자동-테스트)
 
 - `backend/tests/test_retention.py`, `test_backup.py`: 경계·윤년·재생/집계·명시 삭제·내보내기 실패/재시도·후속 복원 마커·위조/기한/경로/환경 거절.
 - `scripts/drill_backup.py`: 테스트 DB에서만 임시 source/restore DB를 생성, 실제 pg_dump→암호화→복원→삭제/410/지식 격리 확인 후 임시 DB 제거.

@@ -1,5 +1,6 @@
 """Twenty concurrent users against isolated E2E stack; no provider calls."""
 
+import argparse
 import asyncio
 import json
 import math
@@ -10,16 +11,22 @@ from uuid import uuid4
 
 import httpx
 
-BASE = "http://localhost:18080"
 
-
-async def main():
-    headers = {"Origin": BASE, "Content-Type": "application/json"}
-    samples = {key: [] for key in ("catalog", "session", "questions", "history", "survey", "chat")}
-    async with httpx.AsyncClient(base_url=BASE, headers=headers, timeout=30) as client:
+async def main(port: int = 18080):
+    base_url = f"http://localhost:{port}"
+    headers = {"Origin": base_url, "Content-Type": "application/json"}
+    samples = {
+        key: []
+        for key in ("catalog", "session", "questions", "history", "survey", "chat")
+    }
+    async with httpx.AsyncClient(
+        base_url=base_url, headers=headers, timeout=30
+    ) as client:
         email = f"load-{uuid4().hex}@example.com"
         credentials = {"email": email, "password": "load-only-long-password"}
-        (await client.post("/api/v1/auth/register", json=credentials)).raise_for_status()
+        (
+            await client.post("/api/v1/auth/register", json=credentials)
+        ).raise_for_status()
         login = await client.post("/api/v1/auth/login", json=credentials)
         login.raise_for_status()
         client.headers["X-CSRF-Token"] = login.json()["csrfToken"]
@@ -33,7 +40,8 @@ async def main():
             session = created.json()["session"]
             base = f"/api/v1/sessions/{session['id']}"
             chat_created = await client.post(
-                "/api/v1/sessions", json={"catalogVersion": catalog["version"], "purpose": "CHAT"}
+                "/api/v1/sessions",
+                json={"catalogVersion": catalog["version"], "purpose": "CHAT"},
             )
             chat_created.raise_for_status()
             chat_base = f"/api/v1/sessions/{chat_created.json()['session']['id']}"
@@ -99,4 +107,9 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--port", type=int, default=18080)
+    args = parser.parse_args()
+    if not 1024 <= args.port <= 65535 or args.port == 8080:
+        parser.error("Use the isolated test port, never the development port 8080.")
+    asyncio.run(main(args.port))

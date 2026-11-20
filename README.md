@@ -4,6 +4,10 @@
 
 Windows에서는 Docker Desktop을 켜고 `test-deploy.bat`를 실행한 뒤 콘솔에 표시된 주소로 접속하세요. 실행 설정은 `.env`를 우선하며, 종료는 `stop-test-deploy.bat`를 실행하세요. [실행·운영 배포 안내](docs/operations/deployment.md)
 
+테스트 서버에 Prometheus와 Grafana를 함께 띄우려면 `test-deploy.bat -Monitoring`을 실행하세요. [Windows 테스트 모니터링](docs/operations/monitoring.md#windows-테스트-실행)
+
+자동 테스트는 저장소의 `Jenkinsfile`로 실행합니다. [Jenkins 테스트 설정](docs/development/local.md#6-jenkins-자동-테스트)
+
 Cloudflare Quick Tunnel로 공유할 때는 실행 중인 8080 서버에 `api-tunnel -Port 8080 -LocalHostHeader`를 연결하세요. `test-deploy.bat -OpenTunnel`로 서버와 터널을 함께 시작할 수도 있습니다. [터널 테스트 실행 안내](docs/operations/deployment.md#windows-cloudflare-quick-tunnel-테스트)
 
 LH 공공주택 입주민이 집 안의 불편이나 하자를 쉽게 설명하고, 보수 관련 기준과 문의할 내용을 확인할 수 있도록 돕는 웹 서비스입니다. 이 문서는 상세 설계가 아닌 서비스 방향과 UI 시안 구성을 정리한 초안입니다.

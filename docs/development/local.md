@@ -88,3 +88,13 @@ DB 모델은 `backend/app/db/models.py`, migration은 `backend/alembic/versions/
 ## 5. 배포와 운영 검증
 
 운영 설정과 릴리스 순서는 [배포 안내](../operations/deployment.md), 보존·삭제·백업·복원은 [운영 절차](../operations/retention-backup.md)에서 관리한다. 개발 `.env`를 운영 설정으로 재사용하지 않는다. 실제 빌드 digest·명령별 결과·시험 건수는 로컬 `progress/records/`에 남긴다.
+
+## 6. Jenkins 자동 테스트
+
+Jenkins에서 **Pipeline script from SCM** 또는 **Multibranch Pipeline**을 만들고 저장소와 루트의 `Jenkinsfile`을 지정한다. 자동 빌드는 Jenkins 작업의 SCM 웹훅이나 브랜치 탐색 설정으로 연결한다. Pipeline, Git, JUnit 플러그인으로 소스 체크아웃과 결과 게시를 지원한다. [Jenkins Pipeline](https://www.jenkins.io/doc/book/pipeline/)
+
+`linux-docker` 라벨의 Linux 에이전트에는 Git, Bash, Docker Engine과 Compose 2.24.4 이상, Node 22.22.2 이상 23 미만, Python 3.12 및 venv, Chromium 시스템 라이브러리가 필요하다. Chromium 의존성은 에이전트를 준비할 때 설치한다. 파이프라인이 lockfile에 대응하는 Chromium을 내려받는다. 에이전트가 Jenkins 작업 경로를 Docker Engine에 bind mount하고 Docker가 할당한 루프백 포트에 접속할 수 있어야 한다. [Compose 구성 병합](https://docs.docker.com/reference/compose-file/merge/#replace-value) · [Playwright 브라우저 설치](https://playwright.dev/docs/browsers)
+
+Jenkins는 프런트엔드·API 계약, PostgreSQL 마이그레이션·회귀, Prometheus·Alertmanager 설정, 암호화 백업 복원, PC·모바일 Playwright, 동시 상담과 장애 복구를 순서대로 실행한다. 빌드마다 새 테스트 DB와 루프백 임시 포트를 사용하고 종료 시 해당 Compose 프로젝트의 볼륨과 빌드 이미지를 정리한다. 공개 테스트 환경 파일로 실행하며 OpenAI 호출을 비활성화한다. Jenkins의 테스트 결과에서 JUnit을 보고, 산출물에서 로그·브라우저 추적과 복원·부하·장애 보고서를 확인한다.
+
+같은 단계를 직접 재현할 때는 Linux 에이전트의 저장소 루트에서 `bash scripts/ci.sh prepare`, `frontend`, `backend`, `monitoring`, `restore`, `browser`, `resilience`를 순서대로 실행한다. 각 인자는 `bash scripts/ci.sh` 뒤에 붙인다. 마지막에 `bash scripts/ci.sh diagnostics`와 `bash scripts/ci.sh cleanup`을 실행한다. Jenkins 작업에서는 마지막 두 단계를 종료 처리에서 수행한다.

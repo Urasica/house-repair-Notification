@@ -1,0 +1,14 @@
+# Jenkins and scripts/ci.sh create a unique Compose project for each verification run.
+services:
+  api:
+    environment:
+      OPENAI_ENABLED: "false"
+      OPENAI_API_KEY: ""
+      MONITORING_ENABLED: "false"
+      MONITORING_PUSHGATEWAY: ""
+      # Postgres-backed API tests use the default origin; browser tests export their assigned port.
+      WEB_ORIGINS: '["http://localhost:${REPAIR_CI_ORIGIN_PORT:-8080}"]'
+  web:
+    ports: !override
+      - target: 80
+        host_ip: 127.0.0.1
