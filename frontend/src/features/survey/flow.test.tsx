@@ -207,7 +207,9 @@ it.each([true, false])('copies a contextual inquiry or provides manual copy reco
   const article = host.querySelector('article')!
   expect(article.querySelector('h2')?.textContent).toBe('지금 할 일')
   expect(article.textContent!.indexOf(result.guidance[0])).toBeLessThan(article.textContent!.indexOf('물이 들어오는 경로를 살펴봐요.'))
-  expect(article.querySelector('details')?.open).toBe(false)
+  expect(article.querySelector('details')).toBeNull()
+  expect(article.querySelector('[aria-label="입력한 내용과 설문 답변"]')?.textContent).toContain(result.summary.housingLabel)
+  expect(article.querySelector('[aria-label="저장 위치와 보관 기간"] time')?.getAttribute('datetime')).toBe(result.generatedAt)
   await click(button('문의 내용 복사'))
   await until(() => expect(writeText).toHaveBeenCalledTimes(1))
   expect(writeText.mock.calls[0][0]).toContain('위치: 시험용 공간 · 시험용 시설물')

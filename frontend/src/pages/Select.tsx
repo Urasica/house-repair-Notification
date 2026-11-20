@@ -56,21 +56,21 @@ function SelectForm({ session, reference, catalog }: { session: Session; referen
   return <>
     <SurveyProgress step={1} controls={<EndConsultation reference={reference} disabled={locked} />} />
     <div className="consultation-layout">
-    <section className="notice form-panel"><p className="eyebrow">01 · 주택과 증상</p><h1>어디가 불편한가요?</h1><p>공간을 먼저 고르면, 그곳에 맞는 시설물과 증상을 차례로 선택할 수 있어요.</p>
-      {reference.mode === 'GUEST' && <p>비회원 설문은 현재 창에서 이어볼 수 있어요. 결과를 계정에 모아 두고 싶으시면 로그인한 뒤 새 설문을 시작해 주세요.</p>}
+    <section className="notice form-panel"><h1>어디가 불편한가요?</h1><p>공간을 먼저 고르면, 그곳에 맞는 시설물과 증상을 차례로 선택할 수 있어요.</p>
+      {reference.mode === 'GUEST' && <p>비회원 설문은 현재 창에서 이어볼 수 있어요.<br />결과를 계정에 모아 두고 싶으시면 로그인한 뒤 새 설문을 시작해 주세요.</p>}
       {!!readPending(reference.id) && <p role="status">처리 중인 평가가 있어요. <Link to="/survey">설문 화면에서 완료 여부 확인</Link></p>}
       <form onSubmit={event => { event.preventDefault(); void save() }}>
         <fieldset className="housing-options" disabled={locked}><legend>주택 유형</legend>{catalog.housingTypes.map(item => <label className="choice" key={item.id}><input type="radio" name="housingType" value={item.id} checked={context.housingType === item.id} onChange={() => select('housingType', item.id)} />{item.label}</label>)}</fieldset>
         {context.housingType === 'UNKNOWN' && <HousingHelp />}
         <div className="selection-group"><span className="field-step" aria-hidden="true">1</span><div><label htmlFor="room">공간</label><p className="field-hint">불편한 곳이 어디인가요?</p><select id="room" value={context.roomId ?? ''} disabled={locked} onChange={event => select('roomId', event.target.value)}><option value="">선택하지 않음</option>{catalog.rooms.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}</select></div></div>
         <div className="selection-group"><span className="field-step" aria-hidden="true">2</span><div><label htmlFor="facility">시설물</label><p className="field-hint" id="facility-hint">{room ? `${room.label}에 있는 어떤 부분인가요?` : '공간을 먼저 선택해 주세요.'}</p><select id="facility" aria-describedby="facility-hint" value={context.facilityId ?? ''} disabled={locked || !context.roomId} onChange={event => select('facilityId', event.target.value)}><option value="">선택하지 않음</option>{previousFacility && <option value={previousFacility.id}>{previousFacility.label} (이전 선택)</option>}{facilities.map(item => <option key={item.id} value={item.id}>{facilityLabel(catalog, context.roomId, item.id)}</option>)}</select></div></div>
-        {sinkLeak && <aside><p>이 항목은 싱크대 아래·뒤쪽의 마감 상태를 확인해요. 물이 새면 배관 항목에서 이어갈 수 있어요.</p><button type="button" className="secondary" disabled={locked} onClick={() => setContext(previous => updateSelection(updateSelection(previous, 'facilityId', 'pipe'), 'symptomId', 'leak'))}>싱크대 아래에서 물이 새요</button></aside>}
+        {sinkLeak && <aside><p>이 항목은 싱크대 아래·뒤쪽의 마감 상태를 확인해요.<br />물이 새면 배관 항목에서 이어갈 수 있어요.</p><button type="button" className="secondary" disabled={locked} onClick={() => setContext(previous => updateSelection(updateSelection(previous, 'facilityId', 'pipe'), 'symptomId', 'leak'))}>싱크대 아래에서 물이 새요</button></aside>}
         {finishLeak && <aside><p>벽이나 천장에서 물이 보이면 어디서 새는지 몰라도 설문을 이어갈 수 있어요.</p><button type="button" className="secondary" disabled={locked} onClick={() => setContext(previous => updateSelection(updateSelection(previous, 'facilityId', 'unknown'), 'symptomId', 'leak'))}>벽·천장에서 물이 새거나 물자국이 보여요</button></aside>}
         <div className="selection-group"><span className="field-step" aria-hidden="true">3</span><div><label htmlFor="symptom">증상</label><p className="field-hint">{context.facilityId === 'unknown' ? '원인을 몰라도 지금 보이는 증상을 골라 주세요.' : context.facilityId ? '어떤 불편함이 있나요?' : '시설물을 선택하면 관련 증상이 나와요.'}</p><select id="symptom" value={context.symptomId ?? ''} disabled={locked || !context.facilityId} onChange={event => select('symptomId', event.target.value)}><option value="">선택하지 않음</option>{symptoms.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}</select></div></div>
         <label htmlFor="description">추가 설명 (선택)</label><textarea id="description" maxLength={1000} rows={4} disabled={locked} value={context.description} aria-describedby="description-hint" onChange={event => setContext({ ...context, description: event.target.value })} /><p id="description-hint">1,000자 이내로 작성해 주세요. 이름·주소·연락처는 적지 마세요.</p>
         <button disabled={locked} type="submit">{busy ? '저장하고 있어요' : '저장하고 설문으로'}</button>
       </form>
-      {!!error && <><Feedback error={error} /><p>아직 저장하지 못한 선택은 그대로 남아 있어요. 최신 입력을 불러오면 아래 선택이 최신 입력으로 바뀌어요.</p><button className="secondary" onClick={() => void reload()}>최신 입력 불러오기</button></>}
+      {!!error && <><Feedback error={error} /><p>아직 저장하지 못한 선택은 그대로 남아 있어요.<br />최신 입력을 불러오면 아래 선택이 최신 입력으로 바뀌어요.</p><button className="secondary" onClick={() => void reload()}>최신 입력 불러오기</button></>}
     </section>
     <SelectionSummary catalog={catalog} context={context} />
     </div>

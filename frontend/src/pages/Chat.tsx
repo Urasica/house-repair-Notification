@@ -17,6 +17,17 @@ import { useRetryDelay } from '../features/survey/useRetryDelay'
 import { statusLabels } from '../features/survey/status'
 import { localTime } from '../features/survey/time'
 
+const sentenceSegmenter = typeof Intl.Segmenter === 'function'
+  ? new Intl.Segmenter('ko', { granularity: 'sentence' })
+  : null
+
+function answerParagraphs(content: string) {
+  return content.trim().split(/\r?\n(?:[ \t]*\r?\n)+/).flatMap(paragraph => {
+    if (!sentenceSegmenter || paragraph.length <= 120 || paragraph.includes('\n')) return [paragraph]
+    return Array.from(sentenceSegmenter.segment(paragraph), part => part.segment.trim())
+  }).filter(Boolean)
+}
+
 export default function Chat() {
   const { auth, reference, query, client } = useSurvey('CHAT')
   const attempted = useRef(false)
@@ -187,28 +198,33 @@ function Conversation({ session, reference, restart }: { session: Session; refer
     <aside id="chat-sidebar" className="chat-sidebar" data-open={showSidebar} aria-label="대화 정보">
       <button type="button" className="secondary" disabled={busy || !!pending || resetting} onClick={() => setConfirmReset(true)}>대화 초기화</button>
     {confirmReset && <section className="notice confirm-panel" role="group" aria-label="대화 초기화 확인">
-      <p>현재 대화와 챗봇에서 확인한 내용이 지워지고 새 대화를 시작합니다. 설문·결과 이력과 별도 보존되는 질문 분석 기록은 유지됩니다.</p>
+      <p>현재 대화와 챗봇에서 확인한 내용이 지워지고 새 대화를 시작합니다.<br />설문·결과 이력과 별도 보존되는 질문 분석 기록은 유지됩니다.</p>
       <div className="actions"><button className="danger" disabled={resetting} onClick={() => void reset()}>초기화 확인</button>
       <button className="secondary" disabled={resetting} onClick={() => { setConfirmReset(false); input.current?.focus() }}>취소</button></div>
     </section>}
       <div className="chat-context"><h2>확인한 내용</h2>
         {contextLabels.length || answerCount ? <ul>{contextLabels.map(label => <li key={label}>{label}</li>)}{!!answerCount && <li>설문 답변 {answerCount}개</li>}</ul> : <p>아직 확인한 내용이 없어요.</p>}
       </div>
-      <details><summary>대화와 개인정보</summary><p>이 창에서 대화를 이어갈 수 있어요. 질문 원문은 상담 만료 후 7일 이내 정리하고, 식별정보가 없는 분류·선택 정보는 기본 5년 보관해요. OpenAI에는 선택·답변 라벨, 조문 번호와 검토 자료만 보내요.</p></details>
+      <div className="chat-privacy">
+        <h2>대화와 개인정보</h2>
+        <p>이 창에서 대화를 이어갈 수 있어요.</p>
+        <p>질문 원문은 상담 만료 후 7일 이내 정리해요.<br />식별정보가 없는 분류·선택 정보는 기본 5년 보관해요.</p>
+        <p>OpenAI에는 선택·답변 라벨, 조문 번호와 검토 자료만 보내요.</p>
+      </div>
     </aside>
     <div className="chat-main">
       <div ref={thread} className="chat-thread" role="region" aria-label="상담 대화" tabIndex={0}>
         {history.isPending && <Waiting />}
         {history.isError && <Feedback error={history.error} retry={() => void history.refetch()} />}
-        {history.data && !items.length && !sending && <div className="chat-welcome"><h2>어디가 불편하신가요?</h2><p>증상이나 궁금한 조문을 적어 주세요. 필요한 내용은 대화에서 하나씩 확인할게요.</p></div>}
+        {history.data && !items.length && !sending && <div className="chat-welcome"><h2>어디가 불편하신가요?</h2><p>증상이나 궁금한 조문을 적어 주세요.<br />필요한 내용은 대화에서 하나씩 확인할게요.</p></div>}
         <ol className="chat-list" aria-label="저장된 대화">{items.map(item => <li key={item.requestId}>
       <p className="chat-bubble chat-content"><span className="sr-only">내 질문. </span>{item.userMessage.content}</p>
       <article className="chat-answer" aria-label="챗봇 답변">
         <h2>{statusLabels[item.status]}</h2><p className="chat-meta">{item.answerMode === 'GROUNDED' ? '근거 확인 답변 · ' : item.answerMode === 'CLARIFY' ? '추가 확인 · ' : ''}<time dateTime={item.assistantMessage.createdAt}>{localTime(item.assistantMessage.createdAt)}</time></p>
-        {(!item.isCurrent || item.contextRevision !== session.revision) && <p className="past-note">이전 입력이나 기준의 답변이에요. 현재 상황과 다를 수 있어요.</p>}
+        {(!item.isCurrent || item.contextRevision !== session.revision) && <p className="past-note">이전 입력이나 기준의 답변이에요.<br />현재 상황과 다를 수 있어요.</p>}
         <div aria-label="답변 내용">
           <LawExplanations citations={item.assistantMessage.citations} />
-          {item.assistantMessage.content.split(/\n{2,}/).map((text, index) => <p key={index} className="chat-content">{text}</p>)}
+          {answerParagraphs(item.assistantMessage.content).map((text, index) => <p key={index} className="chat-content">{text}</p>)}
         </div>
         {!!item.followUpQuestions.length && <ul>{item.followUpQuestions.map((question, index) => <li key={index}>{question}</li>)}</ul>}
         <RepairExamples examples={item.referenceExamples} />

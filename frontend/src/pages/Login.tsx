@@ -30,7 +30,7 @@ export default function Login() {
       form.reset({ email: '', password: '' })
       void navigate(safeReturnPath((location.state as { returnTo?: unknown } | null)?.returnTo), { replace: true })
     } catch (error) {
-      setMessage((registered ? '가입은 완료됐어요. 로그인은 완료하지 못했으니 다시 로그인해 주세요. ' : '') + (error instanceof ApiError ? error.message : '연결하지 못했어요. 잠시 후 다시 시도해 주세요.'))
+      setMessage((registered ? '가입은 완료됐어요.\n로그인은 완료하지 못했으니 다시 로그인해 주세요.\n' : '') + (error instanceof ApiError ? error.message : '연결하지 못했어요. 잠시 후 다시 시도해 주세요.'))
       form.resetField('password')
     }
   }
@@ -39,7 +39,7 @@ export default function Login() {
   return <section className="notice auth-panel" aria-labelledby="auth-title">
     <h1 id="auth-title">{joining ? '회원가입' : '로그인'}</h1>
     <p>챗봇과 본인의 이전 결과를 확인할 수 있어요.</p>
-    {!!storedReference(false) && <p>로그인하면 진행 중인 비회원 상담은 이어갈 수 없고, 계정으로 옮겨지지 않아요. 남겨 둘 내용은 먼저 결과 화면에서 복사해 주세요.</p>}
+    {!!storedReference(false) && <p>로그인하면 진행 중인 비회원 상담은 이어갈 수 없고, 계정으로 옮겨지지 않아요.<br />남겨 둘 내용은 먼저 결과 화면에서 복사해 주세요.</p>}
     <form onSubmit={form.handleSubmit(submit)}>
       <label htmlFor="email">이메일</label>
       <input id="email" type="email" autoComplete="username" maxLength={254} aria-invalid={!!form.formState.errors.email} aria-describedby="email-error" {...form.register('email', { required: '이메일을 입력해 주세요.', maxLength: 254 })} />
@@ -48,7 +48,7 @@ export default function Login() {
       <input id="password" type="password" autoComplete={joining ? 'new-password' : 'current-password'} maxLength={128} aria-invalid={!!form.formState.errors.password} aria-describedby="password-hint password-error" {...form.register('password', { required: '비밀번호를 입력해 주세요.', minLength: { value: 12, message: '12자 이상 입력해 주세요.' }, maxLength: 128 })} />
       <span id="password-hint">12~128자로 입력해 주세요.</span>
       <span id="password-error" className="field-error">{form.formState.errors.password?.message}</span>
-      <p role="status">{message}</p>
+      <p className="auth-status" role="status">{message}</p>
       <button type="submit" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? '처리 중…' : joining ? '가입하기' : '로그인하기'}</button>
       <button type="button" className="secondary" disabled={form.formState.isSubmitting} onClick={() => { setJoining(!joining); setMessage(''); form.resetField('password') }}>{joining ? '로그인으로 돌아가기' : '회원가입'}</button>
     </form>

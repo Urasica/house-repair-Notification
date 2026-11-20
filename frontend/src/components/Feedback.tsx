@@ -11,4 +11,4 @@ export function Feedback({ error, retry }: { error: unknown; retry?: () => void 
 }
 
 export function Waiting() { return <p role="status">정보를 확인하고 있어요.</p> }
-export function NeedSession() { return <section className="notice"><h1>새 상담을 시작해 주세요</h1><p>상담이 없거나 만료·종료됐어요. 홈에서 새 설문을 시작할 수 있어요.</p><Link to="/">홈으로 돌아가기</Link></section> }
+export function NeedSession() { return <section className="notice"><h1>새 상담을 시작해 주세요</h1><p>상담이 없거나 만료·종료됐어요.<br />홈에서 새 설문을 시작할 수 있어요.</p><Link to="/">홈으로 돌아가기</Link></section> }

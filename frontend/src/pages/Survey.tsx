@@ -91,10 +91,10 @@ function SurveyActive({ session, reference, catalog }: { session: Session; refer
   return <>
     <SurveyProgress step={2} controls={<EndConsultation reference={reference} disabled={locked} />} />
     <div className="consultation-layout">
-    <section className="notice form-panel"><p className="eyebrow">02 · 간단 설문</p><h1>간단히 확인해 주세요</h1><p>선택한 답은 자동으로 저장돼요. 위험 확인 항목을 선택하면 저장 후 안내 결과를 먼저 확인해요.</p>
+    <section className="notice form-panel"><h1>간단히 확인해 주세요</h1><p>선택한 답은 자동으로 저장돼요.<br />위험 확인 항목을 선택하면 저장 후 안내 결과를 먼저 확인해요.</p>
       <p className="context-path">{[catalog.rooms.find(item => item.id === session.context.roomId)?.label, facilityLabel(catalog, session.context.roomId, session.context.facilityId), catalog.symptoms.find(item => item.id === session.context.symptomId)?.label].filter(Boolean).join(' → ') || '주택·증상을 선택하면 관련 질문을 확인할 수 있어요.'}</p>
       {questions.isPending ? <Waiting /> : questions.isError ? <Feedback error={questions.error} retry={() => void questions.refetch()} /> : !matching ? <><p role="alert">다른 화면에서 입력이 바뀌었어요. 최신 입력을 확인해 주세요.</p><button onClick={() => void reload()}>최신 입력 불러오기</button></> : <>
-        {!questions.data.questions.length && <p>현재 선택으로 확인할 질문이 없어요. 안내 결과에서 필요한 정보를 확인할 수 있어요.</p>}
+        {!questions.data.questions.length && <p>현재 선택으로 확인할 질문이 없어요.<br />안내 결과에서 필요한 정보를 확인할 수 있어요.</p>}
         <p role="status">필수 질문 {required.length}개 중 {required.length - missing.length}개에 답했어요.</p>
         <AnswerFields key={session.revision} questions={questions.data} session={session} locked={locked} answer={(id, value) => void answer(id, value)} error={!!saveError} showMissing={showMissing} />
       </>}

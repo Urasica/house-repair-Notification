@@ -52,7 +52,9 @@ function DeleteRecord({ resultId }: { resultId?: string }) {
   }
   return <section className="delete-panel">
     {!confirming ? <button ref={trigger} className="secondary danger" onClick={() => setConfirming(true)}>{resultId ? '이 결과 삭제' : '내 질문 기록 전체 삭제'}</button> : <>
-      <p id={descriptionId}>{resultId ? '이 결과와 연결된 질문 기록을 삭제해요. 삭제 후에는 복원할 수 없어요.' : '서비스 개선을 위해 보관한 내 정제 질문 기록을 모두 삭제해요. 안내 결과와 계정은 그대로 남아요.'}</p>
+      <p id={descriptionId}>{resultId
+        ? <>이 결과와 연결된 질문 기록을 삭제해요.<br />삭제 후에는 복원할 수 없어요.</>
+        : <>서비스 개선을 위해 보관한 내 정제 질문 기록을 모두 삭제해요.<br />안내 결과와 계정은 그대로 남아요.</>}</p>
       <div className="actions"><button className="danger" disabled={busy} onClick={() => void erase()}>삭제 확인</button><button ref={cancel} className="secondary" aria-describedby={descriptionId} disabled={busy} onClick={() => setConfirming(false)}>취소</button></div>
     </>}
     {message && <p role="status">{message}</p>}{!!error && <Feedback error={error} />}
@@ -66,7 +68,14 @@ export default function History() {
   if (history.isError && !history.data) return <Feedback error={history.error} retry={() => void history.refetch()} />
   const items = history.data?.pages.flatMap(page => page.items) ?? []
   return <section className="notice member-panel"><h1>이전 결과</h1><p>로그인한 상태에서 생성한 결과를 확인할 수 있어요.</p>
-    {!items.length ? <p>저장된 이전 결과가 없어요.</p> : <ul className="history-list">{items.map(item => <li key={item.id}><Link to={'/history/' + item.id}>{item.summary.symptomLabel || '증상 확인'} · {item.summary.roomLabel} · {item.summary.facilityLabel}</Link><br /><span>{statusLabels[item.status]}</span><br /><time dateTime={item.generatedAt}>{localTime(item.generatedAt)}</time> 생성 · {localTime(item.retainedUntil)}까지 보관</li>)}</ul>}
+    {!items.length ? <p>저장된 이전 결과가 없어요.</p> : <ul className="history-list">{items.map(item => <li key={item.id}>
+      <Link to={'/history/' + item.id}>{item.summary.symptomLabel || '증상 확인'} · {item.summary.roomLabel} · {item.summary.facilityLabel}</Link>
+      <p>{statusLabels[item.status]}</p>
+      <p className="record-dates">
+        <span>생성 <time dateTime={item.generatedAt}>{localTime(item.generatedAt)}</time></span>
+        <span>보관 기한 <time dateTime={item.retainedUntil}>{localTime(item.retainedUntil)}</time></span>
+      </p>
+    </li>)}</ul>}
     {history.isError && <Feedback error={history.error} retry={() => void history.fetchNextPage()} />}
     {history.hasNextPage && <button className="secondary" disabled={history.isFetchingNextPage} onClick={() => void history.fetchNextPage()}>더 보기</button>}
     <DeleteRecord />

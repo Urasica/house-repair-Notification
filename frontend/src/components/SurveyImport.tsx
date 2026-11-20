@@ -16,7 +16,8 @@ export default function SurveyImport({ disabled, load }: { disabled: boolean; lo
   return <section aria-label="설문 불러오기">
     <button type="button" className="secondary" aria-expanded={open} aria-controls="chat-import-panel" disabled={disabled} onClick={() => setOpen(!open)}>{open ? '설문 목록 닫기' : '이전 설문 불러오기'}</button>
     {open && <div id="chat-import-panel" className="notice chat-import-panel">
-      <p>선택한 설문의 주택·위치·증상·답변을 현재 대화에 복사해요. 추가 설명은 가져오지 않아요. 다음 질문부터 선택 라벨과 검토 자료를 OpenAI에 보내 참고하며, 원래 설문은 바뀌지 않아요.</p>
+      <p>선택한 설문의 주택·위치·증상·답변을 현재 대화에 복사해요.<br />추가 설명은 가져오지 않아요.</p>
+      <p>다음 질문부터 선택 라벨과 검토 자료를 OpenAI에 보내 참고해요.<br />원래 설문은 바뀌지 않아요.</p>
       {history.isPending ? <p role="status">설문 결과를 찾고 있어요.</p> : history.isError ? <Feedback error={history.error} retry={() => void history.refetch()} /> : !items.length ? <p>불러올 회원 설문 결과가 없어요. 설문 없이도 바로 질문하실 수 있어요.</p> : <>
         <label htmlFor="import-survey">불러올 설문 결과</label>
         <select id="import-survey" disabled={disabled} value={selected} onChange={event => setSelected(event.target.value)}>

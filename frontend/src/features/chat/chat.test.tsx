@@ -104,28 +104,41 @@ it('sends once, restores complete display metadata and escapes user content', as
   expect(JSON.stringify(sessionStorage)).not.toContain('private@example.com')
 })
 
-it('shows the explanation first with the law text and official link inside its source', async () => {
+it('shows explanations, short excerpts and official links, and folds only long excerpts', async () => {
   const result = answer(crypto.randomUUID())
   const explanation = '물이 보이면 어디를 통해 들어왔는지 살펴봐요.'
+  const paragraphs = [
+    '물방울이 보이는 곳 주변에 벽이나 천장이 젖어 있는지도 살펴봐 주세요.',
+    '물을 쓰지 않을 때도 같은 곳에서 계속 물이 떨어진다면 처음 발견한 시점을 적어 두면 도움이 돼요.',
+    '확인한 내용을 관리사무소에 전하고 현장을 살펴볼 수 있는 시간을 물어보세요.',
+  ]
+  result.assistantMessage.content = paragraphs.join(' ')
   result.assistantMessage.citations = [{
     chunkId: crypto.randomUUID(), documentVersionId: crypto.randomUUID(), kind: 'LAW_CRITERIA', use: 'RELATED',
     title: '공동주택 하자판정기준', locator: '제10조', explanation, excerpt: '누수 하자 기준 원문',
     url: 'https://law.go.kr/example', effectiveDate: '2026-07-08',
     reviewedAt: '2026-10-04T00:00:00Z', reviewUntil: '2027-01-02T00:00:00Z',
   }]
+  const longExcerpt = '원문의 적용 조건과 단서가 이어져요. '.repeat(15).trim()
+  result.assistantMessage.citations.push({ ...result.assistantMessage.citations[0],
+    chunkId: crypto.randomUUID(), locator: '제11조', explanation: undefined, excerpt: longExcerpt,
+  })
   replies = [result]
   await render(); await until(() => expect(host.textContent).toContain(explanation))
 
   const displayed = host.querySelector('[aria-label="답변 내용"]')!
   expect(displayed.firstElementChild?.firstElementChild?.firstElementChild?.textContent).toBe(explanation)
-  const details = displayed.querySelector('details')!
+  expect(Array.from(displayed.querySelectorAll(':scope > .chat-content'), item => item.textContent)).toEqual(paragraphs)
+  expect(displayed.querySelector('details')).toBeNull()
+  expect(displayed.querySelector('.source-excerpt')?.textContent).toBe('누수 하자 기준 원문')
+  expect(displayed.querySelector<HTMLAnchorElement>('.evidence-source a')?.href).toBe('https://law.go.kr/example')
+  const details = host.querySelector<HTMLDetailsElement>('[aria-label="정보 출처"] details')!
   expect(details.open).toBe(false)
   const summary = details.querySelector('summary')!
-  expect(summary.textContent).toBe('근거 보기 · 제10조')
+  expect(summary.textContent).toBe('원문 발췌 보기 · 제11조')
   await act(async () => summary.click())
   expect(details.open).toBe(true)
-  expect(details.querySelector('.source-excerpt')?.textContent).toBe('누수 하자 기준 원문')
-  expect(details.querySelector('a')?.href).toBe('https://law.go.kr/example')
+  expect(details.querySelector('.source-excerpt')?.textContent).toBe(longExcerpt)
 })
 
 it('imports only after choosing a saved survey and explicitly requesting it', async () => {
@@ -271,9 +284,9 @@ it('disables reset while sending and shows evidence in the site without opening 
   const result = answer(crypto.randomUUID())
   result.assistantMessage.citations = [{ chunkId: crypto.randomUUID(), documentVersionId: crypto.randomUUID(), kind: 'LAW_CRITERIA', use: 'APPLICABLE', title: '검토 자료', locator: '제10조', url: 'https://example.invalid/source', excerpt: '원문의 적용 조건과 단서', effectiveDate: '2026-01-01', reviewedAt: new Date().toISOString(), reviewUntil: new Date(Date.now() + 86400000).toISOString() }]
   replies = [result]
-  await render(); await until(() => expect(host.querySelector('[aria-label="정보 출처"] details')).not.toBeNull())
-  expect(host.querySelector('[aria-label="정보 출처"] details')?.textContent).toContain('원문의 적용 조건과 단서')
-  expect(host.querySelector('[aria-label="정보 출처"] summary')?.textContent).toContain('제10조')
+  await render(); await until(() => expect(host.querySelector('[aria-label="정보 출처"] .source-excerpt')).not.toBeNull())
+  expect(host.querySelector('[aria-label="정보 출처"] .source-excerpt')?.textContent).toContain('원문의 적용 조건과 단서')
+  expect(host.querySelector('[aria-label="정보 출처"] .evidence-source-title')?.textContent).toContain('제10조')
   held = true
   await enter('추가 질문'); await submit()
   expect(button('대화 초기화').disabled).toBe(true)
