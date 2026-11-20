@@ -9,6 +9,7 @@ from sqlalchemy import select
 from app.auth.access import account, not_found, own_consultation, require_csrf, require_json_origin
 from app.auth.security import new_token, token_hash
 from app.core.errors import AppError
+from app.core.metrics import GUIDANCE_RESULTS
 from app.db.models import Consultation, QuestionRecord, Result
 from app.db.requests import RequestRepository, request_fingerprint
 from app.domain.constants import ErrorCode, RequestKind, RequestStatus, SessionPurpose
@@ -240,6 +241,7 @@ async def evaluate(
                     await repository.complete(
                         session, run_id, result.model_dump(mode="json", by_alias=True)
                     )
+                GUIDANCE_RESULTS.labels("survey", result.status).inc()
                 return result
         except BaseException as error:
             if run_id:

@@ -1,0 +1,12 @@
+- targets: [http://web/]
+  labels:
+    module: homepage
+    check: homepage
+- targets: [http://web/health/ready]
+  labels:
+    module: readiness
+    check: readiness
+- targets: [http://web/health/ready]
+  labels:
+    module: catalog
+    check: catalog

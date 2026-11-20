@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from app.core.config import Settings
+from app.core.metrics import GUIDANCE_FALLBACKS
 from app.db.models import Consultation, KnowledgeSet, Result
 from app.domain.constants import (
     DISCLAIMER,
@@ -128,7 +129,11 @@ async def evaluate_survey(
     # A survey with no known answers can still show the input-dependent examples.
     has_known_answer = any(value != "UNKNOWN" for value in context.answers.values())
     if not settings.openai_enabled:
-        return unavailable_result(result, OPENAI_DISABLED_MESSAGE) if has_known_answer else result
+        return (
+            unavailable_result(result, OPENAI_DISABLED_MESSAGE, reason="provider_disabled")
+            if has_known_answer
+            else result
+        )
     if database is None or not snapshot.knowledge_release_id:
         return unavailable_result(result) if has_known_answer else result
 
@@ -155,7 +160,7 @@ async def evaluate_survey(
                 catalog_version=snapshot.catalog_version,
             )
     except EmbeddingUnavailable:
-        return unavailable_result(result, OPENAI_UNAVAILABLE_MESSAGE)
+        return unavailable_result(result, OPENAI_UNAVAILABLE_MESSAGE, reason="provider_failure")
     if found.reason == "SOURCE_UNAVAILABLE":
         return unavailable_result(result)
     citations = found.citations(explain=True)
@@ -183,7 +188,10 @@ async def evaluate_survey(
     )
 
 
-def unavailable_result(result, message=KNOWLEDGE_UNAVAILABLE_MESSAGE):
+def unavailable_result(
+    result, message=KNOWLEDGE_UNAVAILABLE_MESSAGE, *, reason="source_unavailable"
+):
+    GUIDANCE_FALLBACKS.labels("survey", reason).inc()
     return result.model_copy(
         update={
             "status": GuidanceStatus.GUIDANCE_UNAVAILABLE,

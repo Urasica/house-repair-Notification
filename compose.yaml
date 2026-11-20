@@ -21,6 +21,8 @@ services:
     build: ./backend
     environment:
       APP_ENV: ${APP_ENV:-development}
+      MONITORING_PUSHGATEWAY: ${MONITORING_PUSHGATEWAY:-}
+      MONITORING_ENABLED: ${MONITORING_ENABLED:-false}
       DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL}
       WEB_ORIGINS: ${WEB_ORIGINS:-["http://localhost:8080"]}
       OPENAI_ENABLED: ${OPENAI_ENABLED:-false}

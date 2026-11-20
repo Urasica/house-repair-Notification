@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     )
     web_origins: list[str] = ["http://localhost:8080"]
     openai_enabled: bool = False
+    monitoring_enabled: bool = False
     openai_api_key: SecretStr = SecretStr("")
     openai_chat_model: str = ""
     openai_embedding_model: str = "text-embedding-3-large"

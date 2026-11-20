@@ -1,0 +1,84 @@
+rule_files:
+  - ../rules/availability.yml
+  - ../rules/maintenance.yml
+  - ../rules/api.yml
+  - ../rules/cost.yml
+
+evaluation_interval: 30s
+
+tests:
+  - name: Homepage alert fires only after consecutive failures and recovers
+    interval: 1m
+    input_series:
+      - series: 'probe_success{check="homepage",instance="http://web/",job="repair_http"}'
+        values: "0 0 0 1"
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: RepairHomepageDown
+      - eval_time: 2m
+        alertname: RepairHomepageDown
+        exp_alerts:
+          - exp_labels: {check: homepage, instance: "http://web/", job: repair_http, severity: critical}
+            exp_annotations: {summary: 홈 접속 실패, description: "대상 http://web/에서 정상 홈 화면을 받지 못했습니다."}
+      - eval_time: 3m
+        alertname: RepairHomepageDown
+  - name: Backup failure does not erase the last success and clears after a successful retry
+    interval: 1m
+    input_series:
+      - series: 'push_time_seconds{job="repair_maintenance",task="backup",result="success"}'
+        values: "10 10 115"
+      - series: 'push_time_seconds{job="repair_maintenance",task="backup",result="failure"}'
+        values: "0 55 55"
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: RepairMaintenanceFailed
+        exp_alerts:
+          - exp_labels: {task: backup, severity: warning}
+            exp_annotations: {summary: 운영 작업 실패, description: backup 작업을 확인하고 재실행하세요.}
+      - eval_time: 2m
+        alertname: RepairMaintenanceFailed
+    promql_expr_test:
+      - expr: repair_maintenance_last_success_timestamp_seconds
+        eval_time: 1m
+        exp_samples:
+          - labels: 'repair_maintenance_last_success_timestamp_seconds{task="backup"}'
+            value: 10
+  - name: Provider failures alert independently of successful HTTP responses
+    interval: 1m
+    input_series:
+      - series: 'repair_guidance_fallbacks_total{flow="chat",reason="provider_failure"}'
+        values: "0 1 2 3"
+      - series: 'repair_guidance_fallbacks_total{flow="survey",reason="provider_disabled"}'
+        values: "0 1 2 3"
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: RepairGuidanceProviderFailures
+        exp_alerts:
+          - exp_labels: {flow: chat, severity: warning}
+            exp_annotations: {summary: AI 공급자 연결 또는 응답 오류 반복, description: chat 안내에서 공급자 오류로 기본 안내가 반복되었습니다.}
+  - name: Monthly budget alerts fire at 80 and 100 percent without overlap
+    interval: 1m
+    input_series:
+      - series: 'repair_openai_month_spend_usd{job="repair_openai_cost"}'
+        values: "7.9 8 10"
+      - series: 'repair_openai_month_budget_usd{job="repair_openai_cost"}'
+        values: "10 10 10"
+      - series: 'repair_openai_month_start_timestamp_seconds{job="repair_openai_cost"}'
+        values: "0 0 0"
+      - series: 'push_time_seconds{job="repair_openai_cost"}'
+        values: "0 58 118"
+    alert_rule_test:
+      - eval_time: 0m
+        alertname: RepairOpenAIBudgetApproaching
+      - eval_time: 1m
+        alertname: RepairOpenAIBudgetApproaching
+        exp_alerts:
+          - exp_labels: {job: repair_openai_cost, severity: warning}
+            exp_annotations: {summary: OpenAI 월 예산의 80%에 도달}
+      - eval_time: 2m
+        alertname: RepairOpenAIBudgetApproaching
+      - eval_time: 2m
+        alertname: RepairOpenAIBudgetReached
+        exp_alerts:
+          - exp_labels: {job: repair_openai_cost, severity: warning}
+            exp_annotations: {summary: OpenAI 월 예산에 도달}

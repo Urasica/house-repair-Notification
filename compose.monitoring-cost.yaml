@@ -1,0 +1,21 @@
+# Explicit one-shot collector. Use only with compose.monitoring.yaml.
+services:
+  monitoring-cost:
+    profiles: [monitoring-cost]
+    image: repair-guide-monitoring-cost:${RELEASE_TAG:-local}
+    build:
+      context: ./backend
+      target: production
+    command: [python, -m, app.commands.monitoring_cost]
+    environment:
+      MONITORING_PUSHGATEWAY: http://pushgateway:9091
+      MONITORING_COST_PROJECT_ID: ${MONITORING_COST_PROJECT_ID:?Set MONITORING_COST_PROJECT_ID}
+      MONITORING_COST_MONTHLY_BUDGET_USD: ${MONITORING_COST_MONTHLY_BUDGET_USD:?Set a USD budget}
+    secrets: [openai_cost_admin_key]
+    read_only: true
+    security_opt: [no-new-privileges:true]
+    restart: "no"
+
+secrets:
+  openai_cost_admin_key:
+    file: ${MONITORING_COST_KEY_FILE:?Set the path to the OpenAI admin key file}

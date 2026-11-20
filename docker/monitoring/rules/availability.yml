@@ -1,0 +1,35 @@
+groups:
+  - name: repair_availability
+    rules:
+      - alert: RepairHomepageDown
+        expr: probe_success{check="homepage"} == 0 or up{job="repair_http",check="homepage"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: 홈 접속 실패
+          description: 대상 {{ $labels.instance }}에서 정상 홈 화면을 받지 못했습니다.
+      - alert: RepairReadinessDown
+        expr: probe_success{check="readiness"} == 0 or up{job="repair_http",check="readiness"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: API 준비 상태 확인 실패
+          description: 대상 {{ $labels.instance }}의 API 준비 상태와 DB 연결을 확인하세요.
+      - alert: RepairCatalogNotReady
+        expr: probe_success{check="catalog"} == 0 or up{job="repair_http",check="catalog"} == 0
+        for: 2m
+        labels: {severity: warning}
+        annotations:
+          summary: 설문 목록을 사용할 수 없음
+      - alert: RepairRagNotReady
+        expr: probe_success{check="rag"} == 0 or up{job="repair_http",check="rag"} == 0
+        for: 2m
+        labels: {severity: warning}
+        annotations:
+          summary: 검색에 사용할 게시 자료를 찾지 못함
+      - alert: RepairPushgatewayDown
+        expr: up{job="pushgateway"} == 0
+        for: 2m
+        labels: {severity: warning}
+        annotations:
+          summary: 운영 작업 지표 수집 실패

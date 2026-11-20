@@ -4,10 +4,11 @@ from contextlib import asynccontextmanager
 from time import perf_counter
 from uuid import uuid4
 
-from fastapi import FastAPI, Query, Request
+from fastapi import FastAPI, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from starlette.exceptions import HTTPException
 
 from app.api.v1.auth import router as auth_router
@@ -25,6 +26,7 @@ from app.core.errors import (
     unexpected_error_handler,
     validation_error_handler,
 )
+from app.core.metrics import METRICS_PATH, REGISTRY
 from app.core.observability import log_http
 from app.db.session import Database
 from app.schemas.catalog import Catalog, Question
@@ -111,8 +113,23 @@ def create_app(settings: Settings | None = None, database: Database | None = Non
         response.headers["X-Trace-Id"] = str(request.state.trace_id)
         if request.url.path.startswith(("/api/", "/health/")):
             response.headers["Cache-Control"] = "no-store"
-        log_http(request, response.status_code, perf_counter() - started)
+        if request.url.path != METRICS_PATH:
+            log_http(
+                request,
+                response.status_code,
+                perf_counter() - started,
+                collect_metrics=settings.monitoring_enabled,
+            )
         return response
+
+    if settings.monitoring_enabled:
+
+        @app.get(METRICS_PATH, include_in_schema=False)
+        async def metrics() -> Response:
+            return Response(
+                generate_latest(REGISTRY),
+                headers={"Content-Type": CONTENT_TYPE_LATEST, "Cache-Control": "no-store"},
+            )
 
     @app.get("/health/live", operation_id="getLive")
     async def live() -> dict[str, str]:

@@ -12,6 +12,7 @@ from uuid import UUID
 from cryptography.fernet import Fernet
 from sqlalchemy import delete, select, text, update
 
+from app.core.metrics import DELETION_EXPORT
 from app.db.models import Consultation, DeletionLog, QuestionRecord, RequestRun, Result
 from app.services.deletion import delete_result
 
@@ -104,9 +105,12 @@ async def export_after_delete(database, settings):
     try:
         await export_deletions(database, settings)
     except Exception:
+        DELETION_EXPORT.labels("failure").inc()
         # DB deletion is already committed. Do not falsely report rollback or log
         # keys/paths/input. Host monitoring must alert and retry export-deletions.
         logger.error("DELETION_EXPORT_FAILED: retry export-deletions before any restore")
+    else:
+        DELETION_EXPORT.labels("success").inc()
 
 
 async def apply_deletions(session, payload, settings):

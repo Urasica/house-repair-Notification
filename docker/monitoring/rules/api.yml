@@ -1,0 +1,76 @@
+groups:
+  - name: repair_api
+    rules:
+      - record: repair_api_5xx_ratio
+        expr: |
+          (sum(rate(repair_http_requests_total{route=~"/api/v1/.*|unmatched_api",status=~"5.."}[15m])) or vector(0))
+          / sum(rate(repair_http_requests_total{route=~"/api/v1/.*|unmatched_api"}[15m]))
+      - record: repair_api_latency_p95_seconds
+        expr: |
+          histogram_quantile(0.95, sum by (le, route, method) (
+            rate(repair_http_request_duration_seconds_bucket{route=~"/api/v1/.*"}[15m])
+          ))
+      - record: repair_guidance_unavailable_ratio
+        expr: |
+          sum by (flow) (rate(repair_guidance_results_total{status="GUIDANCE_UNAVAILABLE"}[15m]))
+          / sum by (flow) (rate(repair_guidance_results_total[15m]))
+      - alert: RepairApiMetricsDown
+        expr: up{job="repair_api"} == 0
+        for: 2m
+        labels: {severity: warning}
+        annotations:
+          summary: API 지표 수집 실패
+      - alert: RepairApiErrorsHigh
+        expr: |
+          repair_api_5xx_ratio >= 0.05
+          and sum(increase(repair_http_requests_total{route=~"/api/v1/.*|unmatched_api",status=~"5.."}[15m])) >= 5
+        for: 2m
+        labels: {severity: warning}
+        annotations:
+          summary: API 서버 오류 증가
+      - alert: RepairGuidanceProviderFailures
+        expr: |
+          sum by (flow) (
+            increase(repair_guidance_fallbacks_total{reason="provider_failure"}[15m])
+          ) >= 3
+        labels: {severity: warning}
+        annotations:
+          summary: AI 공급자 연결 또는 응답 오류 반복
+          description: '{{ $labels.flow }} 안내에서 공급자 오류로 기본 안내가 반복되었습니다.'
+      - alert: RepairGuidanceSourcesUnavailable
+        expr: |
+          sum by (flow) (
+            increase(repair_guidance_fallbacks_total{reason="source_unavailable"}[15m])
+          ) >= 3
+        labels: {severity: warning}
+        annotations:
+          summary: 검토 자료를 사용할 수 없는 안내 반복
+      - alert: RepairGuidanceRateLimitsHigh
+        expr: |
+          sum by (route) (
+            increase(repair_http_requests_total{method="POST",route=~".*/(evaluations|chat/messages)",status="429"}[15m])
+          ) >= 10
+        labels: {severity: warning}
+        annotations:
+          summary: 설문·챗봇 사용 한도에 반복 도달
+      - alert: RepairApiLatencyHigh
+        expr: |
+          (
+            repair_api_latency_p95_seconds{route!~".*/(evaluations|chat/messages)"} > 1
+            or repair_api_latency_p95_seconds{route=~".*/evaluations",method="POST"} > 8
+            or repair_api_latency_p95_seconds{route=~".*/chat/messages",method="POST"} > 20
+            or repair_api_latency_p95_seconds{route=~".*/chat/messages",method="GET"} > 1
+          )
+          and on (route, method)
+          (sum by (route, method) (increase(repair_http_request_duration_seconds_count[15m])) >= 20)
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: API 응답 지연 증가
+          description: '{{ $labels.method }} {{ $labels.route }}의 p95가 기준을 초과했습니다.'
+      - alert: RepairImmediateDeletionExportFailed
+        expr: sum(increase(repair_deletion_exports_total{outcome="failure"}[15m])) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: 삭제 기록 즉시 내보내기 실패
+          description: export-deletions를 재실행하고 최신 암호화 삭제 파일을 확인하세요.

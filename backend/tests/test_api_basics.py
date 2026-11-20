@@ -35,7 +35,7 @@ class UnavailableDatabase(EmptyDatabase):
 
 @pytest.fixture
 async def client():
-    app = create_app(Settings(_env_file=None), EmptyDatabase())
+    app = create_app(Settings(_env_file=None, monitoring_enabled=False), EmptyDatabase())
     async with app.router.lifespan_context(app):
         async with httpx.AsyncClient(
             transport=httpx.ASGITransport(app=app), base_url="http://test"
@@ -47,6 +47,26 @@ async def test_live_does_not_depend_on_catalog_or_openai(client):
     response = await client.get("/health/live")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+async def test_metrics_are_opt_in_and_do_not_include_request_data(client):
+    assert (await client.get("/internal/metrics")).status_code == 404
+    app = create_app(Settings(_env_file=None, monitoring_enabled=True), EmptyDatabase())
+    async with (
+        app.router.lifespan_context(app),
+        httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as probe,
+    ):
+        await probe.get("/api/v1/catalog?version=private-version")
+        await probe.get("/api/v1/private-email@example.com")
+        response = await probe.get("/internal/metrics")
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    assert 'route="/api/v1/catalog"' in response.text
+    assert 'route="unmatched_api"' in response.text
+    assert "private-version" not in response.text
+    assert "example.com" not in response.text
+    assert 'route="/internal/metrics"' not in response.text
+    assert "/internal/metrics" not in app.openapi()["paths"]
 
 
 async def test_catalog_missing_has_safe_error_envelope_and_no_examples(client):

@@ -1,0 +1,48 @@
+groups:
+  - name: repair_maintenance
+    rules:
+      - record: repair_maintenance_last_success_timestamp_seconds
+        expr: max by (task) (push_time_seconds{job="repair_maintenance",result="success"} > 0)
+      - record: repair_maintenance_last_failure_timestamp_seconds
+        expr: max by (task) (push_time_seconds{job="repair_maintenance",result="failure"} > 0)
+      - alert: RepairMaintenanceFailed
+        expr: |
+          repair_maintenance_last_failure_timestamp_seconds
+          unless on (task)
+          (repair_maintenance_last_success_timestamp_seconds
+            >= on (task) repair_maintenance_last_failure_timestamp_seconds)
+        labels: {severity: warning}
+        annotations:
+          summary: 운영 작업 실패
+          description: '{{ $labels.task }} 작업을 확인하고 재실행하세요.'
+      - alert: RepairMaintenanceOverdue
+        expr: |
+          (
+            time() - (
+              repair_maintenance_last_success_timestamp_seconds
+              or label_replace(vector(0), "task", "backup", "__name__", ".*")
+              or label_replace(vector(0), "task", "cleanup", "__name__", ".*")
+              or label_replace(vector(0), "task", "export-deletions", "__name__", ".*")
+            ) > 86400
+          ) and on () (up{job="pushgateway",maintenance_expected="true"} == 1)
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: 일일 운영 작업 성공 기록 누락
+          description: '{{ $labels.task }} 작업의 최근 24시간 성공 기록을 확인하세요.'
+      - alert: RepairKnowledgeReviewRequired
+        expr: |
+          (repair_knowledge_review_status{state=~"REVIEW_DUE|EXPIRED|NOT_READY|ERROR"} == 1)
+          and on () (time() - push_time_seconds{job="repair_knowledge"} < 86400)
+        labels: {severity: warning}
+        annotations:
+          summary: 법령 검토 상태 확인 필요
+          description: '마지막 검토 상태는 {{ $labels.state }}입니다.'
+      - alert: RepairKnowledgeReviewCheckOverdue
+        expr: |
+          (time() - (max(push_time_seconds{job="repair_knowledge"}) or vector(0)) > 86400)
+          and on () (up{job="pushgateway",knowledge_expected="true"} == 1)
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: 법령 검토 기한 점검 누락

@@ -10,6 +10,7 @@ from app.api.v1.history import cursor_for, parse_cursor
 from app.api.v1.sessions import check_question_deletion, ready_database, repository
 from app.auth.access import own_consultation, own_result
 from app.core.errors import AppError
+from app.core.metrics import GUIDANCE_RESULTS
 from app.db.models import ChatUsage, Message, QuestionRecord, RequestRun
 from app.db.requests import request_fingerprint
 from app.domain.constants import ErrorCode, RequestKind, SessionPurpose
@@ -267,6 +268,7 @@ async def send(consultation_id: UUID, body: ChatRequest, request: Request):
                     await repository.complete(
                         session, run_id, stored_response(result, snapshot, settings)
                     )
+                GUIDANCE_RESULTS.labels("chat", result.status).inc()
                 return result
         except BaseException as error:
             if run_id:

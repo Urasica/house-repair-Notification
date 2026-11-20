@@ -1,0 +1,30 @@
+groups:
+  - name: repair_cost
+    rules:
+      - record: repair_openai_budget_fraction
+        expr: |
+          (repair_openai_month_spend_usd / repair_openai_month_budget_usd)
+          and on (job, instance) (
+            time() - push_time_seconds{job="repair_openai_cost"} <= 10800
+          )
+          and on (job, instance) (
+            month(repair_openai_month_start_timestamp_seconds) == scalar(month())
+          )
+      - alert: RepairOpenAIBudgetApproaching
+        expr: repair_openai_budget_fraction >= 0.8 and repair_openai_budget_fraction < 1
+        labels: {severity: warning}
+        annotations:
+          summary: OpenAI 월 예산의 80%에 도달
+      - alert: RepairOpenAIBudgetReached
+        expr: repair_openai_budget_fraction >= 1
+        labels: {severity: warning}
+        annotations:
+          summary: OpenAI 월 예산에 도달
+      - alert: RepairOpenAICostCollectionOverdue
+        expr: |
+          (time() - (max(push_time_seconds{job="repair_openai_cost"}) or vector(0)) > 10800)
+          and on () (up{job="pushgateway",cost_expected="true"} == 1)
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: OpenAI 비용 수집이 3시간 넘게 갱신되지 않음

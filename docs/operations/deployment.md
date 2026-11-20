@@ -8,6 +8,8 @@ Windows 배치는 [localhost:8080](http://localhost:8080)에서 로컬·터널 �
 
 `.env`가 없으면 예제 설정으로 `repair-guide-local` 프로젝트를 같은 8080 포트에서 실행한다. 이 경우 OpenAI는 꺼져 있다. `stop-test-deploy.bat`는 같은 설정 파일을 기준으로 프로젝트를 선택하며 DB 볼륨은 보존한다. `.env`를 추가하거나 제거해서 실행 방식을 바꿀 때는 먼저 실행 중인 서버를 종료한다.
 
+모니터링을 함께 실행하려면 `test-deploy.bat -Monitoring`을 사용한다. 터널까지 시작하려면 `test-deploy.bat -Monitoring -OpenTunnel`을 사용한다. Grafana는 기본 [localhost:3000](http://localhost:3000)에서 열리고 콘솔에 로그인 설정 파일의 위치가 표시된다. `stop-test-deploy.bat`는 모니터링도 함께 종료하며 DB와 모니터링 볼륨은 보존한다. [Windows 테스트 모니터링](monitoring.md#windows-테스트-실행)
+
 ## Windows Cloudflare Quick Tunnel 테스트
 
 공통 서버가 실행 중이면 `api-tunnel -Port 8080 -LocalHostHeader`를 실행한다. 서버와 터널을 한 번에 시작하려면 Docker Desktop과 `api-tunnel.cmd`를 사용할 수 있는 터미널에서 `test-deploy.bat -OpenTunnel`을 실행한다. 출력된 HTTPS 주소에서 테스트한다. Ctrl+C로 공개 터널을 끊고, 서버까지 종료하려면 `stop-test-deploy.bat`를 실행한다. [Cloudflare Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/)
@@ -35,6 +37,8 @@ FastAPI의 `tunnel_test` 설정에서만 HTTPS `*.trycloudflare.com`의 동일 �
 운영 백업 단계에서 schema 불일치가 나면 호환되는 이전 ops 이미지로 먼저 백업한다.
 
 ## 로그·스케줄·경보 인수
+
+접속·운영 작업·답변·비용 경보를 구성할 때는 [Prometheus와 Grafana 모니터링](monitoring.md)을 따른다.
 
 API는 원시 Uvicorn access log를 끄고 시간·정의된 경로 템플릿·HTTP method·status·지연·서버 traceId만 JSON으로 남긴다. URL query·경로의 실제 ID·쿠키·원문·이메일을 기록하지 않는다. Caddy access log는 켜지 않는다.
 

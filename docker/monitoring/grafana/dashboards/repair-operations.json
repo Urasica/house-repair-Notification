@@ -1,0 +1,463 @@
+{
+  "id": null,
+  "uid": "repair-operations",
+  "title": "우리집 보수 길잡이 · 운영 모니터링",
+  "schemaVersion": 39,
+  "version": 3,
+  "timezone": "browser",
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "접속 및 준비 상태",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "repair-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 14,
+        "h": 5
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "실패",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "정상",
+                  "color": "green"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "probe_success{job=\"repair_http\"}",
+          "legendFormat": "{{check}} · {{instance}}",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "접속 검사 응답 시간",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "repair-prometheus"
+      },
+      "gridPos": {
+        "x": 14,
+        "y": 0,
+        "w": 10,
+        "h": 5
+      },
+      "options": {},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "probe_duration_seconds{job=\"repair_http\"}",
+          "legendFormat": "{{check}}",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "최근 운영 작업 성공",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "repair-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 12,
+        "h": 5
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeAsIso"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "repair_maintenance_last_success_timestamp_seconds * 1000",
+          "legendFormat": "{{task}}",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "활성 경보",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "repair-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 12,
+        "h": 5
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "textMode": "name"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ALERTS{alertstate=\"firing\"}",
+          "legendFormat": "{{alertname}} {{task}}",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "API 서버 오류율",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "repair-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 10,
+        "w": 9,
+        "h": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "repair_api_5xx_ratio",
+          "legendFormat": "5xx 비율",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "응답 지연 p95",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "repair-prometheus"
+      },
+      "gridPos": {
+        "x": 9,
+        "y": 10,
+        "w": 15,
+        "h": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "topk(8, repair_api_latency_p95_seconds)",
+          "legendFormat": "{{method}} {{route}}",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "설문·챗봇 안내 불가 비율",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "repair-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 12,
+        "h": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "repair_guidance_unavailable_ratio",
+          "legendFormat": "{{flow}}",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "기본 안내로 전환한 원인 · 최근 15분",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "repair-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 16,
+        "w": 12,
+        "h": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by(flow, reason) (increase(repair_guidance_fallbacks_total[15m]))",
+          "legendFormat": "{{flow}} · {{reason}}",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "설문·챗봇 요청 한도 도달 · 최근 15분",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "repair-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 22,
+        "w": 12,
+        "h": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by(route) (increase(repair_http_requests_total{method=\"POST\",route=~\".*/(evaluations|chat/messages)\",status=\"429\"}[15m]))",
+          "legendFormat": "{{route}}",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "법령 검토 상태",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "repair-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 22,
+        "w": 12,
+        "h": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "repair_knowledge_review_status",
+          "legendFormat": "{{state}}",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "최근 수집된 OpenAI 월 누적 비용",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "repair-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 8,
+        "h": 5
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "repair_openai_month_spend_usd",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "OpenAI 월 예산 사용률",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "repair-prometheus"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 28,
+        "w": 8,
+        "h": 5
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "repair_openai_budget_fraction",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "OpenAI 비용 마지막 수집 시각",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "repair-prometheus"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 28,
+        "w": 8,
+        "h": 5
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeAsIso"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "push_time_seconds{job=\"repair_openai_cost\"} * 1000",
+          "instant": true,
+          "range": false
+        }
+      ]
+    }
+  ]
+}

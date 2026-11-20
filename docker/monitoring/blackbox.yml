@@ -1,0 +1,29 @@
+modules:
+  homepage:
+    prober: http
+    timeout: 7s
+    http:
+      valid_status_codes: [200]
+      preferred_ip_protocol: ip4
+      fail_if_body_not_matches_regexp: ['<div id="root">']
+  readiness:
+    prober: http
+    timeout: 7s
+    http:
+      valid_status_codes: [200]
+      preferred_ip_protocol: ip4
+      fail_if_body_not_matches_regexp: ['"status"\s*:\s*"ok"']
+  catalog:
+    prober: http
+    timeout: 7s
+    http:
+      valid_status_codes: [200]
+      preferred_ip_protocol: ip4
+      fail_if_body_not_matches_regexp: ['"catalogReady"\s*:\s*true']
+  rag:
+    prober: http
+    timeout: 7s
+    http:
+      valid_status_codes: [200]
+      preferred_ip_protocol: ip4
+      fail_if_body_not_matches_regexp: ['"ragReady"\s*:\s*true']

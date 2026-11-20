@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from types import SimpleNamespace
 from uuid import uuid4
 
+from app.core.metrics import GUIDANCE_FALLBACKS
 from app.db.models import Consultation
 from app.domain.constants import (
     DISCLAIMER,
@@ -31,7 +32,8 @@ def project_question(content):
     return question_purpose(content) + " " + " ".join(dict.fromkeys(locators))
 
 
-def fallback(response, message=KNOWLEDGE_UNAVAILABLE_MESSAGE):
+def fallback(response, message=KNOWLEDGE_UNAVAILABLE_MESSAGE, *, reason="source_unavailable"):
+    GUIDANCE_FALLBACKS.labels("chat", reason).inc()
     return response.model_copy(
         update={
             "answer_mode": "TEMPLATE",
@@ -125,7 +127,7 @@ async def chat_response(
     if status != "NEED_CONFIRMATION" or guidance:
         return response
     if not settings.openai_enabled:
-        return fallback(response, OPENAI_DISABLED_MESSAGE)
+        return fallback(response, OPENAI_DISABLED_MESSAGE, reason="provider_disabled")
     if not snapshot.knowledge_release_id:
         return fallback(response)
     observation = (
@@ -244,7 +246,7 @@ async def chat_response(
                 }
             )
     except (EmbeddingUnavailable, GenerationUnavailable, TimeoutError):
-        return fallback(response, OPENAI_UNAVAILABLE_MESSAGE)
+        return fallback(response, OPENAI_UNAVAILABLE_MESSAGE, reason="provider_failure")
 
 
 def stored_response(response, snapshot, settings):

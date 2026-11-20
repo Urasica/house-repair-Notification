@@ -1,0 +1,5 @@
+- targets: [pushgateway:9091]
+  labels:
+    maintenance_expected: "false"
+    knowledge_expected: "false"
+    cost_expected: "false"

@@ -8,9 +8,11 @@ from pathlib import Path
 from uuid import UUID
 
 from sqlalchemy import func, select
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.config import get_settings
 from app.core.errors import AppError
+from app.core.monitoring_push import push_metrics
 from app.db.models import Catalog, KnowledgeDocument, KnowledgeSet
 from app.db.session import Database
 from app.schemas.catalog import CatalogDefinition
@@ -224,10 +226,25 @@ def main(argv=None):
     try:
         report = asyncio.run(execute(args))
         print(json.dumps(report, ensure_ascii=False))
+        if args.action == "check-review":
+            push_metrics(
+                "repair_knowledge",
+                f'repair_knowledge_review_status{{state="{report["status"]}"}} 1\n',
+            )
         return int(args.action == "check-review" and report["status"] != "OK")
-    except (ValueError, KeyError, TypeError, OSError, AppError, EmbeddingUnavailable):
+    except (
+        ValueError,
+        KeyError,
+        TypeError,
+        OSError,
+        AppError,
+        EmbeddingUnavailable,
+        SQLAlchemyError,
+    ):
         # Credentials, source paragraphs, user text and provider bodies never enter command logs.
         print(json.dumps({"error": "KNOWLEDGE_OPERATION_FAILED"}))
+        if args.action == "check-review":
+            push_metrics("repair_knowledge", 'repair_knowledge_review_status{state="ERROR"} 1\n')
         return 1
 
 

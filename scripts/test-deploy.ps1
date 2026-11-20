@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [ValidateSet('Start', 'Stop')][string]$Action = 'Start',
-    [switch]$OpenTunnel
+    [switch]$OpenTunnel,
+    [switch]$Monitoring
 )
 
 $ErrorActionPreference = 'Stop'
@@ -40,6 +41,23 @@ try {
         $envFiles += '.env'
     }
 
+    New-Item -ItemType Directory -Path '.cache' -Force | Out-Null
+    $localDeployLock = [IO.File]::Open((Join-Path $root '.cache/local-deploy.lock'), 'OpenOrCreate', 'ReadWrite', 'None')
+    $monitoringServices = @('prometheus', 'blackbox', 'pushgateway', 'alertmanager', 'grafana')
+    $enableMonitoring = $Action -eq 'Start' -and $Monitoring
+    if ($enableMonitoring) {
+        $monitoringEnvFile = '.env.monitoring'
+        if (-not (Test-Path -LiteralPath $monitoringEnvFile -PathType Leaf)) {
+            $monitoringEnvFile = ".cache/${project}-monitoring.env"
+            if (-not (Test-Path -LiteralPath $monitoringEnvFile -PathType Leaf)) {
+                $password = [Guid]::NewGuid().ToString('N')
+                Set-Content -LiteralPath $monitoringEnvFile -Value "MONITORING_GRAFANA_PASSWORD=$password" -Encoding ASCII
+            }
+        }
+        $envFiles += $monitoringEnvFile
+        $composeFiles += 'compose.monitoring.yaml'
+    }
+
     # Compose would otherwise pick exported shell values over the selected files.
     foreach ($line in Get-Content -LiteralPath $envFiles) {
         if ($line -match '^\s*(?:export\s+)?([A-Z][A-Z0-9_]*)\s*=') {
@@ -48,17 +66,26 @@ try {
     }
     Remove-Item -LiteralPath Env:DOCKER_CONTEXT -ErrorAction SilentlyContinue
     $env:WEB_PORT = [string]$port
+    $env:MONITORING_ENABLED = if ($enableMonitoring) { 'true' } else { 'false' }
+    if ($enableMonitoring) { $env:MONITORING_PUSHGATEWAY = 'http://pushgateway:9091' }
     $composeArgs = @('--host', 'npipe:////./pipe/dockerDesktopLinuxEngine', 'compose', '--project-name', $project)
     foreach ($file in $envFiles) { $composeArgs += @('--env-file', $file) }
     foreach ($file in $composeFiles) { $composeArgs += @('-f', $file) }
 
-    New-Item -ItemType Directory -Path '.cache' -Force | Out-Null
-    $localDeployLock = [IO.File]::Open((Join-Path $root '.cache/local-deploy.lock'), 'OpenOrCreate', 'ReadWrite', 'None')
-
-    if ($Action -eq 'Stop') {
-        Invoke-Compose 'Stopping the local server' @('down')
-        Write-Host "Local server stopped ($project). Database volume retained."
-        exit 0
+    if (-not $enableMonitoring) {
+        $baseComposeArgs = $composeArgs
+        $composeArgs += @('-f', 'compose.monitoring.yaml')
+        # Compose resolves the overlay even when only stopping existing containers.
+        $env:MONITORING_GRAFANA_PASSWORD = 'unused-when-stopping'
+        if ($Action -eq 'Stop') {
+            Invoke-Compose 'Stopping the local server and monitoring' @('down')
+            Write-Host "Local server stopped ($project). Database and monitoring volumes retained."
+            exit 0
+        }
+        Invoke-Compose 'Stopping any previous monitoring services' (@('stop') + $monitoringServices)
+        $composeArgs = $baseComposeArgs
+    } else {
+        Invoke-Compose 'Checking the monitoring configuration' @('config', '--quiet')
     }
 
     $catalog = Get-Item -LiteralPath 'data/catalog/m08a-20261004/catalog.json'
@@ -69,9 +96,16 @@ try {
     Invoke-Compose 'Updating the database schema' @('run', '--rm', '--no-deps', 'api', 'python', '-m', 'alembic', 'upgrade', 'head') -Admin
     Invoke-Compose 'Publishing the reviewed catalog' @('run', '--rm', '--no-deps', '--volume', $catalogMount,
         'api', 'python', '-m', 'app.commands.catalog', 'publish', '/catalog.json')
-    Invoke-Compose 'Starting the local server' @('up', '-d', '--no-build', '--wait', 'api', 'web')
+    $serverServices = @('api', 'web')
+    if ($enableMonitoring) { $serverServices += $monitoringServices }
+    Invoke-Compose 'Starting the local server' (@('up', '-d', '--no-build', '--wait') + $serverServices)
     $binding = Invoke-Compose 'Finding the local address' @('port', 'web', '80')
     Write-Host ('Local server: http://' + $binding.Replace('127.0.0.1:', 'localhost:'))
+    if ($enableMonitoring) {
+        $grafanaBinding = Invoke-Compose 'Finding the Grafana address' @('port', 'grafana', '3000')
+        Write-Host ('Grafana: http://' + $grafanaBinding.Replace('127.0.0.1:', 'localhost:'))
+        Write-Host "Grafana login: admin (password in $monitoringEnvFile)"
+    }
     Write-Host "Public test tunnel: api-tunnel -Port $port -LocalHostHeader"
     Write-Host 'Stop any open tunnel with Ctrl+C. Stop the server with stop-test-deploy.bat.'
     if ($OpenTunnel) {

@@ -16,6 +16,7 @@ from sqlalchemy import delete, text, update
 from sqlalchemy.engine import make_url
 
 from app.core.config import get_settings
+from app.core.monitoring_push import report_maintenance
 from app.db.models import AuthSession, KnowledgeSet
 from app.db.session import MIGRATION_HEAD, Database
 from app.services.deletion_export import (
@@ -281,11 +282,14 @@ def main():
     load.add_argument("--latest-deletions", type=Path, required=True)
     load.add_argument("--reviewed-output", type=Path, required=True)
     load.add_argument("--maintenance", action="store_true")
+    args = parser.parse_args()
     try:
-        print(json.dumps(asyncio.run(execute(parser.parse_args())), ensure_ascii=False))
+        print(json.dumps(asyncio.run(execute(args)), ensure_ascii=False))
+        report_maintenance(args.action, success=True)
         return 0
     except Exception as error:
         print(json.dumps({"error": "MAINTENANCE_FAILED", "type": type(error).__name__}))
+        report_maintenance(args.action, success=False)
         return 1
 
 

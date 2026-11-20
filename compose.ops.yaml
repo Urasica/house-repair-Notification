@@ -8,6 +8,7 @@ services:
       dockerfile: Dockerfile.ops
     environment:
       APP_ENV: ${APP_ENV:-development}
+      MONITORING_PUSHGATEWAY: ${MONITORING_PUSHGATEWAY:-}
       WEB_ORIGINS: ${WEB_ORIGINS:-["http://localhost:8080"]}
       DATABASE_URL: ${MIGRATION_DATABASE_URL:?Set MIGRATION_DATABASE_URL}
       BACKUP_KEY: ${BACKUP_KEY:?Set a separate Fernet BACKUP_KEY}
